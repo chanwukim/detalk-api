@@ -1,0 +1,89 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.4.0'
+	id 'io.spring.dependency-management' version '1.1.6'
+	id 'org.jooq.jooq-codegen-gradle' version '3.19.15'
+}
+
+group = 'net.detalk'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(21)
+	}
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-jooq'
+	
+	implementation 'org.flywaydb:flyway-core'
+	implementation 'org.flywaydb:flyway-database-postgresql'
+	runtimeOnly 'org.postgresql:postgresql'
+	runtimeOnly 'com.h2database:h2'
+	jooqCodegen 'org.jooq:jooq-meta-extensions:3.19.15'
+
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.security:spring-security-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
+
+// https://www.jooq.org/doc/latest/manual/code-generation/codegen-configuration
+jooq {
+	configuration {
+		generator {
+			database {
+				// https://www.jooq.org/doc/latest/manual/code-generation/codegen-ddl
+				name = 'org.jooq.meta.extensions.ddl.DDLDatabase'
+				inputSchema = 'PUBLIC'
+				includes = '.*'  // 모든 테이블 포함
+				excludes = 'flyway_schema_history'
+				properties {
+					property {
+						key = 'scripts'
+						value = 'src/main/resources/db/migration/*.sql'
+					}
+					property {
+						key = 'sort'
+						value = 'flyway'
+					}
+				}
+				forcedTypes {
+					forcedType {
+						userType = 'java.time.Instant'
+						converter = 'net.detalk.api.support.InstantConverter'
+						includeExpression = '.*(_AT)$'
+						includeTypes = 'BIGINT'
+					}
+				}
+			}
+			target {
+				packageName = 'net.detalk.jooq'
+				directory = 'src/main/java'
+			}
+		}
+	}
+}

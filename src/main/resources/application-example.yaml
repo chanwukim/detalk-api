@@ -1,0 +1,34 @@
+server:
+  forward-headers-strategy: framework
+
+logging:
+  level:
+    org.jooq.tools.LoggerListener: DEBUG
+    net.detalk.api: DEBUG
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/postgres?serverTimezone=UTC
+    username: postgres
+    password: postgres
+  jpa:
+    properties:
+      hibernate:
+        ddl-auto: validate
+  flyway:
+    enabled: true
+    # https://docs.spring.io/spring-boot/reference/io/email.html
+  mail:
+    host: smtp.domain.com
+    port: 587
+    username:
+    password:
+    properties:
+      mail:
+        smtp:
+          connectiontimeout: 5000
+          timeout: 3000
+          writetimeout: 5000
+          auth: true
+          starttls:
+            enable: true

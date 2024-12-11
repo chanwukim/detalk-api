@@ -1,0 +1,29 @@
+package net.detalk.api.support.error;
+
+import lombok.Getter;
+import org.springframework.http.HttpStatus;
+
+@Getter
+public enum ErrorCode {
+    // HTTP
+    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "internal_server_error", "Internal Server Error. Please try again later. If the issue persists, contact support."),
+    BAD_REQUEST(HttpStatus.BAD_REQUEST, "bad_request", "Bad Request."),
+    UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "uauthorized", "Unauthorized. Please sign in."),
+    FORBIDDEN(HttpStatus.FORBIDDEN, "forbidden", "Forbidden. You do not have permission to access this resource."),
+    NOT_FOUND(HttpStatus.NOT_FOUND, "not_found", "Not Found."),
+    METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED, "method_not_allowed", "Method not allowed"),
+    CONFLICT(HttpStatus.CONFLICT, "conflict", "Conflict. A conflict occurred with the current state of the resource."),
+    //
+    VALIDATION_FAILED(HttpStatus.BAD_REQUEST, "validation_failed", "Validation failed."),
+    ;
+
+    private final HttpStatus status;
+    private final String code;
+    private final String message;
+
+    ErrorCode(HttpStatus status, String code, String message) {
+        this.status = status;
+        this.code = code;
+        this.message = message;
+    }
+}
