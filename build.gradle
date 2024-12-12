@@ -84,6 +84,18 @@ jooq {
 				packageName = 'net.detalk.jooq'
 				directory = 'src/main/java'
 			}
+			strategy {
+				matchers {
+					tables {
+						table {
+							tableClass {
+								transform = "PASCAL"
+								expression = 'J_$0'
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 }
