@@ -2,13 +2,13 @@ package net.detalk.api.service;
 
 import jakarta.transaction.Transactional;
 import net.detalk.api.domain.*;
+import net.detalk.api.repository.AuthRefreshTokenRepository;
 import net.detalk.api.repository.MemberExternalRepository;
 import net.detalk.api.repository.MemberRepository;
 import net.detalk.api.support.TimeHolder;
 import net.detalk.api.support.error.ApiException;
 import net.detalk.api.support.error.ErrorCode;
-import net.detalk.api.support.security.OAuthProvider;
-import net.detalk.api.support.security.OAuthUser;
+import net.detalk.api.support.security.*;
 
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -25,6 +25,8 @@ import lombok.extern.slf4j.Slf4j;
 public class AuthService extends DefaultOAuth2UserService {
     private final MemberRepository memberRepository;
     private final MemberExternalRepository memberExternalRepository;
+    private final AuthRefreshTokenRepository authRefreshTokenRepository;
+    private final TokenProvider tokenProvider;
     private final TimeHolder timeHolder;
 
     @Override
@@ -40,12 +42,23 @@ public class AuthService extends DefaultOAuth2UserService {
         MemberExternal memberExternal = memberExternalRepository.findByTypeAndUid(provider, providerId)
                 .orElseGet(() -> register(provider, providerId));
 
+        AccessToken accessToken = tokenProvider.createAccessToken(memberExternal.getMemberId());
+        RefreshToken refreshToken = tokenProvider.createRefreshToken();
+
+        authRefreshTokenRepository.save(
+            AuthRefreshToken.builder()
+                .memberId(memberExternal.getMemberId())
+                .token(refreshToken.getValue())
+                .createdAt(refreshToken.getIssuedAt().toInstant())
+                .expiresAt(refreshToken.getExpiresAt().toInstant())
+                .build()
+        );
+
         return OAuthUser.builder()
                 .id(memberExternal.getMemberId())
                 .username("username")
-                // TODO: 토큰 발급
-                .accessToken("accessToken")
-                .refreshToken("refreshToken")
+                .accessToken(accessToken.getValue())
+                .refreshToken(refreshToken.getValue())
                 .authorities(AuthorityUtils.createAuthorityList(MemberRole.MEMBER.getName()))
                 .attributes(user.getAttributes())
                 .build();
