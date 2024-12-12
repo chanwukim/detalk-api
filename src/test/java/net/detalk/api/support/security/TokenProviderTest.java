@@ -33,8 +33,8 @@ class TokenProviderTest {
         Long memberId = 1L;
 
         // when
-        String accessToken = tokenProvider.createAccessToken(memberId);
-        AccessToken parsedToken = tokenProvider.parseAccessToken(accessToken);
+        AccessToken accessToken = tokenProvider.createAccessToken(memberId);
+        AccessToken parsedToken = tokenProvider.parseAccessToken(accessToken.getValue());
 
         // then
         assertThat(parsedToken.getMemberId()).isEqualTo(memberId);
@@ -46,7 +46,7 @@ class TokenProviderTest {
     @DisplayName("리프레시 토큰 생성 테스트")
     void createRefreshToken() {
         // when
-        String refreshToken = tokenProvider.createRefreshToken();
+        RefreshToken refreshToken = tokenProvider.createRefreshToken();
 
         // then
         assertThat(refreshToken).isNotNull();
@@ -73,10 +73,10 @@ class TokenProviderTest {
         expiredProperties.setAccessTokenExpiresInSeconds(-1L);
         TokenProvider expiredTokenProvider = new TokenProvider(expiredProperties);
 
-        String expiredToken = expiredTokenProvider.createAccessToken(1L);
+        AccessToken expiredToken = expiredTokenProvider.createAccessToken(1L);
 
         // when & then
-        assertThatThrownBy(() -> tokenProvider.parseAccessToken(expiredToken))
+        assertThatThrownBy(() -> tokenProvider.parseAccessToken(expiredToken.getValue()))
             .isInstanceOf(ExpiredTokenException.class);
     }
 

@@ -26,7 +26,47 @@ public class TokenProvider {
         this.secretKey = Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String createToken(Claims claims) {
+    public AccessToken createAccessToken(Long memberId) {
+        Date issuedAt = new Date();
+        Date expiresAt = new Date(issuedAt.getTime()
+            + appProperties.getAccessTokenExpiresInSeconds() * 1000L);
+
+        Claims claims = Jwts.claims()
+            .add(KEY_CLAIMS_ID, memberId)
+            .issuedAt(issuedAt)
+            .expiration(expiresAt)
+            .build();
+
+        String token = createToken(claims);
+
+        return AccessToken.builder()
+            .value(token)
+            .memberId(memberId)
+            .issuedAt(issuedAt)
+            .expiresAt(expiresAt)
+            .build();
+    }
+
+    public RefreshToken createRefreshToken() {
+        Date issuedAt = new Date();
+        Date expiresAt = new Date(issuedAt.getTime()
+            + appProperties.getRefreshTokenExpiresInSeconds() * 1000L);
+
+        Claims claims = Jwts.claims()
+            .issuedAt(issuedAt)
+            .expiration(expiresAt)
+            .build();
+
+        String token = createToken(claims);
+
+        return RefreshToken.builder()
+            .value(token)
+            .issuedAt(issuedAt)
+            .expiresAt(expiresAt)
+            .build();
+    }
+
+    private String createToken(Claims claims) {
         if (claims.getIssuedAt() == null) {
             log.error("[createToken] claims에 issuedAt 정보가 없습니다.");
             throw new TokenException("Claims must have issuedAt");
@@ -44,33 +84,6 @@ public class TokenProvider {
             .compact();
     }
 
-    public String createAccessToken(Long memberId) {
-        Date issuedAt = new Date();
-        Date expiresAt = new Date(issuedAt.getTime()
-            + appProperties.getAccessTokenExpiresInSeconds() * 1000L);
-
-        Claims claims = Jwts.claims()
-            .add(KEY_CLAIMS_ID, memberId)
-            .issuedAt(issuedAt)
-            .expiration(expiresAt)
-            .build();
-
-        return createToken(claims);
-    }
-
-    public String createRefreshToken() {
-        Date issuedAt = new Date();
-        Date expiresAt = new Date(issuedAt.getTime()
-            + appProperties.getRefreshTokenExpiresInSeconds() * 1000L);
-
-        Claims claims = Jwts.claims()
-            .issuedAt(issuedAt)
-            .expiration(expiresAt)
-            .build();
-
-        return createToken(claims);
-    }
-
     public AccessToken parseAccessToken(String token) {
         try {
             Claims payload = Jwts.parser()
@@ -80,6 +93,7 @@ public class TokenProvider {
                 .getPayload();
 
             return AccessToken.builder()
+                .value(token)
                 .memberId(payload.get(KEY_CLAIMS_ID, Long.class))
                 .issuedAt(payload.getIssuedAt())
                 .expiresAt(payload.getExpiration())
