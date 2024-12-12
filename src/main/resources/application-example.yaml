@@ -1,3 +1,6 @@
+detalk:
+  base-url: http://localhost:3000
+
 server:
   forward-headers-strategy: framework
 
@@ -17,7 +20,17 @@ spring:
         ddl-auto: validate
   flyway:
     enabled: true
-    # https://docs.spring.io/spring-boot/reference/io/email.html
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            scope:
+              - email
+              - profile
+            client-id:
+            client-secret:
+  # https://docs.spring.io/spring-boot/reference/io/email.html
   mail:
     host: smtp.domain.com
     port: 587
