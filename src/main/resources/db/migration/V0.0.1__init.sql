@@ -133,13 +133,15 @@ CREATE TABLE "product_post_snapshot" (
         FOREIGN KEY ("pricing_plan_id") REFERENCES "pricing_plan" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-CREATE TABLE "last_product_post_snapshot" (
+CREATE TABLE "product_post_last_snapshot" (
         "post_id" BIGINT NOT NULL,
-        "created_at" BIGINT NOT NULL,
-        CONSTRAINT "last_product_post_snapshot_pkey" PRIMARY KEY ("post_id"),
-        FOREIGN KEY ("post_id") REFERENCES "product_post" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
-        CONSTRAINT "unique_created_at" UNIQUE ("created_at")
+        "snapshot_id" BIGINT NOT NULL,
+        CONSTRAINT "product_post_last_snapshot_pkey" PRIMARY KEY ("post_id"),
+        CONSTRAINT "product_post_last_snapshot_post_id_fkey" FOREIGN KEY ("post_id") REFERENCES "product_post"("id") ON DELETE CASCADE ON UPDATE CASCADE,
+        CONSTRAINT "product_post_last_snapshot_snapshot_id_fkey" FOREIGN KEY ("snapshot_id") REFERENCES "product_post_snapshot"("id") ON DELETE CASCADE ON UPDATE CASCADE,
+        CONSTRAINT "product_post_last_snapshot_snapshot_id_key" UNIQUE ("snapshot_id")
 );
+
 
 CREATE TABLE "product_post_snapshot_tag" (
         "id" BIGINT GENERATED ALWAYS AS IDENTITY,
