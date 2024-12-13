@@ -94,4 +94,15 @@ public class AuthService extends DefaultOAuth2UserService {
                         .createdAt(timeHolder.now())
                         .build());
     }
+
+    public void signOut(String refreshToken) {
+        RefreshToken verifiedRefreshToken = tokenProvider.parseRefreshToken(refreshToken);
+        AuthRefreshToken authRefreshToken = authRefreshTokenRepository.findByToken(verifiedRefreshToken.getValue())
+            .orElseThrow(() -> {
+                log.error("[signOut] 서버에 존재하지 않는 토큰 : {}", refreshToken);
+                return new ApiException(ErrorCode.UNAUTHORIZED);
+            });
+        authRefreshToken.revoked(timeHolder);
+        authRefreshTokenRepository.update(authRefreshToken);
+    }
 }
