@@ -17,6 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Arrays;
 
+import static net.detalk.api.support.Constant.COOKIE_ACCESS_TOKEN;
+import static net.detalk.api.support.Constant.COOKIE_REFRESH_TOKEN;
+
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
@@ -26,7 +29,7 @@ public class AuthController {
 
     @PostMapping("/refresh")
     public ResponseEntity<Void> refresh(HttpServletRequest request, HttpServletResponse response) {
-        String refreshToken = CookieUtil.getCookie("rt", request)
+        String refreshToken = CookieUtil.getCookie(COOKIE_REFRESH_TOKEN, request)
             .orElseThrow(() -> new ApiException(ErrorCode.UNAUTHORIZED))
             .getValue();
 
@@ -35,7 +38,7 @@ public class AuthController {
         boolean secure = !Arrays.asList(env.getActiveProfiles()).contains("dev");
 
         ResponseCookie accessTokenCookie = ResponseCookie
-            .from("at", authToken.accessToken())
+            .from(COOKIE_ACCESS_TOKEN, authToken.accessToken())
             .httpOnly(true)
             .secure(secure)
             .sameSite("Lax")
@@ -43,7 +46,7 @@ public class AuthController {
             .build();
 
         ResponseCookie refreshTokenCookie = ResponseCookie
-            .from("rt", authToken.refreshToken())
+            .from(COOKIE_REFRESH_TOKEN, authToken.refreshToken())
             .httpOnly(true)
             .secure(secure)
             .sameSite("Lax")
@@ -60,14 +63,14 @@ public class AuthController {
 
     @PostMapping("/sign-out")
     public ResponseEntity<Void> signOut(HttpServletRequest request, HttpServletResponse response) {
-        String refreshToken = CookieUtil.getCookie("rt", request)
+        String refreshToken = CookieUtil.getCookie(COOKIE_REFRESH_TOKEN, request)
             .orElseThrow(() -> new ApiException(ErrorCode.UNAUTHORIZED))
             .getValue();
 
         authService.signOut(refreshToken);
 
-        CookieUtil.deleteCookie("at", request, response);
-        CookieUtil.deleteCookie("rt", request, response);
+        CookieUtil.deleteCookie(COOKIE_ACCESS_TOKEN, request, response);
+        CookieUtil.deleteCookie(COOKIE_REFRESH_TOKEN, request, response);
 
         return ResponseEntity
             .noContent()

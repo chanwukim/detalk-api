@@ -17,6 +17,9 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.util.Arrays;
 
+import static net.detalk.api.support.Constant.COOKIE_ACCESS_TOKEN;
+import static net.detalk.api.support.Constant.COOKIE_REFRESH_TOKEN;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -34,7 +37,7 @@ public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
         boolean secure = !Arrays.asList(env.getActiveProfiles()).contains("dev");
 
         ResponseCookie accessTokenCookie = ResponseCookie
-            .from("at", oAuth2User.getAccessToken())
+            .from(COOKIE_ACCESS_TOKEN, oAuth2User.getAccessToken())
             .httpOnly(true)
             .secure(secure)
             .sameSite("Lax")
@@ -42,7 +45,7 @@ public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
             .build();
 
         ResponseCookie refreshTokenCookie = ResponseCookie
-            .from("rt", oAuth2User.getRefreshToken())
+            .from(COOKIE_REFRESH_TOKEN, oAuth2User.getRefreshToken())
             .httpOnly(true)
             .secure(secure)
             .sameSite("Lax")
