@@ -17,6 +17,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.io.PrintWriter;
 
@@ -25,6 +26,7 @@ import java.io.PrintWriter;
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final AuthService userService;
+    private final TokenProvider tokenProvider;
     private final OAuthSuccessHandler oAuthSuccessHandler;
     private final OAuthFailHandler oAuthFailHandler;
 
@@ -53,31 +55,28 @@ public class SecurityConfig {
     }
 
     @Bean
-    protected SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    protected SecurityFilterChain securityFilterChain(HttpSecurity http, TokenProvider tokenProvider) throws Exception {
         http
-            .csrf(AbstractHttpConfigurer::disable)
-            .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            )
-            .httpBasic(AbstractHttpConfigurer::disable)
-            .formLogin(AbstractHttpConfigurer::disable)
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers(HttpMethod.OPTIONS).permitAll()
-                .anyRequest().permitAll())
-            /**
-             *  sign-in:  /oauth2/authorization/{registrationId}
-             *  redirect: /login/oauth2/code/{registrationId}
-             */
-            .oauth2Login(oauth2 -> oauth2
-                .userInfoEndpoint(userInfoEndpointConfig ->
-                    userInfoEndpointConfig.userService(userService))
-                .successHandler(oAuthSuccessHandler)
-                .failureHandler(oAuthFailHandler)
-            )
-            .exceptionHandling(config -> config
-                .authenticationEntryPoint(unauthorizedHandler())
-                .accessDeniedHandler(accessDeniedHandler())
-            );
+                .csrf(AbstractHttpConfigurer::disable)
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .httpBasic(AbstractHttpConfigurer::disable)
+                .formLogin(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.OPTIONS).permitAll()
+                        .anyRequest().permitAll())
+                /**
+                 * sign-in: /oauth2/authorization/{registrationId}
+                 * redirect: /login/oauth2/code/{registrationId}
+                 */
+                .oauth2Login(oauth2 -> oauth2
+                        .userInfoEndpoint(userInfoEndpointConfig -> userInfoEndpointConfig.userService(userService))
+                        .successHandler(oAuthSuccessHandler)
+                        .failureHandler(oAuthFailHandler))
+            .addFilterBefore(new TokenFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(config -> config
+                        .authenticationEntryPoint(unauthorizedHandler())
+                        .accessDeniedHandler(accessDeniedHandler()));
 
         return http.build();
     }

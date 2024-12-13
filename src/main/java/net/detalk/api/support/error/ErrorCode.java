@@ -15,6 +15,9 @@ public enum ErrorCode {
     CONFLICT(HttpStatus.CONFLICT, "conflict", "Conflict. A conflict occurred with the current state of the resource."),
     //
     VALIDATION_FAILED(HttpStatus.BAD_REQUEST, "validation_failed", "Validation failed."),
+
+    TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "token_expired", "Token expired."),
+    TOKEN_INVALID(HttpStatus.UNAUTHORIZED, "token_invalid", "Token Invalid."),
     ;
 
     private final HttpStatus status;
