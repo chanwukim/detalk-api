@@ -3,6 +3,10 @@ detalk:
   token-secret: # https://jwtsecret.com/generate
   access-token-expires-in-seconds: 300
   refresh-token-expires-in-seconds: 1209600
+  s3-bucket:
+  s3-endpoint: https://{account-id}.r2.cloudflarestorage.com
+  s3-access-key:
+  s3-secret-key:
 
 server:
   forward-headers-strategy: framework
