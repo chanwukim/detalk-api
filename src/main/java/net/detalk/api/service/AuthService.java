@@ -19,6 +19,9 @@ import org.springframework.security.core.authority.AuthorityUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -40,9 +43,13 @@ public class AuthService extends DefaultOAuth2UserService {
         log.debug("[loadUser] providerId: {}", providerId);
 
         MemberExternal memberExternal = memberExternalRepository.findByTypeAndUid(provider, providerId)
-                .orElseGet(() -> register(provider, providerId));
+            .orElseGet(() -> register(provider, providerId));
 
-        AccessToken accessToken = tokenProvider.createAccessToken(memberExternal.getMemberId());
+        // TODO: ADMIN 권한 확인
+        List<String> authorities = new ArrayList<>();
+        authorities.add(SecurityRole.MEMBER.getName());
+
+        AccessToken accessToken = tokenProvider.createAccessToken(memberExternal.getMemberId(), authorities);
         RefreshToken refreshToken = tokenProvider.createRefreshToken();
 
         authRefreshTokenRepository.save(
@@ -51,17 +58,16 @@ public class AuthService extends DefaultOAuth2UserService {
                 .token(refreshToken.getValue())
                 .createdAt(refreshToken.getIssuedAt().toInstant())
                 .expiresAt(refreshToken.getExpiresAt().toInstant())
-                .build()
-        );
+                .build());
 
         return OAuthUser.builder()
-                .id(memberExternal.getMemberId())
-                .username("username")
-                .accessToken(accessToken.getValue())
-                .refreshToken(refreshToken.getValue())
-                .authorities(AuthorityUtils.createAuthorityList(MemberRole.MEMBER.getName()))
-                .attributes(user.getAttributes())
-                .build();
+            .id(memberExternal.getMemberId())
+            .username("username")
+            .accessToken(accessToken.getValue())
+            .refreshToken(refreshToken.getValue())
+            .authorities(AuthorityUtils.createAuthorityList(authorities.toArray(String[]::new)))
+            .attributes(user.getAttributes())
+            .build();
     }
 
     private String extractProviderId(String provider, OAuth2User user) {
@@ -79,20 +85,20 @@ public class AuthService extends DefaultOAuth2UserService {
 
         // 소셜 로그인후 LoginType.EXTERNAL, 상태는 PENDING이라면, 가입 form으로 이동
         Member member = memberRepository.save(
-                Member.builder()
-                        .loginType(LoginType.EXTERNAL)
-                        .status(MemberStatus.PENDING)
-                        .createdAt(timeHolder.now())
-                        .updatedAt(timeHolder.now())
-                        .build());
+            Member.builder()
+                .loginType(LoginType.EXTERNAL)
+                .status(MemberStatus.PENDING)
+                .createdAt(timeHolder.now())
+                .updatedAt(timeHolder.now())
+                .build());
 
         return memberExternalRepository.save(
-                MemberExternal.builder()
-                        .memberId(member.getId())
-                        .oauthProvider(OAuthProvider.valueOf(provider.toUpperCase()))
-                        .uid(providerId)
-                        .createdAt(timeHolder.now())
-                        .build());
+            MemberExternal.builder()
+                .memberId(member.getId())
+                .oauthProvider(OAuthProvider.valueOf(provider.toUpperCase()))
+                .uid(providerId)
+                .createdAt(timeHolder.now())
+                .build());
     }
 
     @Transactional
@@ -104,8 +110,13 @@ public class AuthService extends DefaultOAuth2UserService {
                 return new ApiException(ErrorCode.UNAUTHORIZED);
             });
 
-        Long memberId  = authRefreshToken.getMemberId();
-        AccessToken accessToken = tokenProvider.createAccessToken(memberId);
+        Long memberId = authRefreshToken.getMemberId();
+
+        // TODO: ADMIN 권한 확인
+        List<String> authorities = new ArrayList<>();
+        authorities.add(SecurityRole.MEMBER.getName());
+
+        AccessToken accessToken = tokenProvider.createAccessToken(memberId, authorities);
         RefreshToken refreshToken = tokenProvider.createRefreshToken();
 
         log.debug("[refresh] 기존 refresh 토큰 무효화 후 새 refresh 저장");
@@ -118,8 +129,7 @@ public class AuthService extends DefaultOAuth2UserService {
                 .token(refreshToken.getValue())
                 .createdAt(refreshToken.getIssuedAt().toInstant())
                 .expiresAt(refreshToken.getExpiresAt().toInstant())
-                .build()
-        );
+                .build());
 
         return new AuthToken(accessToken.getValue(), refreshToken.getValue());
     }

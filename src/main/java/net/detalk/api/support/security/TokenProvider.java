@@ -17,6 +17,7 @@ import java.util.*;
 @Component
 public class TokenProvider {
     private static final String KEY_CLAIMS_ID = "id";
+    private static final String KEY_CLAIMS_AUTHORITIES = "authorities";
     private final AppProperties appProperties;
     private final SecretKey secretKey;
 
@@ -26,13 +27,14 @@ public class TokenProvider {
         this.secretKey = Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public AccessToken createAccessToken(Long memberId) {
+    public AccessToken createAccessToken(Long memberId, List<String> authorities) {
         Date issuedAt = new Date();
         Date expiresAt = new Date(issuedAt.getTime()
             + appProperties.getAccessTokenExpiresInSeconds() * 1000L);
 
         Claims claims = Jwts.claims()
             .add(KEY_CLAIMS_ID, memberId)
+            .add(KEY_CLAIMS_AUTHORITIES, authorities)
             .issuedAt(issuedAt)
             .expiration(expiresAt)
             .build();
@@ -42,6 +44,7 @@ public class TokenProvider {
         return AccessToken.builder()
             .value(token)
             .memberId(memberId)
+            .authorities(authorities)
             .issuedAt(issuedAt)
             .expiresAt(expiresAt)
             .build();
@@ -95,6 +98,7 @@ public class TokenProvider {
             return AccessToken.builder()
                 .value(token)
                 .memberId(payload.get(KEY_CLAIMS_ID, Long.class))
+                .authorities(payload.get(KEY_CLAIMS_AUTHORITIES, List.class))
                 .issuedAt(payload.getIssuedAt())
                 .expiresAt(payload.getExpiration())
                 .build();
