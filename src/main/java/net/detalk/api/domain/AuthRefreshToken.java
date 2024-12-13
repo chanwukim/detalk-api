@@ -2,6 +2,7 @@ package net.detalk.api.domain;
 
 import lombok.Builder;
 import lombok.Getter;
+import net.detalk.api.support.TimeHolder;
 
 import java.time.Instant;
 
@@ -28,5 +29,9 @@ public class AuthRefreshToken {
         this.createdAt = createdAt;
         this.expiresAt = expiresAt;
         this.revokedAt = revokedAt;
+    }
+
+    public void revoked(TimeHolder timeHolder) {
+        this.revokedAt = timeHolder.now();
     }
 }

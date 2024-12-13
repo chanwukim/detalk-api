@@ -99,10 +99,32 @@ public class TokenProvider {
                 .expiresAt(payload.getExpiration())
                 .build();
         } catch (ExpiredJwtException e) {
-            log.warn("[validateToken] 만료된 액세스 토큰 : {}", token);
+            log.warn("[parseAccessToken] 만료된 액세스 토큰 : {}", token);
             throw new ExpiredTokenException();
         } catch (Exception e) {
-            log.warn("[validateToken] {}", e.getMessage());
+            log.warn("[parseAccessToken] {}", e.getMessage());
+            throw new TokenException("Invalid token");
+        }
+    }
+
+    public RefreshToken parseRefreshToken(String token) {
+        try {
+            Claims payload = Jwts.parser()
+                .verifyWith(secretKey)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+
+            return RefreshToken.builder()
+                .value(token)
+                .issuedAt(payload.getIssuedAt())
+                .expiresAt(payload.getExpiration())
+                .build();
+        } catch (ExpiredJwtException e) {
+            log.warn("[parseRefreshToken] 만료된 리프레시 토큰 : {}", token);
+            throw new ExpiredTokenException();
+        } catch (Exception e) {
+            log.warn("[parseRefreshToken] {}", e.getMessage());
             throw new TokenException("Invalid token");
         }
     }
