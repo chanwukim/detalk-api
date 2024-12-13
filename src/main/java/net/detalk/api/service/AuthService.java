@@ -95,6 +95,35 @@ public class AuthService extends DefaultOAuth2UserService {
                         .build());
     }
 
+    @Transactional
+    public AuthToken refresh(String originalRefreshToken) {
+        RefreshToken verifiedRefreshToken = tokenProvider.parseRefreshToken(originalRefreshToken);
+        AuthRefreshToken authRefreshToken = authRefreshTokenRepository.findByToken(verifiedRefreshToken.getValue())
+            .orElseThrow(() -> {
+                log.error("[refresh] 서버에 존재하지 않는 토큰 : {}", originalRefreshToken);
+                return new ApiException(ErrorCode.UNAUTHORIZED);
+            });
+
+        Long memberId  = authRefreshToken.getMemberId();
+        AccessToken accessToken = tokenProvider.createAccessToken(memberId);
+        RefreshToken refreshToken = tokenProvider.createRefreshToken();
+
+        log.debug("[refresh] 기존 refresh 토큰 무효화 후 새 refresh 저장");
+        authRefreshToken.revoked(timeHolder);
+        authRefreshTokenRepository.update(authRefreshToken);
+
+        authRefreshTokenRepository.save(
+            AuthRefreshToken.builder()
+                .memberId(memberId)
+                .token(refreshToken.getValue())
+                .createdAt(refreshToken.getIssuedAt().toInstant())
+                .expiresAt(refreshToken.getExpiresAt().toInstant())
+                .build()
+        );
+
+        return new AuthToken(accessToken.getValue(), refreshToken.getValue());
+    }
+
     public void signOut(String refreshToken) {
         RefreshToken verifiedRefreshToken = tokenProvider.parseRefreshToken(refreshToken);
         AuthRefreshToken authRefreshToken = authRefreshTokenRepository.findByToken(verifiedRefreshToken.getValue())
