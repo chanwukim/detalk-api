@@ -21,6 +21,13 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
 
+/**
+ * 요청 헤더에서 액세스 토큰을 추출하고 인증을 처리하는 Filter.
+ * <p>
+ * HTTP 요청 헤더에서 액세스 토큰을 추출하여 검증한 후,
+ * 유효한 토큰에 대해 {@link SecurityUser} 객체를 생성하고 Spring Security 인증 컨텍스트에 저장한다.
+ * </p>
+ */
 @Slf4j
 public class TokenFilter extends OncePerRequestFilter {
     private final TokenProvider tokenProvider;
@@ -50,8 +57,10 @@ public class TokenFilter extends OncePerRequestFilter {
 
                 List<GrantedAuthority> authorities = AuthorityUtils.createAuthorityList(verifiedAccessToken.getAuthorities());
 
+                SecurityUser principal = new SecurityUser(verifiedAccessToken.getMemberId(), authorities);
+
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                    verifiedAccessToken.getMemberId(),
+                    principal,
                     null, // 비밀번호 없음
                     authorities
                 );
@@ -66,7 +75,7 @@ public class TokenFilter extends OncePerRequestFilter {
                 response.getWriter().flush();
                 return;
             } catch (Exception e) {
-                log.error("[doFilterInternal] unkown", e);
+                log.error("[doFilterInternal] unknown : {}", e.getMessage());
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.setContentType(MediaType.APPLICATION_JSON_VALUE);
                 response.setCharacterEncoding("UTF-8");
