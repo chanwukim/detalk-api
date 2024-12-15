@@ -44,9 +44,9 @@ public class ProductPostService {
     private final ProductPostSnapshotRepository productPostSnapshotRepository;
     private final TimeHolder timeHolder;
 
-    // TODO : 검증 로직 구현, S3 이미지 구현, 리턴 구현
+    // TODO : 작성자 정보 받기, SRP 리팩토링
     @Transactional
-    public void create(ProductCreate productCreate) {
+    public Long create(ProductCreate productCreate) {
 
         Instant now = timeHolder.now();
 
@@ -57,6 +57,7 @@ public class ProductPostService {
          */
         Product product = productRepository.findByName(productCreate.getName())
             .orElseGet(() -> productRepository.save(productCreate.getName(), now));
+
         Long productId = product.getId();
 
         // 게시글 저장
@@ -127,24 +128,20 @@ public class ProductPostService {
         List<String> tags = productCreate.getTags();
 
         List<ProductPostSnapshotTag> snapshotTags = tags.stream()
-            .map(tagName -> {
-                Tag tag = tagRepository.findByName(tagName)
-                    .orElseGet(() -> tagRepository.save(
-                        Tag.builder()
-                            .name(tagName)
-                            .build())
-                    );
-
-                return ProductPostSnapshotTag.builder()
-                    .postId(postSnapshotId)
-                    .tagId(tag.getId())
-                    .build();
-
-            })
+            .map(this::getOrCreateTag)
+            .map(tag -> ProductPostSnapshotTag.builder()
+                .postId(postSnapshotId)
+                .tagId(tag.getId())
+                .build())
             .toList();
 
         productPostSnapshotTagRepository.saveAll(snapshotTags);
+
+        return productPost.getId();
     }
 
-
+    private Tag getOrCreateTag(String tagName) {
+        return tagRepository.findByName(tagName)
+            .orElseGet(() -> tagRepository.save(Tag.builder().name(tagName).build()));
+    }
 }
