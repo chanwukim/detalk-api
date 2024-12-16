@@ -10,8 +10,6 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
-import java.util.Collection;
-
 /**
  * {@link HasRole} 어노테이션을 처리하는 HandlerMethodArgumentResolver.
  * <p>
@@ -54,10 +52,10 @@ public class HasRoleArgumentResolver implements HandlerMethodArgumentResolver {
 
         // @HasRole 어노테이션이 요구하는 ROLE 가져오기
         HasRole hasRoleAnnotation = parameter.getParameterAnnotation(HasRole.class);
-        SecurityRole requiredRole = hasRoleAnnotation.value();
+        String requiredRole = hasRoleAnnotation.value().getName();
 
         // 사용자가 필요한 역할을 가지고 있는지 확인
-        if (hasRole(securityUser.getAuthorities(), requiredRole)) {
+        if (hasRole(securityUser, requiredRole)) {
             return securityUser;
         }
 
@@ -65,8 +63,9 @@ public class HasRoleArgumentResolver implements HandlerMethodArgumentResolver {
         return null;
     }
 
-    private boolean hasRole(Collection<? extends GrantedAuthority> authorities, SecurityRole role) {
-        return authorities.stream()
-            .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals(role.getName()));
+    private boolean hasRole(SecurityUser securityUser, String requiredRole) {
+        return securityUser.getAuthorities().stream()
+            .map(GrantedAuthority::getAuthority)
+            .anyMatch(role -> role.equals(requiredRole));
     }
 }
