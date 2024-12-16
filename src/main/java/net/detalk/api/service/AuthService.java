@@ -4,12 +4,14 @@ import jakarta.transaction.Transactional;
 import net.detalk.api.domain.*;
 import net.detalk.api.repository.AuthRefreshTokenRepository;
 import net.detalk.api.repository.MemberExternalRepository;
+import net.detalk.api.repository.MemberProfileRepository;
 import net.detalk.api.repository.MemberRepository;
 import net.detalk.api.support.TimeHolder;
 import net.detalk.api.support.error.ApiException;
 import net.detalk.api.support.error.ErrorCode;
 import net.detalk.api.support.security.*;
 
+import net.detalk.api.support.util.StringUtil;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -19,6 +21,7 @@ import org.springframework.security.core.authority.AuthorityUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,6 +30,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AuthService extends DefaultOAuth2UserService {
     private final MemberRepository memberRepository;
+    private final MemberProfileRepository memberProfileRepository;
     private final MemberExternalRepository memberExternalRepository;
     private final AuthRefreshTokenRepository authRefreshTokenRepository;
     private final TokenProvider tokenProvider;
@@ -83,14 +87,26 @@ public class AuthService extends DefaultOAuth2UserService {
     private MemberExternal register(String provider, String providerId) {
         log.info("[register] 새 소셜회원가입 provider {}", provider);
 
+        Instant now = Instant.now();
+
         // 소셜 로그인후 LoginType.EXTERNAL, 상태는 PENDING이라면, 가입 form으로 이동
         Member member = memberRepository.save(
             Member.builder()
                 .loginType(LoginType.EXTERNAL)
                 .status(MemberStatus.PENDING)
-                .createdAt(timeHolder.now())
-                .updatedAt(timeHolder.now())
+                .createdAt(now)
+                .updatedAt(now)
                 .build());
+
+        System.out.println("member.getId() = " + member.getId());
+
+        memberProfileRepository.save(
+            MemberProfile.builder()
+                .memberId(member.getId())
+                .userhandle(StringUtil.generateMixedCaseAndNumber(64))
+                .updatedAt(now)
+                .build()
+        );
 
         return memberExternalRepository.save(
             MemberExternal.builder()
