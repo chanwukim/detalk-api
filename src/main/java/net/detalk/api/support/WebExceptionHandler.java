@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.detalk.api.support.error.ApiException;
 import net.detalk.api.support.error.ErrorCode;
 import net.detalk.api.support.error.ErrorMessage;
+import net.detalk.api.support.error.InvalidStateException;
 import net.detalk.api.support.util.StringUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +28,14 @@ public class WebExceptionHandler {
         return ResponseEntity
             .status(e.getErrorCode().getStatus())
             .body(new ErrorMessage(e.getErrorCode()));
+    }
+
+    @ExceptionHandler(InvalidStateException.class)
+    public ResponseEntity<ErrorMessage> handleInvalidStateException(InvalidStateException e) {
+        log.error("InvalidStateException. {}", e.getMessage());
+        return ResponseEntity
+            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body(new ErrorMessage(ErrorCode.INTERNAL_SERVER_ERROR));
     }
 
     // Validation
