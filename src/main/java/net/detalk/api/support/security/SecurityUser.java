@@ -1,6 +1,5 @@
 package net.detalk.api.support.security;
 
-import net.detalk.api.support.error.InvalidStateException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -25,12 +24,12 @@ public class SecurityUser implements UserDetails {
 
     @Override
     public String getUsername() {
-        throw new InvalidStateException("SecurityUser의 Username을 사용하지 마세요");
+        return null;
     }
 
     @Override
     public String getPassword() {
-        throw new InvalidStateException("SecurityUser의 Password를 사용하지 마세요");
+        return null;
     }
 
     @Override
