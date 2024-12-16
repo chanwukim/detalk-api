@@ -4,12 +4,14 @@ import jakarta.transaction.Transactional;
 import net.detalk.api.domain.*;
 import net.detalk.api.repository.AuthRefreshTokenRepository;
 import net.detalk.api.repository.MemberExternalRepository;
+import net.detalk.api.repository.MemberProfileRepository;
 import net.detalk.api.repository.MemberRepository;
 import net.detalk.api.support.TimeHolder;
 import net.detalk.api.support.error.ApiException;
 import net.detalk.api.support.error.ErrorCode;
 import net.detalk.api.support.security.*;
 
+import net.detalk.api.support.util.StringUtil;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -19,11 +21,16 @@ import org.springframework.security.core.authority.AuthorityUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService extends DefaultOAuth2UserService {
     private final MemberRepository memberRepository;
+    private final MemberProfileRepository memberProfileRepository;
     private final MemberExternalRepository memberExternalRepository;
     private final AuthRefreshTokenRepository authRefreshTokenRepository;
     private final TokenProvider tokenProvider;
@@ -32,17 +39,24 @@ public class AuthService extends DefaultOAuth2UserService {
     @Override
     @Transactional
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
+        // OAuthProvider 검증 및 변환
+        // 시큐리티에서 이미 지원하지 않는 건 OAuth2AuthorizationRequestRedirectFilter에서
+        // OAuth2AuthorizationRequestException 발생하긴 함
+        OAuthProvider provider = validateAndGetProvider(userRequest.getClientRegistration().getRegistrationId());
+
         OAuth2User user = super.loadUser(userRequest);
-
-        String provider = userRequest.getClientRegistration().getRegistrationId();
         String providerId = extractProviderId(provider, user);
-        log.debug("[loadUser] provider: {}", provider);
-        log.debug("[loadUser] providerId: {}", providerId);
 
-        MemberExternal memberExternal = memberExternalRepository.findByTypeAndUid(provider, providerId)
-                .orElseGet(() -> register(provider, providerId));
+        log.debug("[loadUser] provider: {}, providerId: {}", provider, providerId);
 
-        AccessToken accessToken = tokenProvider.createAccessToken(memberExternal.getMemberId());
+        // 소셜 계정 정보 조회 또는 신규 회원 등록
+        MemberExternal memberExternal = memberExternalRepository
+            .findByTypeAndUid(provider, providerId)
+            .orElseGet(() -> register(provider, providerId));
+
+        // TODO: ADMIN 권한 확인
+        List<String> authorities = List.of(SecurityRole.MEMBER.getName());
+        AccessToken accessToken = tokenProvider.createAccessToken(memberExternal.getMemberId(), authorities);
         RefreshToken refreshToken = tokenProvider.createRefreshToken();
 
         authRefreshTokenRepository.save(
@@ -51,48 +65,61 @@ public class AuthService extends DefaultOAuth2UserService {
                 .token(refreshToken.getValue())
                 .createdAt(refreshToken.getIssuedAt().toInstant())
                 .expiresAt(refreshToken.getExpiresAt().toInstant())
-                .build()
-        );
+                .build());
 
         return OAuthUser.builder()
-                .id(memberExternal.getMemberId())
-                .username("username")
-                .accessToken(accessToken.getValue())
-                .refreshToken(refreshToken.getValue())
-                .authorities(AuthorityUtils.createAuthorityList(MemberRole.MEMBER.getName()))
-                .attributes(user.getAttributes())
-                .build();
+            .id(memberExternal.getMemberId())
+            .username("username")
+            .accessToken(accessToken.getValue())
+            .refreshToken(refreshToken.getValue())
+            .authorities(AuthorityUtils.createAuthorityList(authorities.toArray(String[]::new)))
+            .attributes(user.getAttributes())
+            .build();
     }
 
-    private String extractProviderId(String provider, OAuth2User user) {
-        return switch (OAuthProvider.valueOf(provider.toUpperCase())) {
+    private OAuthProvider validateAndGetProvider(String registrationId) {
+        try {
+            return OAuthProvider.valueOf(registrationId.toUpperCase());
+        } catch (Exception e) {
+            log.error("[validateAndGetProvider] 알 수 없는 OAuth Provider: {}", registrationId);
+            throw new ApiException(ErrorCode.PROVIDER_UNSUPPORTED);
+        }
+    }
+
+    private String extractProviderId(OAuthProvider provider, OAuth2User user) {
+        return switch (provider) {
             case GOOGLE -> user.getAttribute("sub");
-            default -> {
-                log.error("[extractProviderId] 알 수 없는 provider: {}", provider);
-                throw new ApiException(ErrorCode.INTERNAL_SERVER_ERROR);
-            }
         };
     }
 
-    private MemberExternal register(String provider, String providerId) {
+    private MemberExternal register(OAuthProvider provider, String providerId) {
         log.info("[register] 새 소셜회원가입 provider {}", provider);
+
+        Instant now = Instant.now();
 
         // 소셜 로그인후 LoginType.EXTERNAL, 상태는 PENDING이라면, 가입 form으로 이동
         Member member = memberRepository.save(
-                Member.builder()
-                        .loginType(LoginType.EXTERNAL)
-                        .status(MemberStatus.PENDING)
-                        .createdAt(timeHolder.now())
-                        .updatedAt(timeHolder.now())
-                        .build());
+            Member.builder()
+                .loginType(LoginType.EXTERNAL)
+                .status(MemberStatus.PENDING)
+                .createdAt(now)
+                .updatedAt(now)
+                .build());
+
+        memberProfileRepository.save(
+            MemberProfile.builder()
+                .memberId(member.getId())
+                .userhandle(StringUtil.generateMixedCaseAndNumber(64))
+                .updatedAt(now)
+                .build());
 
         return memberExternalRepository.save(
-                MemberExternal.builder()
-                        .memberId(member.getId())
-                        .oauthProvider(OAuthProvider.valueOf(provider.toUpperCase()))
-                        .uid(providerId)
-                        .createdAt(timeHolder.now())
-                        .build());
+            MemberExternal.builder()
+                .memberId(member.getId())
+                .oauthProvider(provider)
+                .uid(providerId)
+                .createdAt(timeHolder.now())
+                .build());
     }
 
     @Transactional
@@ -104,8 +131,13 @@ public class AuthService extends DefaultOAuth2UserService {
                 return new ApiException(ErrorCode.UNAUTHORIZED);
             });
 
-        Long memberId  = authRefreshToken.getMemberId();
-        AccessToken accessToken = tokenProvider.createAccessToken(memberId);
+        Long memberId = authRefreshToken.getMemberId();
+
+        // TODO: ADMIN 권한 확인
+        List<String> authorities = new ArrayList<>();
+        authorities.add(SecurityRole.MEMBER.getName());
+
+        AccessToken accessToken = tokenProvider.createAccessToken(memberId, authorities);
         RefreshToken refreshToken = tokenProvider.createRefreshToken();
 
         log.debug("[refresh] 기존 refresh 토큰 무효화 후 새 refresh 저장");
@@ -118,8 +150,7 @@ public class AuthService extends DefaultOAuth2UserService {
                 .token(refreshToken.getValue())
                 .createdAt(refreshToken.getIssuedAt().toInstant())
                 .expiresAt(refreshToken.getExpiresAt().toInstant())
-                .build()
-        );
+                .build());
 
         return new AuthToken(accessToken.getValue(), refreshToken.getValue());
     }

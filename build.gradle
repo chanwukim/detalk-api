@@ -86,6 +86,24 @@ jooq {
 						includeExpression = '.*(_AT)$'
 						includeTypes = 'BIGINT'
 					}
+					forcedType {
+						userType = 'net.detalk.api.domain.LoginType'
+						enumConverter = true
+						name = 'varchar'
+						includeExpression = 'member\\.login_type'
+					}
+					forcedType {
+						userType = 'net.detalk.api.domain.MemberStatus'
+						enumConverter = true
+						name = 'varchar'
+						includeExpression = 'member\\.status'
+					}
+					forcedType {
+						userType = 'net.detalk.api.support.security.OAuthProvider'
+						enumConverter = true
+						name = 'varchar'
+						includeExpression = 'member_external\\.type'
+					}
 				}
 			}
 			target {

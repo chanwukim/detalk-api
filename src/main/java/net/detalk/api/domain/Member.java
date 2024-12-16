@@ -23,4 +23,8 @@ public class Member {
         this.updatedAt = updatedAt;
         this.deletedAt = deletedAt;
     }
+
+    public boolean isPendingExternalMember() {
+        return loginType == LoginType.EXTERNAL && status == MemberStatus.PENDING;
+    }
 }
