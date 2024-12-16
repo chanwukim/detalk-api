@@ -1,6 +1,7 @@
 package net.detalk.api.repository;
 
 import net.detalk.api.domain.MemberExternal;
+import net.detalk.api.support.security.OAuthProvider;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Repository;
 
@@ -19,7 +20,7 @@ public class MemberExternalRepositoryImpl implements MemberExternalRepository {
     public MemberExternal save(MemberExternal memberExternal) {
         return dsl.insertInto(MEMBER_EXTERNAL)
                 .set(MEMBER_EXTERNAL.MEMBER_ID, memberExternal.getMemberId())
-                .set(MEMBER_EXTERNAL.TYPE, memberExternal.getOauthProvider().getValue())
+                .set(MEMBER_EXTERNAL.TYPE, memberExternal.getOauthProvider())
                 .set(MEMBER_EXTERNAL.UID, memberExternal.getUid())
                 .set(MEMBER_EXTERNAL.CREATED_AT, memberExternal.getCreatedAt())
                 .returning()
@@ -27,7 +28,7 @@ public class MemberExternalRepositoryImpl implements MemberExternalRepository {
     }
 
     @Override
-    public Optional<MemberExternal> findByTypeAndUid(String type, String uid) {
+    public Optional<MemberExternal> findByTypeAndUid(OAuthProvider type, String uid) {
         return dsl
                 .selectFrom(MEMBER_EXTERNAL)
                 .where(MEMBER_EXTERNAL.TYPE.eq(type))

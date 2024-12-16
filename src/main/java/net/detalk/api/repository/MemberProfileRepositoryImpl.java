@@ -8,6 +8,8 @@ import static net.detalk.jooq.Tables.MEMBER_PROFILE;
 
 import lombok.RequiredArgsConstructor;
 
+import java.util.Optional;
+
 @Repository
 @RequiredArgsConstructor
 public class MemberProfileRepositoryImpl implements MemberProfileRepository {
@@ -24,5 +26,12 @@ public class MemberProfileRepositoryImpl implements MemberProfileRepository {
                 .set(MEMBER_PROFILE.UPDATED_AT, memberProfile.getUpdatedAt())
                 .returning()
                 .fetchOneInto(MemberProfile.class);
+    }
+
+    @Override
+    public Optional<MemberProfile> findByMemberId(Long memberId) {
+        return dsl.selectFrom(MEMBER_PROFILE)
+            .where(MEMBER_PROFILE.MEMBER_ID.eq(memberId))
+            .fetchOptionalInto(MemberProfile.class);
     }
 }

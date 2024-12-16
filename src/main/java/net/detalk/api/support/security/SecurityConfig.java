@@ -64,7 +64,8 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS).permitAll()
-                        .anyRequest().permitAll())
+                        .requestMatchers(HttpMethod.GET, "/api/v1/members/me").hasRole("MEMBER")
+                        .anyRequest().authenticated())
                 /**
                  * sign-in: /oauth2/authorization/{registrationId}
                  * redirect: /login/oauth2/code/{registrationId}
