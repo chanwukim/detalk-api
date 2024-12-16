@@ -1,7 +1,6 @@
 package net.detalk.api.support.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -9,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import net.detalk.api.support.error.ErrorCode;
 import net.detalk.api.support.error.ErrorMessage;
+import net.detalk.api.support.error.ExpiredTokenException;
 import net.detalk.api.support.util.StringUtil;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -66,7 +66,8 @@ public class TokenFilter extends OncePerRequestFilter {
                 );
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
-            } catch (ExpiredJwtException e) {
+                log.debug("[doFilterInternal] SecurityContext에 authentication 설정 완료");
+            } catch (ExpiredTokenException e) {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.setContentType(MediaType.APPLICATION_JSON_VALUE);
                 response.setCharacterEncoding("UTF-8");
