@@ -9,6 +9,7 @@ import net.detalk.api.domain.ProductCreate;
 import net.detalk.api.service.ProductPostService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -29,11 +30,16 @@ public class ProductPostController {
 
     @GetMapping
     public ResponseEntity<CursorPageData<GetProductPostResponse>> getProductPosts(
-        @RequestParam(name = "size", defaultValue = "5") @Max(20) int pageSize ,
+        @RequestParam(name = "size", defaultValue = "5") @Max(20) int pageSize,
         @RequestParam(name = "startId", required = false) Long nextId) {
         CursorPageData<GetProductPostResponse> result = productPostService.getProductPosts(pageSize,
             nextId);
         return ResponseEntity.ok(result);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<GetProductPostResponse> getProductPost(@PathVariable("id") Long id) {
+        GetProductPostResponse result = productPostService.getProductPostById(id);
+        return ResponseEntity.ok(result);
+    }
 }
