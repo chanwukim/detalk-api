@@ -7,7 +7,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.detalk.api.controller.v1.response.GetProductPostResponse;
-import net.detalk.api.controller.v1.response.CursorPageData;
+import net.detalk.api.support.CursorPageData;
 import net.detalk.api.domain.ProductMaker;
 import net.detalk.api.domain.ProductPostSnapshotAttachmentFile;
 import net.detalk.api.domain.PricingPlan;

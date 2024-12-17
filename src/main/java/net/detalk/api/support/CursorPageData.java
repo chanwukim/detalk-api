@@ -1,4 +1,4 @@
-package net.detalk.api.controller.v1.response;
+package net.detalk.api.support;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
