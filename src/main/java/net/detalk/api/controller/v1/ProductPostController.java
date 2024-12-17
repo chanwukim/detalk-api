@@ -39,7 +39,7 @@ public class ProductPostController {
 
     @GetMapping("/{id}")
     public ResponseEntity<GetProductPostResponse> getProductPost(@PathVariable("id") Long id) {
-        GetProductPostResponse result = productPostService.getProductPostById(id);
+        GetProductPostResponse result = productPostService.getProductPostDetailsById(id);
         return ResponseEntity.ok(result);
     }
 }

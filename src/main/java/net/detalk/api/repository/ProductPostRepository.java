@@ -43,7 +43,7 @@ public class ProductPostRepository {
             .fetchOneInto(ProductPost.class);
     }
 
-    public Optional<GetProductPostResponse> findById(Long id) {
+    public Optional<GetProductPostResponse> findDetailsById(Long id) {
 
         var result = dsl.select(
                 PRODUCT_POST.ID,

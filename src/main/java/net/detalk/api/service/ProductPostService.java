@@ -176,8 +176,8 @@ public class ProductPostService {
     }
 
     @Transactional(readOnly = true)
-    public GetProductPostResponse getProductPostById(Long id) {
-        return productPostRepository.findById(id).orElseThrow(() -> {
+    public GetProductPostResponse getProductPostDetailsById(Long id) {
+        return productPostRepository.findDetailsById(id).orElseThrow(() -> {
             log.warn("[getProductPostById] 제품 게시글 없음 ID: {}", id);
             return new ApiException(ErrorCode.NOT_FOUND);
         });
