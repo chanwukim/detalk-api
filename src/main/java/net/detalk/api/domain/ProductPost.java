@@ -12,12 +12,14 @@ public class ProductPost {
     private Long writerId;
     private Long productId;
     private Instant createdAt;
+    private Long recommendCount;
 
-    public ProductPost(Long id, Long writerId, Long productId, Instant createdAt) {
+    public ProductPost(Long id, Long writerId, Long productId, Instant createdAt, Long recommendCount) {
         this.id = id;
         this.writerId = writerId;
         this.productId = productId;
         this.createdAt = createdAt;
+        this.recommendCount = recommendCount;
     }
 
 }

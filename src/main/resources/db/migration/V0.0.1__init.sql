@@ -116,6 +116,7 @@ CREATE TABLE "product_post" (
         "writer_id" BIGINT NOT NULL,
         "product_id" BIGINT NOT NULL,
         "created_at" BIGINT NOT NULL,
+        "recommend_count" BIGINT DEFAULT 0 NOT NULL,
         CONSTRAINT "product_post_pkey" PRIMARY KEY ("id"),
         FOREIGN KEY ("writer_id") REFERENCES "member" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY ("product_id") REFERENCES "product" ("id") ON DELETE CASCADE ON UPDATE CASCADE
