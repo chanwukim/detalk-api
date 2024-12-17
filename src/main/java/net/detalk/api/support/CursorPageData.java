@@ -1,15 +1,15 @@
-package net.detalk.api.controller.v1.response;
+package net.detalk.api.support;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
-public class PageResponse<T> {
+public class CursorPageData<T> {
 
     private final List<T> items;
     private final Long nextId;
     private final boolean hasNext;
 
-    public PageResponse(List<T> items, Long nextId, boolean hasNext) {
+    public CursorPageData(List<T> items, Long nextId, boolean hasNext) {
         this.items = items;
         this.nextId = nextId;
         this.hasNext = hasNext;

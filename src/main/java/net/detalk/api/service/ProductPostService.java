@@ -7,7 +7,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.detalk.api.controller.v1.response.GetProductPostResponse;
-import net.detalk.api.controller.v1.response.PageResponse;
+import net.detalk.api.support.CursorPageData;
 import net.detalk.api.domain.ProductMaker;
 import net.detalk.api.domain.ProductPostSnapshotAttachmentFile;
 import net.detalk.api.domain.PricingPlan;
@@ -146,7 +146,7 @@ public class ProductPostService {
         return productPost.getId();
     }
 
-    public PageResponse<GetProductPostResponse> getProductPosts(int pageSize, Long nextId) {
+    public CursorPageData<GetProductPostResponse> getProductPosts(int pageSize, Long nextId) {
 
         // 요청 size가 1보다 작을 경우 예외 발생
         if (pageSize < 1) {
@@ -172,7 +172,7 @@ public class ProductPostService {
             result = result.subList(0, pageSize);
         }
 
-        return new PageResponse<>(result, nextPageId, hasNext);
+        return new CursorPageData<>(result, nextPageId, hasNext);
     }
 
     private Tag getOrCreateTag(String tagName) {
