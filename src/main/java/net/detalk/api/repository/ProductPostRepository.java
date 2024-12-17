@@ -12,6 +12,7 @@ import static net.detalk.jooq.tables.JProductPostSnapshotTag.PRODUCT_POST_SNAPSH
 import static net.detalk.jooq.tables.JTag.TAG;
 
 import java.time.Instant;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,10 +43,106 @@ public class ProductPostRepository {
             .fetchOneInto(ProductPost.class);
     }
 
-    public Optional<ProductPost> findById(Long id) {
-        return dsl.selectFrom(PRODUCT_POST)
+    public Optional<GetProductPostResponse> findById(Long id) {
+
+        var result = dsl.select(
+                PRODUCT_POST.ID,
+                MEMBER_PROFILE.NICKNAME,
+                MEMBER_PROFILE.USERHANDLE.as("userHandle"),
+                PRODUCT_POST_SNAPSHOT.CREATED_AT.as("createdAt"),
+                DSL.when(PRODUCT_MAKER.ID.isNotNull(), true).otherwise(false).as("isMaker"),
+                ATTACHMENT_FILE.URL.as("avatarUrl"),
+                PRODUCT_POST_SNAPSHOT.TITLE,
+                PRODUCT_POST_SNAPSHOT.DESCRIPTION,
+                PRICING_PLAN.NAME.as("pricingPlan"),
+                DSL.arrayAgg(TAG.NAME).as("tags"),
+                PRODUCT_POST.RECOMMEND_COUNT.as("recommendCount"),
+                PRODUCT_POST_SNAPSHOT.ID.as("snapshotId")
+            )
+            .from(PRODUCT_POST)
+            .join(PRODUCT_POST_LAST_SNAPSHOT)
+            .on(PRODUCT_POST.ID.eq(PRODUCT_POST_LAST_SNAPSHOT.POST_ID))
+            .join(PRODUCT_POST_SNAPSHOT)
+            .on(PRODUCT_POST_LAST_SNAPSHOT.SNAPSHOT_ID.eq(PRODUCT_POST_SNAPSHOT.ID))
+            .join(PRICING_PLAN)
+            .on(PRODUCT_POST_SNAPSHOT.PRICING_PLAN_ID.eq(PRICING_PLAN.ID))
+            .leftJoin(PRODUCT_POST_SNAPSHOT_TAG)
+            .on(PRODUCT_POST_SNAPSHOT_TAG.POST_ID.eq(PRODUCT_POST_SNAPSHOT.ID))
+            .leftJoin(TAG)
+            .on(TAG.ID.eq(PRODUCT_POST_SNAPSHOT_TAG.TAG_ID))
+            .leftJoin(MEMBER_PROFILE)
+            .on(MEMBER_PROFILE.MEMBER_ID.eq(PRODUCT_POST.WRITER_ID))
+            .leftJoin(PRODUCT_MAKER)
+            .on(PRODUCT_MAKER.PRODUCT_ID.eq(PRODUCT_POST.PRODUCT_ID))
+            .leftJoin(ATTACHMENT_FILE)
+            .on(ATTACHMENT_FILE.ID.eq(MEMBER_PROFILE.AVATAR_ID))
             .where(PRODUCT_POST.ID.eq(id))
-            .fetchOptionalInto(ProductPost.class);
+            .groupBy(
+                PRODUCT_POST.ID,
+                MEMBER_PROFILE.NICKNAME,
+                MEMBER_PROFILE.USERHANDLE,
+                PRODUCT_POST_SNAPSHOT.CREATED_AT,
+                PRODUCT_MAKER.ID,
+                ATTACHMENT_FILE.URL,
+                PRODUCT_POST_SNAPSHOT.TITLE,
+                PRODUCT_POST_SNAPSHOT.DESCRIPTION,
+                PRICING_PLAN.NAME,
+                PRODUCT_POST.RECOMMEND_COUNT,
+                PRODUCT_POST_SNAPSHOT.ID
+            )
+            .fetchOne();
+
+        if (result == null) {
+            return Optional.empty();
+        }
+
+        Long snapshotId = result.get("snapshotId", Long.class);
+        List<Media> images = Collections.emptyList();
+
+        if (snapshotId != null) {
+            var imagesResult = dsl.select(
+                    PRODUCT_POST.ID.as("postId"),
+                    PRODUCT_POST_SNAPSHOT_ATTACHMENT_FILE.SEQUENCE.as("sequence"),
+                    ATTACHMENT_FILE.URL.as("imageUrl")
+                )
+                .from(PRODUCT_POST_SNAPSHOT_ATTACHMENT_FILE)
+                .join(ATTACHMENT_FILE)
+                    .on(PRODUCT_POST_SNAPSHOT_ATTACHMENT_FILE.ATTACHMENT_FILE_ID.eq(ATTACHMENT_FILE.ID))
+                .join(PRODUCT_POST_SNAPSHOT)
+                    .on(PRODUCT_POST_SNAPSHOT_ATTACHMENT_FILE.SNAPSHOT_ID.eq(PRODUCT_POST_SNAPSHOT.ID))
+                .join(PRODUCT_POST_LAST_SNAPSHOT)
+                    .on(PRODUCT_POST_SNAPSHOT.ID.eq(PRODUCT_POST_LAST_SNAPSHOT.SNAPSHOT_ID))
+                .join(PRODUCT_POST)
+                    .on(PRODUCT_POST_LAST_SNAPSHOT.POST_ID.eq(PRODUCT_POST.ID))
+                .where(PRODUCT_POST_SNAPSHOT_ATTACHMENT_FILE.SNAPSHOT_ID.eq(snapshotId))
+                .orderBy(PRODUCT_POST_SNAPSHOT_ATTACHMENT_FILE.SEQUENCE.asc())
+                .fetch();
+
+            images = imagesResult.stream()
+                .map(record -> new Media(
+                    record.get("imageUrl", String.class),
+                    record.get("sequence", Integer.class)
+                ))
+                .toList();
+        }
+
+        String[] tagsArr = result.get("tags", String[].class);
+        List<String> tags = List.of(tagsArr);
+
+        return Optional.of(new GetProductPostResponse(
+            result.get(PRODUCT_POST.ID, Long.class),
+            result.get("nickname", String.class),
+            result.get("userHandle", String.class),
+            result.get("createdAt", Instant.class),
+            result.get("isMaker", Boolean.class),
+            result.get("avatarUrl", String.class),
+            result.get(PRODUCT_POST_SNAPSHOT.TITLE, String.class),
+            result.get(PRODUCT_POST_SNAPSHOT.DESCRIPTION, String.class),
+            result.get("pricingPlan", String.class),
+            result.get("recommendCount", Integer.class),
+            tags,
+            images
+        ));
     }
 
 
