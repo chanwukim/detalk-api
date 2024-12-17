@@ -6,7 +6,8 @@ import org.springframework.http.HttpStatus;
 @Getter
 public enum ErrorCode {
     // HTTP
-    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "internal_server_error", "Internal Server Error. Please try again later. If the issue persists, contact support."),
+    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "internal_server_error",
+        "Internal Server Error. Please try again later. If the issue persists, contact support."),
     BAD_REQUEST(HttpStatus.BAD_REQUEST, "bad_request", "Bad Request."),
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "uauthorized", "Unauthorized. Please sign in."),
     FORBIDDEN(HttpStatus.FORBIDDEN, "forbidden", "Forbidden. You do not have permission to access this resource."),
@@ -15,6 +16,13 @@ public enum ErrorCode {
     CONFLICT(HttpStatus.CONFLICT, "conflict", "Conflict. A conflict occurred with the current state of the resource."),
     //
     VALIDATION_FAILED(HttpStatus.BAD_REQUEST, "validation_failed", "Validation failed."),
+
+    TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "token_expired", "Token expired."),
+    TOKEN_INVALID(HttpStatus.UNAUTHORIZED, "token_invalid", "Token Invalid."),
+
+    PROVIDER_UNSUPPORTED(HttpStatus.BAD_REQUEST, "provider_unsupported", "Unsupported provider."),
+
+    NEED_SIGN_UP(HttpStatus.UNAUTHORIZED, "need_sign_up", "Need Sign Up."),
     ;
 
     private final HttpStatus status;

@@ -1,15 +1,15 @@
-package net.detalk.api.domain;
+package net.detalk.api.support.security;
 
 import lombok.Getter;
 
 @Getter
-public enum MemberRole {
+public enum SecurityRole {
     MEMBER("ROLE_MEMBER"),
     ADMIN("ROLE_ADMIN");
 
     private final String name;
 
-    MemberRole(String name) {
+    SecurityRole(String name) {
         this.name = name;
     }
 }
