@@ -175,6 +175,15 @@ public class ProductPostService {
         return new CursorPageData<>(result, nextPageId, hasNext);
     }
 
+    @Transactional(readOnly = true)
+    public GetProductPostResponse getProductPostById(Long id) {
+        return productPostRepository.findById(id).orElseThrow(() -> {
+            log.warn("[getProductPostById] 제품 게시글 없음 ID: {}", id);
+            return new ApiException(ErrorCode.NOT_FOUND);
+        });
+    }
+
+
     private Tag getOrCreateTag(String tagName) {
         return tagRepository.findByName(tagName)
             .orElseGet(() -> tagRepository.save(Tag.builder().name(tagName).build()));
