@@ -4,7 +4,7 @@ import jakarta.validation.constraints.Max;
 import lombok.RequiredArgsConstructor;
 import net.detalk.api.controller.v1.response.CreateProductPostResponse;
 import net.detalk.api.controller.v1.response.GetProductPostResponse;
-import net.detalk.api.controller.v1.response.PageResponse;
+import net.detalk.api.controller.v1.response.CursorPageData;
 import net.detalk.api.domain.ProductCreate;
 import net.detalk.api.service.ProductPostService;
 import org.springframework.http.ResponseEntity;
@@ -28,10 +28,10 @@ public class ProductPostController {
     }
 
     @GetMapping
-    public ResponseEntity<PageResponse<GetProductPostResponse>> getProductPosts(
+    public ResponseEntity<CursorPageData<GetProductPostResponse>> getProductPosts(
         @RequestParam(name = "size", defaultValue = "5") @Max(20) int pageSize ,
         @RequestParam(name = "startId", required = false) Long nextId) {
-        PageResponse<GetProductPostResponse> result = productPostService.getProductPosts(pageSize,
+        CursorPageData<GetProductPostResponse> result = productPostService.getProductPosts(pageSize,
             nextId);
         return ResponseEntity.ok(result);
     }
