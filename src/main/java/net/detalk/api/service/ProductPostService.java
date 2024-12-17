@@ -1,8 +1,13 @@
 package net.detalk.api.service;
 
+import static net.detalk.api.support.error.ErrorCode.BAD_REQUEST;
+
 import java.time.Instant;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import net.detalk.api.controller.v1.response.GetProductPostResponse;
+import net.detalk.api.controller.v1.response.PageResponse;
 import net.detalk.api.domain.ProductMaker;
 import net.detalk.api.domain.ProductPostSnapshotAttachmentFile;
 import net.detalk.api.domain.PricingPlan;
@@ -28,6 +33,7 @@ import net.detalk.api.support.error.ErrorCode;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ProductPostService {
@@ -44,9 +50,9 @@ public class ProductPostService {
     private final ProductPostSnapshotRepository productPostSnapshotRepository;
     private final TimeHolder timeHolder;
 
-    // TODO : 검증 로직 구현, S3 이미지 구현, 리턴 구현
+    // TODO : 작성자 정보 받기, SRP 리팩토링
     @Transactional
-    public void create(ProductCreate productCreate) {
+    public Long create(ProductCreate productCreate) {
 
         Instant now = timeHolder.now();
 
@@ -57,6 +63,7 @@ public class ProductPostService {
          */
         Product product = productRepository.findByName(productCreate.getName())
             .orElseGet(() -> productRepository.save(productCreate.getName(), now));
+
         Long productId = product.getId();
 
         // 게시글 저장
@@ -127,24 +134,49 @@ public class ProductPostService {
         List<String> tags = productCreate.getTags();
 
         List<ProductPostSnapshotTag> snapshotTags = tags.stream()
-            .map(tagName -> {
-                Tag tag = tagRepository.findByName(tagName)
-                    .orElseGet(() -> tagRepository.save(
-                        Tag.builder()
-                            .name(tagName)
-                            .build())
-                    );
-
-                return ProductPostSnapshotTag.builder()
-                    .postId(postSnapshotId)
-                    .tagId(tag.getId())
-                    .build();
-
-            })
+            .map(this::getOrCreateTag)
+            .map(tag -> ProductPostSnapshotTag.builder()
+                .postId(postSnapshotId)
+                .tagId(tag.getId())
+                .build())
             .toList();
 
         productPostSnapshotTagRepository.saveAll(snapshotTags);
+
+        return productPost.getId();
     }
 
+    public PageResponse<GetProductPostResponse> getProductPosts(int pageSize, Long nextId) {
 
+        // 요청 size가 1보다 작을 경우 예외 발생
+        if (pageSize < 1) {
+            log.warn("잘못된 페이지 사이즈 요청입니다={}", pageSize);
+            throw new ApiException(BAD_REQUEST);
+        }
+
+        // hasNext 판별하기 위해 pageSize + 1
+        List<GetProductPostResponse> result = productPostRepository.findProductPosts(
+            pageSize + 1, nextId);
+
+        boolean hasNext = false;
+        Long nextPageId = null;
+
+        // +1 했는데, 조회가 되었다면 다음데이터가 있음
+        if (result.size() > pageSize) {
+            // 마지막 item 추출 (배열이므로 size-1)
+            GetProductPostResponse lastItem = result.get(pageSize - 1);
+            // 클라이언트가 요청해야할 다음 ID
+            nextPageId = lastItem.id();
+            hasNext = true;
+            // 클라이언트 size 요청 개수만큼 return
+            result = result.subList(0, pageSize);
+        }
+
+        return new PageResponse<>(result, nextPageId, hasNext);
+    }
+
+    private Tag getOrCreateTag(String tagName) {
+        return tagRepository.findByName(tagName)
+            .orElseGet(() -> tagRepository.save(Tag.builder().name(tagName).build()));
+    }
 }
