@@ -25,7 +25,6 @@ public class MemberService {
             return new ApiException(ErrorCode.UNAUTHORIZED);
         });
 
-        System.out.println("member.isPendingExternalMember() = " + member.isPendingExternalMember());
         if(member.isPendingExternalMember()) {
             log.debug("[me] 회원가입이 필요한 외부 회원");
             throw new ApiException(ErrorCode.NEED_SIGN_UP);

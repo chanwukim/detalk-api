@@ -24,7 +24,7 @@ public class OAuthFailHandler implements AuthenticationFailureHandler {
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception)
         throws ServletException, IOException {
-        String url = appProperties.getBaseUrl() + "/sign-in?error=oauth";
+        String url = appProperties.getBaseUrl() + "?error=oauth";
         redirectStrategy.sendRedirect(request, response, url);
     }
 }
