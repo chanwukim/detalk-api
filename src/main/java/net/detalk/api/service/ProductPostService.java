@@ -79,11 +79,13 @@ public class ProductPostService {
          * 게시글 스냅샷 저장
          */
         ProductPostSnapshot postSnapshot = productPostSnapshotRepository.save(
-            productPost.getId(),
-            pricingPlan.getId(),
-            productCreate.getName(),
-            productCreate.getDescription(),
-            now
+            ProductPostSnapshot.builder()
+                .postId(productPost.getId())
+                .pricingPlanId(pricingPlan.getId())
+                .title(productCreate.getName())
+                .description(productCreate.getDescription())
+                .createdAt(now)
+                .build()
         );
         Long postSnapshotId = postSnapshot.getId();
 
@@ -176,13 +178,12 @@ public class ProductPostService {
     }
 
     @Transactional(readOnly = true)
-    public GetProductPostResponse getProductPostById(Long id) {
-        return productPostRepository.findById(id).orElseThrow(() -> {
-            log.warn("[getProductPostById] 제품 게시글 없음 ID: {}", id);
+    public GetProductPostResponse getProductPostDetailsById(Long id) {
+        return productPostRepository.findDetailsById(id).orElseThrow(() -> {
+            log.warn("[getProductPostDetailsById] 제품 게시글 없음 ID: {}", id);
             return new ApiException(ErrorCode.NOT_FOUND);
         });
     }
-
 
     private Tag getOrCreateTag(String tagName) {
         return tagRepository.findByName(tagName)
