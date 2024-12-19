@@ -9,7 +9,7 @@ public enum ErrorCode {
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "internal_server_error",
         "Internal Server Error. Please try again later. If the issue persists, contact support."),
     BAD_REQUEST(HttpStatus.BAD_REQUEST, "bad_request", "Bad Request."),
-    UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "uauthorized", "Unauthorized. Please sign in."),
+    UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "unauthorized", "Unauthorized. Please sign in."),
     FORBIDDEN(HttpStatus.FORBIDDEN, "forbidden", "Forbidden. You do not have permission to access this resource."),
     NOT_FOUND(HttpStatus.NOT_FOUND, "not_found", "Not Found."),
     METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED, "method_not_allowed", "Method not allowed"),

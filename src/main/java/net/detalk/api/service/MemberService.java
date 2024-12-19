@@ -47,7 +47,7 @@ public class MemberService {
 
     @Transactional
     public MemberDetail registerProfile(Long memberId, String userhandle, String nickname) {
-        // userhandle 중복검사
+        log.debug("[registerProfile] userhandle 중복검사 {}", userhandle);
         memberProfileRepository.findByUserHandle(userhandle).ifPresent(m -> {
             throw new ApiException(ErrorCode.CONFLICT);
         });
@@ -63,9 +63,12 @@ public class MemberService {
 
         member.active(timeHolder);
         memberRepository.update(member);
+        MemberProfile memberProfile = memberProfileRepository.findByMemberId(member.getId())
+            .orElseThrow(() -> new InvalidStateException("[me] 회원 " + member.getId() + "의 프로필이 존재하지 않습니다"));
 
-        MemberProfile memberProfile = memberProfileRepository.update(
+         memberProfile = memberProfileRepository.update(
             MemberProfile.builder()
+                .id(memberProfile.getId())
                 .memberId(member.getId())
                 .userhandle(userhandle)
                 .nickname(nickname)

@@ -46,8 +46,8 @@ public class MemberProfileRepositoryImpl implements MemberProfileRepository {
     public MemberProfile update(MemberProfile memberProfile) {
         return dsl.update(MEMBER_PROFILE)
             .set(MEMBER_PROFILE.AVATAR_ID, memberProfile.getAvatarId())
-            .set(MEMBER_PROFILE.USERHANDLE, memberProfile.getNickname())
-            .set(MEMBER_PROFILE.NICKNAME, memberProfile.getDescription())
+            .set(MEMBER_PROFILE.NICKNAME, memberProfile.getNickname())
+            .set(MEMBER_PROFILE.DESCRIPTION, memberProfile.getDescription())
             .set(MEMBER_PROFILE.UPDATED_AT, memberProfile.getUpdatedAt())
             .where(MEMBER_PROFILE.ID.eq(memberProfile.getId()))
             .returning()

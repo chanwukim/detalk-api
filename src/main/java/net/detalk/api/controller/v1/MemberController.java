@@ -1,5 +1,6 @@
 package net.detalk.api.controller.v1;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import net.detalk.api.controller.v1.request.RegisterProfileRequest;
 import net.detalk.api.domain.MemberDetail;
@@ -8,10 +9,7 @@ import net.detalk.api.support.security.HasRole;
 import net.detalk.api.support.security.SecurityRole;
 import net.detalk.api.support.security.SecurityUser;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/members")
@@ -30,7 +28,7 @@ public class MemberController {
     @PostMapping("/profile")
     public ResponseEntity<MemberDetail> registerProfile(
         @HasRole(SecurityRole.MEMBER) SecurityUser user,
-        RegisterProfileRequest registerProfile
+        @Valid @RequestBody RegisterProfileRequest registerProfile
     ) {
         MemberDetail memberDetail = memberService.registerProfile(user.getId(), registerProfile.userhandle(), registerProfile.nickname());
         return ResponseEntity.ok().body(memberDetail);
