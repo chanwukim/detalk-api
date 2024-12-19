@@ -3,12 +3,14 @@ package net.detalk.api.support.security;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import net.detalk.api.support.error.ErrorCode;
 import net.detalk.api.support.error.ErrorMessage;
 import net.detalk.api.support.error.ExpiredTokenException;
+import net.detalk.api.support.util.CookieUtil;
 import net.detalk.api.support.util.StringUtil;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -20,6 +22,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.Optional;
+
+import static net.detalk.api.support.Constant.COOKIE_ACCESS_TOKEN;
 
 /**
  * 요청 헤더에서 액세스 토큰을 추출하고 인증을 처리하는 Filter.
@@ -37,18 +42,28 @@ public class TokenFilter extends OncePerRequestFilter {
     }
 
     @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        String method = request.getMethod();
+
+        return path.equals("/api/v1/auth/refresh") &&
+            method.equalsIgnoreCase("POST");
+    }
+
+    @Override
     protected void doFilterInternal(
         HttpServletRequest request,
         HttpServletResponse response,
         FilterChain filterChain) throws ServletException, IOException {
-
+        String path = request.getRequestURI();
+        String method = request.getMethod();
+        log.debug("[doFilterInternal] {} {}", path, method);
         String accessToken = null;
 
-        // Authorization 헤더에서 Bearer 토큰 추출
-        String authHeader = request.getHeader("Authorization");
-        if (StringUtil.isNotEmpty(authHeader) && authHeader.startsWith("Bearer ")) {
-            accessToken = authHeader.substring(7);
-            log.debug("[doFilterInternal] 요청 헤더에 액세스 토큰이 존재 : {}", accessToken);
+        Optional<Cookie> cookieOptional = CookieUtil.getCookie(COOKIE_ACCESS_TOKEN, request);
+        if (cookieOptional.isPresent()) {
+            accessToken = cookieOptional.get().getValue();
+            log.debug("[doFilterInternal] accessToken : {}", accessToken);
         }
 
         if(StringUtil.isNotEmpty(accessToken)) {
