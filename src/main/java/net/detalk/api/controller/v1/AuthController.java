@@ -7,6 +7,7 @@ import net.detalk.api.domain.AuthToken;
 import net.detalk.api.service.AuthService;
 import net.detalk.api.support.error.ApiException;
 import net.detalk.api.support.error.ErrorCode;
+import net.detalk.api.support.error.ErrorMessage;
 import net.detalk.api.support.util.CookieUtil;
 import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseCookie;
@@ -28,37 +29,45 @@ public class AuthController {
     private final Environment env;
 
     @PostMapping("/refresh")
-    public ResponseEntity<Void> refresh(HttpServletRequest request, HttpServletResponse response) {
-        String refreshToken = CookieUtil.getCookie(COOKIE_REFRESH_TOKEN, request)
-            .orElseThrow(() -> new ApiException(ErrorCode.UNAUTHORIZED))
-            .getValue();
+    public ResponseEntity<?> refresh(HttpServletRequest request, HttpServletResponse response) {
+        try {
+            String refreshToken = CookieUtil.getCookie(COOKIE_REFRESH_TOKEN, request)
+                .orElseThrow(() -> new ApiException(ErrorCode.UNAUTHORIZED))
+                .getValue();
 
-        AuthToken authToken = authService.refresh(refreshToken);
+            AuthToken authToken = authService.refresh(refreshToken);
 
-        boolean secure = !Arrays.asList(env.getActiveProfiles()).contains("dev");
+            boolean secure = !Arrays.asList(env.getActiveProfiles()).contains("dev");
 
-        ResponseCookie accessTokenCookie = ResponseCookie
-            .from(COOKIE_ACCESS_TOKEN, authToken.accessToken())
-            .httpOnly(true)
-            .secure(secure)
-            .sameSite("Lax")
-            .path("/")
-            .build();
+            ResponseCookie accessTokenCookie = ResponseCookie
+                .from(COOKIE_ACCESS_TOKEN, authToken.accessToken())
+                .httpOnly(true)
+                .secure(secure)
+                .sameSite("Lax")
+                .path("/")
+                .build();
 
-        ResponseCookie refreshTokenCookie = ResponseCookie
-            .from(COOKIE_REFRESH_TOKEN, authToken.refreshToken())
-            .httpOnly(true)
-            .secure(secure)
-            .sameSite("Lax")
-            .path("/")
-            .build();
+            ResponseCookie refreshTokenCookie = ResponseCookie
+                .from(COOKIE_REFRESH_TOKEN, authToken.refreshToken())
+                .httpOnly(true)
+                .secure(secure)
+                .sameSite("Lax")
+                .path("/")
+                .build();
 
-        response.addHeader("Set-Cookie", accessTokenCookie.toString());
-        response.addHeader("Set-Cookie", refreshTokenCookie.toString());
+            response.addHeader("Set-Cookie", accessTokenCookie.toString());
+            response.addHeader("Set-Cookie", refreshTokenCookie.toString());
 
-        return ResponseEntity
-            .noContent()
-            .build();
+            return ResponseEntity
+                .noContent()
+                .build();
+        } catch (ApiException e) {
+            CookieUtil.deleteCookie(COOKIE_ACCESS_TOKEN, request, response);
+            CookieUtil.deleteCookie(COOKIE_REFRESH_TOKEN, request, response);
+            return ResponseEntity
+                .status(e.getErrorCode().getStatus())
+                .body(new ErrorMessage(e.getErrorCode()));
+        }
     }
 
     @PostMapping("/sign-out")
