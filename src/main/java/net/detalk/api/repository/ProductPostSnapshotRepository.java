@@ -15,14 +15,13 @@ public class ProductPostSnapshotRepository {
 
     private final DSLContext dsl;
 
-    public ProductPostSnapshot save(Long postId, Long pricingPlanId, String title, String description,
-        Instant now) {
+    public ProductPostSnapshot save(ProductPostSnapshot snapshot) {
         return dsl.insertInto(PRODUCT_POST_SNAPSHOT)
-            .set(PRODUCT_POST_SNAPSHOT.POST_ID, postId)
-            .set(PRODUCT_POST_SNAPSHOT.PRICING_PLAN_ID, pricingPlanId)
-            .set(PRODUCT_POST_SNAPSHOT.TITLE, title)
-            .set(PRODUCT_POST_SNAPSHOT.DESCRIPTION, description)
-            .set(PRODUCT_POST_SNAPSHOT.CREATED_AT, now)
+            .set(PRODUCT_POST_SNAPSHOT.POST_ID, snapshot.getPostId())
+            .set(PRODUCT_POST_SNAPSHOT.PRICING_PLAN_ID, snapshot.getPricingPlanId())
+            .set(PRODUCT_POST_SNAPSHOT.TITLE, snapshot.getTitle())
+            .set(PRODUCT_POST_SNAPSHOT.DESCRIPTION, snapshot.getDescription())
+            .set(PRODUCT_POST_SNAPSHOT.CREATED_AT, snapshot.getCreatedAt())
             .returning()
             .fetchOneInto(ProductPostSnapshot.class);
     }
@@ -32,5 +31,4 @@ public class ProductPostSnapshotRepository {
             .where(PRODUCT_POST_SNAPSHOT.ID.eq(id))
             .fetchOptionalInto(ProductPostSnapshot.class);
     }
-
 }
