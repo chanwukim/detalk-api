@@ -22,7 +22,7 @@ public enum ErrorCode {
 
     PROVIDER_UNSUPPORTED(HttpStatus.BAD_REQUEST, "provider_unsupported", "Unsupported provider."),
 
-    NEED_SIGN_UP(HttpStatus.UNAUTHORIZED, "need_sign_up", "Need Sign Up."),
+    NEED_SIGN_UP(HttpStatus.FORBIDDEN, "need_sign_up", "Need Sign Up."),
     ;
 
     private final HttpStatus status;
