@@ -3,6 +3,7 @@ package net.detalk.api.repository;
 import static net.detalk.jooq.tables.JAttachmentFile.ATTACHMENT_FILE;
 import static net.detalk.jooq.tables.JMemberProfile.MEMBER_PROFILE;
 import static net.detalk.jooq.tables.JPricingPlan.PRICING_PLAN;
+import static net.detalk.jooq.tables.JProductLink.PRODUCT_LINK;
 import static net.detalk.jooq.tables.JProductMaker.PRODUCT_MAKER;
 import static net.detalk.jooq.tables.JProductPost.PRODUCT_POST;
 import static net.detalk.jooq.tables.JProductPostLastSnapshot.PRODUCT_POST_LAST_SNAPSHOT;
@@ -43,6 +44,18 @@ public class ProductPostRepository {
             .fetchOneInto(ProductPost.class);
     }
 
+    public Optional<ProductPost> findById(Long id) {
+        return dsl.selectFrom(PRODUCT_POST)
+            .where(PRODUCT_POST.ID.eq(id))
+            .fetchOptionalInto(ProductPost.class);
+    }
+
+    public Optional<ProductPost> findByProductId(Long productId) {
+        return dsl.selectFrom(PRODUCT_POST)
+            .where(PRODUCT_POST.PRODUCT_ID.eq(productId))
+            .fetchOptionalInto(ProductPost.class);
+    }
+
     public Optional<GetProductPostResponse> findDetailsById(Long id) {
 
         var result = dsl.select(
@@ -57,7 +70,8 @@ public class ProductPostRepository {
                 PRICING_PLAN.NAME.as("pricingPlan"),
                 DSL.arrayAgg(TAG.NAME).as("tags"),
                 PRODUCT_POST.RECOMMEND_COUNT.as("recommendCount"),
-                PRODUCT_POST_SNAPSHOT.ID.as("snapshotId")
+                PRODUCT_POST_SNAPSHOT.ID.as("snapshotId"),
+                DSL.arrayAggDistinct(PRODUCT_LINK.URL).as("productUrls")
             )
             .from(PRODUCT_POST)
             .join(PRODUCT_POST_LAST_SNAPSHOT)
@@ -76,6 +90,8 @@ public class ProductPostRepository {
             .on(PRODUCT_MAKER.PRODUCT_ID.eq(PRODUCT_POST.PRODUCT_ID))
             .leftJoin(ATTACHMENT_FILE)
             .on(ATTACHMENT_FILE.ID.eq(MEMBER_PROFILE.AVATAR_ID))
+            .leftJoin(PRODUCT_LINK)
+            .on(PRODUCT_LINK.PRODUCT_ID.eq(PRODUCT_POST.PRODUCT_ID))
             .where(PRODUCT_POST.ID.eq(id))
             .groupBy(
                 PRODUCT_POST.ID,
@@ -129,6 +145,9 @@ public class ProductPostRepository {
         String[] tagsArr = result.get("tags", String[].class);
         List<String> tags = List.of(tagsArr);
 
+        String[] productUrlsArr = result.get("productUrls", String[].class);
+        List<String> productUrls = List.of(productUrlsArr);
+
         return Optional.of(new GetProductPostResponse(
             result.get(PRODUCT_POST.ID, Long.class),
             result.get("nickname", String.class),
@@ -141,7 +160,8 @@ public class ProductPostRepository {
             result.get("pricingPlan", String.class),
             result.get("recommendCount", Integer.class),
             tags,
-            images
+            images,
+            productUrls
         ));
     }
 
@@ -169,7 +189,8 @@ public class ProductPostRepository {
                 PRICING_PLAN.NAME.as("pricingPlan"),
                 DSL.arrayAgg(TAG.NAME).as("tags"),
                 PRODUCT_POST.RECOMMEND_COUNT.as("recommendCount"),
-                PRODUCT_POST_SNAPSHOT.ID.as("snapshotId")
+                PRODUCT_POST_SNAPSHOT.ID.as("snapshotId"),
+                DSL.arrayAggDistinct(PRODUCT_LINK.URL).as("productUrls")
             )
             .from(PRODUCT_POST)
             .join(PRODUCT_POST_LAST_SNAPSHOT)
@@ -188,6 +209,8 @@ public class ProductPostRepository {
                 .on(PRODUCT_MAKER.PRODUCT_ID.eq(PRODUCT_POST.PRODUCT_ID))
             .leftJoin(ATTACHMENT_FILE)
                 .on(ATTACHMENT_FILE.ID.eq(MEMBER_PROFILE.AVATAR_ID))
+            .leftJoin(PRODUCT_LINK)
+                .on(PRODUCT_LINK.PRODUCT_ID.eq(PRODUCT_POST.PRODUCT_ID))
             .where(condition)
             .groupBy(
                 PRODUCT_POST.ID,
@@ -259,7 +282,8 @@ public class ProductPostRepository {
             Long postId = record.get(PRODUCT_POST.ID);
             List<Media> images = imagesMap.getOrDefault(postId, List.of());
 
-
+            String[] productUrlsArr = record.get("productUrls", String[].class);
+            List<String> productUrls = List.of(productUrlsArr);
             return new GetProductPostResponse(
                 record.get("id", Long.class),
                 record.get("nickname", String.class),
@@ -272,8 +296,8 @@ public class ProductPostRepository {
                 record.get("pricingPlan", String.class),
                 record.get("recommendCount", Integer.class),
                 tags,
-                images
-            );
+                images,
+                productUrls);
         });
     }
 
