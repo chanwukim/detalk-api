@@ -25,10 +25,9 @@ public class RecommendService {
     private final TimeHolder timeHolder;
 
     @Transactional
-    public void addRecommendation(Long postId, CreateRecommend createRecommend) {
+    public void addRecommendation(Long postId, Long memberId, CreateRecommend createRecommend) {
 
         Instant now = timeHolder.now();
-        Long memberId = createRecommend.memberId();
         String reason = createRecommend.reason();
 
         // 추천 하려는 게시글이 존재하는지 검증

@@ -1,5 +1,6 @@
 package net.detalk.api.controller.v1;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import lombok.RequiredArgsConstructor;
 import net.detalk.api.controller.v1.response.CreateProductPostResponse;
@@ -9,6 +10,9 @@ import net.detalk.api.service.RecommendService;
 import net.detalk.api.support.CursorPageData;
 import net.detalk.api.controller.v1.request.ProductPostCreate;
 import net.detalk.api.service.ProductPostService;
+import net.detalk.api.support.security.HasRole;
+import net.detalk.api.support.security.SecurityRole;
+import net.detalk.api.support.security.SecurityUser;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,8 +32,11 @@ public class ProductPostController {
     private final RecommendService recommendService;
 
     @PostMapping
-    public ResponseEntity<CreateProductPostResponse> create(ProductPostCreate productPostCreate) {
-        Long productPostId = productPostService.create(productPostCreate);
+    public ResponseEntity<CreateProductPostResponse> create(
+        @Valid @RequestBody ProductPostCreate productPostCreate,
+        @HasRole(SecurityRole.MEMBER) SecurityUser user
+        ) {
+        Long productPostId = productPostService.create(productPostCreate, user.getId());
         return ResponseEntity.ok(new CreateProductPostResponse(productPostId));
     }
 
@@ -51,8 +58,10 @@ public class ProductPostController {
     @PostMapping("/{id}/recommend")
     public ResponseEntity<Void> createRecommend(
         @PathVariable("id") Long postId,
-        @RequestBody CreateRecommend createRecommend) {
-        recommendService.addRecommendation(postId, createRecommend);
+        @Valid @RequestBody CreateRecommend createRecommend,
+        @HasRole(SecurityRole.MEMBER) SecurityUser user
+        ) {
+        recommendService.addRecommendation(postId, user.getId(), createRecommend);
         return ResponseEntity.noContent().build();
     }
 }

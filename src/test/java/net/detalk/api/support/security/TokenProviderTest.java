@@ -1,5 +1,6 @@
 package net.detalk.api.support.security;
 
+import java.util.List;
 import net.detalk.api.support.AppProperties;
 import net.detalk.api.support.error.ExpiredTokenException;
 import net.detalk.api.support.error.TokenException;
@@ -33,7 +34,7 @@ class TokenProviderTest {
         Long memberId = 1L;
 
         // when
-        AccessToken accessToken = tokenProvider.createAccessToken(memberId);
+        AccessToken accessToken = tokenProvider.createAccessToken(memberId,List.of());
         AccessToken parsedToken = tokenProvider.parseAccessToken(accessToken.getValue());
 
         // then
@@ -73,7 +74,7 @@ class TokenProviderTest {
         expiredProperties.setAccessTokenExpiresInSeconds(-1L);
         TokenProvider expiredTokenProvider = new TokenProvider(expiredProperties);
 
-        AccessToken expiredToken = expiredTokenProvider.createAccessToken(1L);
+        AccessToken expiredToken = expiredTokenProvider.createAccessToken(1L, List.of());
 
         // when & then
         assertThatThrownBy(() -> tokenProvider.parseAccessToken(expiredToken.getValue()))

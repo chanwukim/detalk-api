@@ -13,9 +13,6 @@ public record ProductPostCreate(
     @Size(max = 255, message = "Name must be less than or equal to 255 characters")
     String name,
 
-    @NotNull(message = "Writer ID is required")
-    Long writerId,
-
     @NotBlank(message = "URL is required")
     @Size(max = 255, message = "URL must be less than or equal to 255 characters")
     @Pattern(regexp = "^(https?|ftp)://[^\\s/$.?#].\\S*$", message = "URL must be valid")
