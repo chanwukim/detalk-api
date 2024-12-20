@@ -28,8 +28,8 @@ import org.jooq.DSLContext;
 import org.jooq.impl.DSL;
 import org.springframework.stereotype.Repository;
 
-@RequiredArgsConstructor
 @Repository
+@RequiredArgsConstructor
 public class ProductPostRepository {
 
     private final DSLContext dsl;
@@ -301,5 +301,18 @@ public class ProductPostRepository {
         });
     }
 
+    public boolean existsById(Long id) {
+        Integer count = dsl.selectCount()
+            .from(PRODUCT_POST)
+            .where(PRODUCT_POST.ID.eq(id))
+            .fetchOne(0, Integer.class);
+        return count != null && count > 0;
+    }
 
+    public void incrementRecommendCount(Long postId) {
+        dsl.update(PRODUCT_POST)
+            .set(PRODUCT_POST.RECOMMEND_COUNT, PRODUCT_POST.RECOMMEND_COUNT.plus(1))
+            .where(PRODUCT_POST.ID.eq(postId))
+            .execute();
+    }
 }
