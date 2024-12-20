@@ -16,7 +16,6 @@ import net.detalk.api.controller.v1.request.ProductPostCreate;
 import net.detalk.api.domain.ProductPost;
 import net.detalk.api.domain.ProductPostSnapshot;
 import net.detalk.api.domain.ProductPostSnapshotTag;
-import net.detalk.api.domain.Tag;
 import net.detalk.api.repository.ProductLinkRepository;
 import net.detalk.api.repository.ProductMakerRepository;
 import net.detalk.api.repository.ProductPostLastSnapshotRepository;
@@ -25,7 +24,6 @@ import net.detalk.api.repository.ProductPostSnapshotAttachmentFileRepository;
 import net.detalk.api.repository.ProductPostSnapshotRepository;
 import net.detalk.api.repository.ProductPostSnapshotTagRepository;
 import net.detalk.api.repository.ProductRepository;
-import net.detalk.api.repository.TagRepository;
 import net.detalk.api.support.TimeHolder;
 import net.detalk.api.support.error.ApiException;
 import net.detalk.api.support.error.ErrorCode;
@@ -44,7 +42,7 @@ public class ProductPostService {
     private final ProductLinkRepository productLinkRepository;
     private final ProductPostSnapshotAttachmentFileRepository productPostSnapshotAttachmentFileRepository;
     private final ProductMakerRepository productMakerRepository;
-    private final TagRepository tagRepository;
+    private final TagService tagService;
     private final ProductPostSnapshotTagRepository productPostSnapshotTagRepository;
     private final ProductPostSnapshotRepository productPostSnapshotRepository;
     private final TimeHolder timeHolder;
@@ -133,7 +131,7 @@ public class ProductPostService {
         List<String> tags = productPostCreate.tags();
 
         List<ProductPostSnapshotTag> snapshotTags = tags.stream()
-            .map(this::getOrCreateTag)
+            .map(tagService::getOrCreateTag)
             .map(tag -> ProductPostSnapshotTag.builder()
                 .postId(postSnapshotId)
                 .tagId(tag.getId())
@@ -213,8 +211,4 @@ public class ProductPostService {
         productPostRepository.incrementRecommendCount(id);
     }
 
-    private Tag getOrCreateTag(String tagName) {
-        return tagRepository.findByName(tagName)
-            .orElseGet(() -> tagRepository.save(Tag.builder().name(tagName).build()));
-    }
 }
