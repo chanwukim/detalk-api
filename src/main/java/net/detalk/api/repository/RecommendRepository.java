@@ -5,6 +5,7 @@ import static net.detalk.jooq.tables.JRecommend.RECOMMEND;
 import java.time.Instant;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import net.detalk.api.controller.v1.request.CreateRecommend;
 import net.detalk.api.domain.Recommend;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Repository;
@@ -21,9 +22,9 @@ public class RecommendRepository {
             .fetchOptionalInto(Recommend.class);
     }
 
-    public Recommend save(String reason, Instant now) {
+    public Recommend save(CreateRecommend createRecommend, Instant now) {
         return dsl.insertInto(RECOMMEND)
-            .set(RECOMMEND.VALUE, reason)
+            .set(RECOMMEND.VALUE, createRecommend.reason())
             .set(RECOMMEND.CREATED_AT, now)
             .returning()
             .fetchOneInto(Recommend.class);

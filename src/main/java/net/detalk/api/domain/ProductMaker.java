@@ -3,6 +3,7 @@ package net.detalk.api.domain;
 import java.time.Instant;
 import lombok.Builder;
 import lombok.Getter;
+import net.detalk.api.support.TimeHolder;
 
 @Getter
 public class ProductMaker {
@@ -21,5 +22,13 @@ public class ProductMaker {
         this.memberId = memberId;
         this.createdAt = createdAt;
         this.deletedAt = deletedAt;
+    }
+
+    public static ProductMaker create(Long productId, Long memberId, TimeHolder timeHolder) {
+        return ProductMaker.builder()
+            .productId(productId)
+            .memberId(memberId)
+            .createdAt(timeHolder.now())
+            .build();
     }
 }
