@@ -38,6 +38,7 @@ public class MemberRepositoryImpl implements MemberRepository {
         return dsl.update(MEMBER)
             .set(MEMBER.STATUS, member.getStatus())
             .set(MEMBER.UPDATED_AT, member.getUpdatedAt())
+            .where(MEMBER.ID.eq(member.getId()))
             .returning()
             .fetchOneInto(Member.class);
     }
