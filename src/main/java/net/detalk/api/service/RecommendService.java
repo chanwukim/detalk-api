@@ -4,7 +4,7 @@ import java.time.Instant;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.detalk.api.domain.CreateRecommend;
+import net.detalk.api.controller.v1.request.CreateRecommend;
 import net.detalk.api.domain.Recommend;
 import net.detalk.api.repository.RecommendProductRepository;
 import net.detalk.api.repository.RecommendRepository;
@@ -28,8 +28,8 @@ public class RecommendService {
     public void addRecommendation(Long postId, CreateRecommend createRecommend) {
 
         Instant now = timeHolder.now();
-        Long memberId = createRecommend.getMemberId();
-        String reason = createRecommend.getReason();
+        Long memberId = createRecommend.memberId();
+        String reason = createRecommend.reason();
 
         // 추천 하려는 게시글이 존재하는지 검증
         productPostService.validatePostExists(postId);

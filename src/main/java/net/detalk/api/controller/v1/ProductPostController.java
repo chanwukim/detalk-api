@@ -4,7 +4,7 @@ import jakarta.validation.constraints.Max;
 import lombok.RequiredArgsConstructor;
 import net.detalk.api.controller.v1.response.CreateProductPostResponse;
 import net.detalk.api.controller.v1.response.GetProductPostResponse;
-import net.detalk.api.domain.CreateRecommend;
+import net.detalk.api.controller.v1.request.CreateRecommend;
 import net.detalk.api.service.RecommendService;
 import net.detalk.api.support.CursorPageData;
 import net.detalk.api.domain.ProductCreate;
