@@ -7,4 +7,6 @@ import java.util.Optional;
 public interface MemberProfileRepository {
     MemberProfile save(MemberProfile memberProfile);
     Optional<MemberProfile> findByMemberId(Long memberId);
+    Optional<MemberProfile> findByUserHandle(String handle);
+    MemberProfile update(MemberProfile memberProfile);
 }

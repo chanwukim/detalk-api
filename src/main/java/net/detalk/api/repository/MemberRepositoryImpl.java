@@ -32,4 +32,13 @@ public class MemberRepositoryImpl implements MemberRepository {
             .where(MEMBER.ID.eq(id))
             .fetchOptionalInto(Member.class);
     }
+
+    @Override
+    public Member update(Member member) {
+        return dsl.update(MEMBER)
+            .set(MEMBER.STATUS, member.getStatus())
+            .set(MEMBER.UPDATED_AT, member.getUpdatedAt())
+            .returning()
+            .fetchOneInto(Member.class);
+    }
 }

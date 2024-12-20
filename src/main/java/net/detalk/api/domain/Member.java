@@ -2,6 +2,7 @@ package net.detalk.api.domain;
 
 import lombok.Builder;
 import lombok.Getter;
+import net.detalk.api.support.TimeHolder;
 
 import java.time.Instant;
 
@@ -26,5 +27,10 @@ public class Member {
 
     public boolean isPendingExternalMember() {
         return loginType == LoginType.EXTERNAL && status == MemberStatus.PENDING;
+    }
+
+    public void active(TimeHolder timeHolder) {
+        status = MemberStatus.ACTIVE;
+        this.updatedAt = timeHolder.now();
     }
 }
