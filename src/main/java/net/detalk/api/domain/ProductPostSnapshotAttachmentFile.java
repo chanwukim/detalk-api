@@ -19,4 +19,14 @@ public class ProductPostSnapshotAttachmentFile {
         this.attachmentFileId = attachmentFileId;
         this.sequence = sequence;
     }
+
+    public static ProductPostSnapshotAttachmentFile create(Long snapshotId, Long attachmentFileId,
+        int sequence) {
+        return ProductPostSnapshotAttachmentFile.builder()
+            .snapshotId(snapshotId)
+            .attachmentFileId(attachmentFileId)
+            .sequence(sequence)
+            .build();
+    }
+
 }
