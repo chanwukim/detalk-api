@@ -12,7 +12,7 @@ import net.detalk.api.domain.ProductMaker;
 import net.detalk.api.domain.ProductPostSnapshotAttachmentFile;
 import net.detalk.api.domain.PricingPlan;
 import net.detalk.api.domain.Product;
-import net.detalk.api.domain.ProductCreate;
+import net.detalk.api.controller.v1.request.ProductPostCreate;
 import net.detalk.api.domain.ProductPost;
 import net.detalk.api.domain.ProductPostSnapshot;
 import net.detalk.api.domain.ProductPostSnapshotTag;
@@ -51,17 +51,17 @@ public class ProductPostService {
 
     /**
      * 게시글 생성
-     * @param productCreate 게시글 생성 데이터
+     * @param productPostCreate 게시글 생성 데이터
      * @return 생성된 게시글 ID
      */
     // TODO : 작성자 정보 받기, SRP 리팩토링
     @Transactional
-    public Long create(ProductCreate productCreate) {
+    public Long create(ProductPostCreate productPostCreate) {
 
         Instant now = timeHolder.now();
-        Long memberId = productCreate.getWriterId();
-        String productUrl = productCreate.getUrl();
-        String productName = productCreate.getName();
+        Long memberId = productPostCreate.writerId();
+        String productUrl = productPostCreate.url();
+        String productName = productPostCreate.name();
 
         /*
          * 제품 조회
@@ -69,7 +69,7 @@ public class ProductPostService {
          * 없다면 저장 후 사용
          */
         Product product = productRepository.findByName(productName)
-            .orElseGet(() -> productRepository.save(productCreate, now));
+            .orElseGet(() -> productRepository.save(productPostCreate, now));
 
         Long productId = product.getId();
 
@@ -82,7 +82,7 @@ public class ProductPostService {
         /*
          * 요청 가격 정책 조회
          */
-        PricingPlan pricingPlan = pricingPlanService.findById(productCreate.getPricingPlan());
+        PricingPlan pricingPlan = pricingPlanService.findById(productPostCreate.pricingPlan());
 
         /*
          * 게시글 스냅샷 저장
@@ -92,7 +92,7 @@ public class ProductPostService {
                 .postId(newProductPostId)
                 .pricingPlanId(pricingPlan.getId())
                 .title(productName)
-                .description(productCreate.getDescription())
+                .description(productPostCreate.description())
                 .createdAt(timeHolder.now()).build(
                 ));
         Long postSnapshotId = postSnapshot.getId();
@@ -111,7 +111,7 @@ public class ProductPostService {
         /*
          * 이미지 파일 시퀀스 설정 및 스냅샷 저장
          */
-        List<Long> imageIds = productCreate.getImageIds();
+        List<Long> imageIds = productPostCreate.imageIds();
 
         for(int sequence = 0; sequence < imageIds.size(); sequence++) {
             Long attachmentFileId = imageIds.get(sequence);
@@ -123,7 +123,7 @@ public class ProductPostService {
         /*
          * 메이커 여부
          */
-        if (productCreate.isMaker()) {
+        if (productPostCreate.isMaker()) {
             ProductMaker maker = ProductMaker.create(productId, memberId, timeHolder);
             productMakerRepository.save(maker);
         }
@@ -132,7 +132,7 @@ public class ProductPostService {
          * 태그 있다면 재사용
          * 없다면 저장
          */
-        List<String> tags = productCreate.getTags();
+        List<String> tags = productPostCreate.tags();
 
         List<ProductPostSnapshotTag> snapshotTags = tags.stream()
             .map(this::getOrCreateTag)
