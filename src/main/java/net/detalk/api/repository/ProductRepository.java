@@ -6,6 +6,7 @@ import java.time.Instant;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import net.detalk.api.domain.Product;
+import net.detalk.api.domain.ProductCreate;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Repository;
 
@@ -21,9 +22,9 @@ public class ProductRepository {
             .fetchOptionalInto(Product.class);
     }
 
-    public Product save(String name, Instant now) {
+    public Product save(ProductCreate productCreate, Instant now) {
         return dsl.insertInto(PRODUCT)
-            .set(PRODUCT.NAME, name)
+            .set(PRODUCT.NAME, productCreate.getName())
             .set(PRODUCT.CREATED_AT, now)
             .returning()
             .fetchOneInto(Product.class);
