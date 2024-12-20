@@ -54,12 +54,10 @@ public class ProductPostService {
      * @param productPostCreate 게시글 생성 데이터
      * @return 생성된 게시글 ID
      */
-    // TODO : 작성자 정보 받기, SRP 리팩토링
     @Transactional
-    public Long create(ProductPostCreate productPostCreate) {
+    public Long create(ProductPostCreate productPostCreate, Long memberId) {
 
         Instant now = timeHolder.now();
-        Long memberId = productPostCreate.writerId();
         String productUrl = productPostCreate.url();
         String productName = productPostCreate.name();
 
