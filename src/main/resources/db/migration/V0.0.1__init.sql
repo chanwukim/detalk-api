@@ -177,10 +177,12 @@ CREATE TABLE "recommend_product" (
         "id" BIGINT GENERATED ALWAYS AS IDENTITY,
         "recommend_id" BIGINT NOT NULL,
         "product_post_id" BIGINT NOT NULL,
+        "member_id" BIGINT NOT NULL,
         "created_at" BIGINT NOT NULL,
         CONSTRAINT "recommend_product_pkey" PRIMARY KEY ("id"),
         FOREIGN KEY ("recommend_id") REFERENCES "recommend" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
-        FOREIGN KEY ("product_post_id") REFERENCES "product_post" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+        FOREIGN KEY ("product_post_id") REFERENCES "product_post" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY ("member_id") REFERENCES "member" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 
