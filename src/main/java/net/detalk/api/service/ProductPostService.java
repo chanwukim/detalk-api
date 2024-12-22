@@ -4,7 +4,6 @@ import static net.detalk.api.support.error.ErrorCode.BAD_REQUEST;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.UUID;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +27,7 @@ import net.detalk.api.repository.ProductPostSnapshotRepository;
 import net.detalk.api.repository.ProductPostSnapshotTagRepository;
 import net.detalk.api.repository.ProductRepository;
 import net.detalk.api.support.TimeHolder;
+import net.detalk.api.support.UUIDGenerator;
 import net.detalk.api.support.error.ApiException;
 import net.detalk.api.support.error.ErrorCode;
 import org.springframework.stereotype.Service;
@@ -49,6 +49,7 @@ public class ProductPostService {
     private final ProductPostSnapshotTagRepository productPostSnapshotTagRepository;
     private final ProductPostSnapshotRepository productPostSnapshotRepository;
     private final TimeHolder timeHolder;
+    private final UUIDGenerator uuidGenerator;
 
     /**
      * 게시글 생성
@@ -115,7 +116,7 @@ public class ProductPostService {
         for(int sequence = 0; sequence < imageIds.size(); sequence++) {
             String attachmentFileId = imageIds.get(sequence);
             ProductPostSnapshotAttachmentFile attachmentFile = ProductPostSnapshotAttachmentFile.create(
-                postSnapshotId, UUID.fromString(attachmentFileId), sequence);
+                postSnapshotId, uuidGenerator.fromString(attachmentFileId), sequence);
             productPostSnapshotAttachmentFileRepository.save(attachmentFile);
         }
 
@@ -265,7 +266,7 @@ public class ProductPostService {
             String attachmentFileId = imageIds.get(sequence);
 
             ProductPostSnapshotAttachmentFile attachmentFile = ProductPostSnapshotAttachmentFile.create(
-                newSnapshotId, UUID.fromString(attachmentFileId), sequence);
+                newSnapshotId, uuidGenerator.fromString(attachmentFileId), sequence);
 
             productPostSnapshotAttachmentFileRepository.save(attachmentFile);
         }
