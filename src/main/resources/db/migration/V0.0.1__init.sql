@@ -9,7 +9,7 @@ CREATE TABLE "member" (
 );
 
 CREATE TABLE "attachment_file" (
-        "id" BIGINT GENERATED ALWAYS AS IDENTITY,
+        "id" UUID,
         "uploader_id" BIGINT NOT NULL,
         "name" VARCHAR(255) NOT NULL,
         "extension" VARCHAR(16),
@@ -142,7 +142,6 @@ CREATE TABLE "product_post_last_snapshot" (
         CONSTRAINT "product_post_last_snapshot_snapshot_id_fkey" FOREIGN KEY ("snapshot_id") REFERENCES "product_post_snapshot"("id") ON DELETE CASCADE ON UPDATE CASCADE,
         CONSTRAINT "product_post_last_snapshot_snapshot_id_key" UNIQUE ("snapshot_id")
 );
-
 
 CREATE TABLE "product_post_snapshot_tag" (
         "id" BIGINT GENERATED ALWAYS AS IDENTITY,
