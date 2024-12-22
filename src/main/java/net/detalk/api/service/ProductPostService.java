@@ -4,6 +4,8 @@ import static net.detalk.api.support.error.ErrorCode.BAD_REQUEST;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.detalk.api.controller.v1.response.GetProductPostResponse;
@@ -107,12 +109,12 @@ public class ProductPostService {
         /*
          * 이미지 파일 시퀀스 설정 및 스냅샷 저장
          */
-        List<Long> imageIds = productPostCreate.imageIds();
+        List<String> imageIds = productPostCreate.imageIds();
 
         for(int sequence = 0; sequence < imageIds.size(); sequence++) {
-            Long attachmentFileId = imageIds.get(sequence);
+            String attachmentFileId = imageIds.get(sequence);
             ProductPostSnapshotAttachmentFile attachmentFile = ProductPostSnapshotAttachmentFile.create(
-                postSnapshotId, attachmentFileId, sequence);
+                postSnapshotId, UUID.fromString(attachmentFileId), sequence);
             productPostSnapshotAttachmentFileRepository.save(attachmentFile);
         }
 

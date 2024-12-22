@@ -15,6 +15,7 @@ public class AttachmentFileRepositoryImpl implements AttachmentFileRepository {
     @Override
     public AttachmentFile save(AttachmentFile file) {
         return dsl.insertInto(ATTACHMENT_FILE)
+            .set(ATTACHMENT_FILE.ID, file.getId())
             .set(ATTACHMENT_FILE.UPLOADER_ID, file.getUploaderId())
             .set(ATTACHMENT_FILE.NAME, file.getName())
             .set(ATTACHMENT_FILE.EXTENSION, file.getExtension())

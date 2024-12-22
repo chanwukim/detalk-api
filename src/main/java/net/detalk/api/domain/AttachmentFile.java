@@ -4,10 +4,11 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.Instant;
+import java.util.UUID;
 
 @Getter
 public class AttachmentFile {
-    private Long id;
+    private UUID id;
     private Long uploaderId;
     private String name;
     private String extension;
@@ -15,7 +16,7 @@ public class AttachmentFile {
     private Instant createdAt;
 
     @Builder
-    public AttachmentFile(Long id, Long uploaderId, String name, String extension, String url, Instant createdAt) {
+    public AttachmentFile(UUID id, Long uploaderId, String name, String extension, String url, Instant createdAt) {
         this.id = id;
         this.uploaderId = uploaderId;
         this.name = name;

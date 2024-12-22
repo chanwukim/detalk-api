@@ -7,10 +7,11 @@ import net.detalk.api.domain.UploadFileMetadata;
 import net.detalk.api.domain.FileWithPresigned;
 import net.detalk.api.repository.AttachmentFileRepository;
 import net.detalk.api.support.TimeHolder;
+import net.detalk.api.support.UUIDGenerator;
 import net.detalk.api.support.s3.StorageClient;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -19,9 +20,12 @@ public class FileService {
     private final AttachmentFileRepository attachmentFileRepository;
     private final StorageClient storageClient;
     private final TimeHolder timeHolder;
+    private final UUIDGenerator uuidGenerator;
 
     public FileWithPresigned createPreSignedUrl(Long uploaderId, UploadFileMetadata uploadFileMetadata) {
-        String baseKey = String.format("u/%d-%s-", Instant.now().toEpochMilli(), uploaderId);
+        UUID fileId = uuidGenerator.generateV7();
+
+        String baseKey = String.format("u/%s", fileId);
         String fileName = uploadFileMetadata.fileName();
 
         // 파일 이름과 확장자 분리
@@ -42,11 +46,12 @@ public class FileService {
         }
 
         // Pre-signed URL 생성
-        String preSignedUrl = storageClient.createPreSignedUrl(baseKey + fileName);
-        String publicUrl = "https://cdn.detalk.net/" + baseKey + uploadFileMetadata.fileName();
+        String preSignedUrl = storageClient.createPreSignedUrl(baseKey);
+        String publicUrl = String.format("https://cdn.detalk.net/" + baseKey);
 
         AttachmentFile attachmentFile = attachmentFileRepository.save(
             AttachmentFile.builder()
+                .id(fileId)
                 .uploaderId(uploaderId)
                 .name(realFileName)
                 .extension(extension)

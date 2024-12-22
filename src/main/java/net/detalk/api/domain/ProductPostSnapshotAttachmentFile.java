@@ -3,16 +3,18 @@ package net.detalk.api.domain;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.util.UUID;
+
 @Getter
 public class ProductPostSnapshotAttachmentFile {
 
     private Long id;
     private Long snapshotId;
-    private Long attachmentFileId;
+    private UUID attachmentFileId;
     private int sequence;
 
     @Builder
-    public ProductPostSnapshotAttachmentFile(Long id, Long snapshotId, Long attachmentFileId,
+    public ProductPostSnapshotAttachmentFile(Long id, Long snapshotId, UUID attachmentFileId,
         int sequence) {
         this.id = id;
         this.snapshotId = snapshotId;
@@ -20,7 +22,7 @@ public class ProductPostSnapshotAttachmentFile {
         this.sequence = sequence;
     }
 
-    public static ProductPostSnapshotAttachmentFile create(Long snapshotId, Long attachmentFileId,
+    public static ProductPostSnapshotAttachmentFile create(Long snapshotId, UUID attachmentFileId,
         int sequence) {
         return ProductPostSnapshotAttachmentFile.builder()
             .snapshotId(snapshotId)
