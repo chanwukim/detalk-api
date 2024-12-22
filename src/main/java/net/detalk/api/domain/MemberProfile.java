@@ -4,20 +4,21 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.Instant;
+import java.util.UUID;
 
 @Getter
 public class MemberProfile {
     private Long id;
     private Long memberId;
-    private Long avatarId;
+    private UUID avatarId;
     private String userhandle;
     private String nickname;
     private String description;
     private Instant updatedAt;
 
     @Builder
-    public MemberProfile(Long id, Long memberId, Long avatarId, String userhandle, String nickname, String description,
-            Instant updatedAt) {
+    public MemberProfile(Long id, Long memberId, UUID avatarId, String userhandle, String nickname, String description,
+                         Instant updatedAt) {
         this.id = id;
         this.memberId = memberId;
         this.avatarId = avatarId;
