@@ -3,6 +3,7 @@ package net.detalk.api.controller.v1;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import lombok.RequiredArgsConstructor;
+import net.detalk.api.controller.v1.request.UpdateProductPost;
 import net.detalk.api.controller.v1.response.CreateProductPostResponse;
 import net.detalk.api.controller.v1.response.GetProductPostResponse;
 import net.detalk.api.controller.v1.request.CreateRecommend;
@@ -17,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -53,6 +55,16 @@ public class ProductPostController {
     public ResponseEntity<GetProductPostResponse> getProductPost(@PathVariable("id") Long id) {
         GetProductPostResponse result = productPostService.getProductPostDetailsById(id);
         return ResponseEntity.ok(result);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Void> updateProductPost(
+        @PathVariable("id") Long id,
+        @Valid @RequestBody UpdateProductPost updateProductPost,
+        @HasRole(SecurityRole.MEMBER) SecurityUser user
+    ) {
+        productPostService.update(id, updateProductPost, user.getId());
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{id}/recommend")
