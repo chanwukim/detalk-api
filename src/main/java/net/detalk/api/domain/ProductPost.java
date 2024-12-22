@@ -22,4 +22,8 @@ public class ProductPost {
         this.recommendCount = recommendCount;
     }
 
+    public boolean isAuthor(Long loginMemberId) {
+        return this.writerId.equals(loginMemberId);
+    }
+
 }
