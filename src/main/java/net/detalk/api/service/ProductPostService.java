@@ -8,6 +8,7 @@ import java.util.UUID;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.detalk.api.controller.v1.request.UpdateProductPost;
 import net.detalk.api.controller.v1.response.GetProductPostResponse;
 import net.detalk.api.support.CursorPageData;
 import net.detalk.api.domain.ProductMaker;
@@ -67,7 +68,7 @@ public class ProductPostService {
          * 없다면 저장 후 사용
          */
         Product product = productRepository.findByName(productName)
-            .orElseGet(() -> productRepository.save(productPostCreate, now));
+            .orElseGet(() -> productRepository.save(productPostCreate.name(), now));
 
         Long productId = product.getId();
 
@@ -191,6 +192,109 @@ public class ProductPostService {
             log.error("[getProductPostDetailsById] 제품 게시글 없음 ID: {}", id);
             return new ApiException(ErrorCode.NOT_FOUND);
         });
+    }
+
+
+    /**
+     * 제품 게시글 업데이트
+     *
+     * @param postId                수정할 제품 게시글
+     * @param updateProductPost 제품 수정 요청 dto
+     * @param memberId          요청 회원 postId
+     */
+    public Long update(Long postId, UpdateProductPost updateProductPost, Long memberId) {
+
+        Instant now = timeHolder.now();
+
+        // 1. 게시글 존재
+        ProductPost productPost = productPostRepository.findById(postId).orElseThrow(() -> {
+            log.error("[update] 제품 게시글을 찾지 못했습니다 postId={}", postId);
+            return new ApiException(ErrorCode.NOT_FOUND);
+        });
+
+        // 작성자 검증
+        if (!productPost.isAuthor(memberId)) {
+            log.error("[update] 작성자와 요청자가 다릅니다 memberId={}", memberId);
+            throw new ApiException(ErrorCode.FORBIDDEN);
+        }
+
+        // 2. 제품 조회 또는 재사용
+        String productName = updateProductPost.name();
+        Product product = productRepository.findByName(productName)
+            .orElseGet(() -> productRepository.save(updateProductPost.name(), now));
+        Long productId = product.getId();
+
+        // 3. 가격 정책 조회
+        PricingPlan pricingPlan = pricingPlanService.findById(updateProductPost.pricingPlan());
+
+        // 4. 새 스냅샷 생성
+        ProductPostSnapshot newSnapshot = productPostSnapshotRepository.save(
+            ProductPostSnapshot.builder()
+                .postId(postId)
+                .pricingPlanId(pricingPlan.getId())
+                .title(productName)
+                .description(updateProductPost.description())
+                .createdAt(now)
+                .build()
+        );
+
+        Long newSnapshotId = newSnapshot.getId();
+
+        // 5. 새 스냅샷 태그 추가
+        List<String> tags = updateProductPost.tags();
+        List<ProductPostSnapshotTag> snapshotTags = tags.stream()
+            .map(tagService::getOrCreateTag)
+            .map(tag -> ProductPostSnapshotTag.builder()
+                .postId(newSnapshotId)
+                .tagId(tag.getId())
+                .build())
+            .toList();
+
+        productPostSnapshotTagRepository.saveAll(snapshotTags);
+
+        // 6. 링크 업데이트
+        String url = updateProductPost.url();
+        if (url != null && !url.isEmpty()) {
+            productLinkRepository.findByUrl(url)
+                .orElseGet(() -> productLinkRepository.save(productId, url, now));
+        }
+
+        // 7. 이미지 업데이트
+        List<String> imageIds = updateProductPost.imageIds();
+        for (int sequence = 0; sequence < imageIds.size(); sequence++) {
+            String attachmentFileId = imageIds.get(sequence);
+
+            ProductPostSnapshotAttachmentFile attachmentFile = ProductPostSnapshotAttachmentFile.create(
+                newSnapshotId, UUID.fromString(attachmentFileId), sequence);
+
+            productPostSnapshotAttachmentFileRepository.save(attachmentFile);
+        }
+
+        // 8. 제품 메이커 확인 (메이커 요청일 경우)
+        if (updateProductPost.isMaker()) {
+            productMakerRepository.findByProductIdAndMemberId(productId, memberId)
+                .orElseGet(() -> {
+                    // 새 메이커 요청일 경우
+                    log.info("[update] 메이커 생성: productId={}, memberId={}", productId, memberId);
+                    ProductMaker maker = ProductMaker.create(productId, memberId, timeHolder);
+                    return productMakerRepository.save(maker);
+                });
+        }else{
+            // 메이커 요청을 하지 않았을 경우
+            // 이미 메이커일 경우에만 메이커 삭제
+            log.info("[update] 메이커 삭제 시도: productId={}, memberId={}", productId, memberId);
+            productMakerRepository.deleteByProductIdAndMemberId(productId, memberId);
+        }
+
+        // 9. 최근 스냅샷 업데이트
+        int updateResult = productPostLastSnapshotRepository.update(postId, newSnapshot);
+        if (updateResult == 0) {
+            log.error("[update] 게시글 수정에 실패했습니다. postId={}, newSnapshotId={}", postId,
+                newSnapshot.getId());
+            throw new ApiException(ErrorCode.BAD_REQUEST);
+        }
+
+        return newSnapshotId;
     }
 
     /**
