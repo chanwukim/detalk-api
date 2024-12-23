@@ -25,7 +25,6 @@ public record ProductPostCreate(
     String description,
 
     @NotNull(message = "Image IDs cannot be null")
-    @Size(min = 1, message = "At least one image ID is required")
     List<@NotNull(message = "Image ID cannot be null") String> imageIds,
 
     boolean isMaker,
