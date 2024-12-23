@@ -82,7 +82,8 @@ public class ProductPostService {
         /*
          * 요청 가격 정책 조회
          */
-        PricingPlan pricingPlan = pricingPlanService.findById(productPostCreate.pricingPlan());
+        PricingPlan pricingPlan = pricingPlanService.findById(
+            productPostCreate.pricingPlan().toUpperCase());
 
         /*
          * 게시글 스냅샷 저장
@@ -226,7 +227,7 @@ public class ProductPostService {
         Long productId = product.getId();
 
         // 3. 가격 정책 조회
-        PricingPlan pricingPlan = pricingPlanService.findById(updateProductPost.pricingPlan());
+        PricingPlan pricingPlan = pricingPlanService.findById(updateProductPost.pricingPlan().toUpperCase());
 
         // 4. 새 스냅샷 생성
         ProductPostSnapshot newSnapshot = productPostSnapshotRepository.save(
