@@ -13,10 +13,12 @@ import static net.detalk.jooq.tables.JProductPostSnapshotTag.PRODUCT_POST_SNAPSH
 import static net.detalk.jooq.tables.JTag.TAG;
 
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -229,6 +231,7 @@ public class ProductPostRepository {
             .limit(pageSize)
             .fetch();
 
+
         // 첫 번째 쿼리 결과에서 스냅샷 ID 추출
         List<Long> snapshotIds = result.getValues("snapshotId", Long.class);
         Map<Long, List<Media>> imagesMap;
@@ -277,13 +280,30 @@ public class ProductPostRepository {
         return result.map(record -> {
 
             String[] tagsArr = record.get("tags", String[].class);
-            List<String> tags = List.of(tagsArr);
+            List<String> tags;
+
+            if (tagsArr != null) {
+                tags = Arrays.stream(tagsArr)
+                    .filter(Objects::nonNull)
+                    .toList();
+            }else{
+                tags = List.of();
+            }
 
             Long postId = record.get(PRODUCT_POST.ID);
             List<Media> images = imagesMap.getOrDefault(postId, List.of());
 
             String[] productUrlsArr = record.get("urls", String[].class);
-            List<String> productUrls = List.of(productUrlsArr);
+            List<String> productUrls;
+
+            if (productUrlsArr != null) {
+                productUrls = Arrays.stream(productUrlsArr)
+                    .filter(Objects::nonNull)
+                    .toList();
+            }else{
+                productUrls = List.of();
+            }
+
             return new GetProductPostResponse(
                 record.get("id", Long.class),
                 record.get("nickname", String.class),
