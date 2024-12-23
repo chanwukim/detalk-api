@@ -71,7 +71,7 @@ public class ProductPostRepository {
                 DSL.arrayAgg(TAG.NAME).as("tags"),
                 PRODUCT_POST.RECOMMEND_COUNT.as("recommendCount"),
                 PRODUCT_POST_SNAPSHOT.ID.as("snapshotId"),
-                DSL.arrayAggDistinct(PRODUCT_LINK.URL).as("productUrls")
+                DSL.arrayAggDistinct(PRODUCT_LINK.URL).as("urls")
             )
             .from(PRODUCT_POST)
             .join(PRODUCT_POST_LAST_SNAPSHOT)
@@ -145,7 +145,7 @@ public class ProductPostRepository {
         String[] tagsArr = result.get("tags", String[].class);
         List<String> tags = List.of(tagsArr);
 
-        String[] productUrlsArr = result.get("productUrls", String[].class);
+        String[] productUrlsArr = result.get("urls", String[].class);
         List<String> productUrls = List.of(productUrlsArr);
 
         return Optional.of(new GetProductPostResponse(
@@ -190,7 +190,7 @@ public class ProductPostRepository {
                 DSL.arrayAgg(TAG.NAME).as("tags"),
                 PRODUCT_POST.RECOMMEND_COUNT.as("recommendCount"),
                 PRODUCT_POST_SNAPSHOT.ID.as("snapshotId"),
-                DSL.arrayAggDistinct(PRODUCT_LINK.URL).as("productUrls")
+                DSL.arrayAggDistinct(PRODUCT_LINK.URL).as("urls")
             )
             .from(PRODUCT_POST)
             .join(PRODUCT_POST_LAST_SNAPSHOT)
@@ -282,7 +282,7 @@ public class ProductPostRepository {
             Long postId = record.get(PRODUCT_POST.ID);
             List<Media> images = imagesMap.getOrDefault(postId, List.of());
 
-            String[] productUrlsArr = record.get("productUrls", String[].class);
+            String[] productUrlsArr = record.get("urls", String[].class);
             List<String> productUrls = List.of(productUrlsArr);
             return new GetProductPostResponse(
                 record.get("id", Long.class),
