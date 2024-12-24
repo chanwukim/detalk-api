@@ -1,5 +1,6 @@
 package net.detalk.api.support.security;
 
+import lombok.NonNull;
 import org.springframework.core.MethodParameter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -31,27 +32,26 @@ public class HasRoleArgumentResolver implements HandlerMethodArgumentResolver {
 
     @Override
     public Object resolveArgument(
-        MethodParameter parameter,
+        @NonNull MethodParameter parameter,
         ModelAndViewContainer mavContainer,
-        NativeWebRequest webRequest,
+        @NonNull NativeWebRequest webRequest,
         WebDataBinderFactory binderFactory
-    ) throws Exception {
+    ) {
 
-        /**
+        /*
          * TokenFilter에서 SecurityContextHolder 설정을 확인할 것
          * @see net.detalk.api.support.security.TokenFilter
          */
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         // authentication 없거나 Principal이 SecurityUser 아닐경우 null 리턴
-        if (authentication == null || !(authentication.getPrincipal() instanceof SecurityUser)) {
+        if (authentication == null || !(authentication.getPrincipal() instanceof SecurityUser securityUser)) {
             return null;
         }
 
-        SecurityUser securityUser = (SecurityUser) authentication.getPrincipal();
-
         // @HasRole 어노테이션이 요구하는 ROLE 가져오기
         HasRole hasRoleAnnotation = parameter.getParameterAnnotation(HasRole.class);
+        assert hasRoleAnnotation != null;
         String requiredRole = hasRoleAnnotation.value().getName();
 
         // 사용자가 필요한 역할을 가지고 있는지 확인
