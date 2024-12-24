@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import net.detalk.api.service.AuthService;
+import net.detalk.api.service.SessionAuthService;
 import net.detalk.api.support.error.ErrorCode;
 import net.detalk.api.support.error.ErrorMessage;
 import org.springframework.context.annotation.Bean;
@@ -25,9 +26,12 @@ import java.io.PrintWriter;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-    private final AuthService userService;
-    private final TokenProvider tokenProvider;
-    private final OAuthSuccessHandler oAuthSuccessHandler;
+
+    //private final AuthService userService;
+    //private final TokenProvider tokenProvider;
+    //private final OAuthSuccessHandler oAuthSuccessHandler;
+    private final SessionAuthService sessionAuthService;
+    private final SessionOAuthSuccessHandler sessionOAuthSuccessHandler;
     private final OAuthFailHandler oAuthFailHandler;
 
     @Bean
@@ -59,7 +63,7 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
@@ -72,10 +76,10 @@ public class SecurityConfig {
                  * redirect: /login/oauth2/code/{registrationId}
                  */
                 .oauth2Login(oauth2 -> oauth2
-                        .userInfoEndpoint(userInfoEndpointConfig -> userInfoEndpointConfig.userService(userService))
-                        .successHandler(oAuthSuccessHandler)
+                        .userInfoEndpoint(userInfoEndpointConfig -> userInfoEndpointConfig.userService(sessionAuthService))
+                        .successHandler(sessionOAuthSuccessHandler)
                         .failureHandler(oAuthFailHandler))
-            .addFilterBefore(new TokenFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class)
+            //.addFilterBefore(new TokenFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(config -> config
                         .authenticationEntryPoint(unauthorizedHandler())
                         .accessDeniedHandler(accessDeniedHandler()));
