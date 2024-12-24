@@ -145,10 +145,28 @@ public class ProductPostRepository {
         }
 
         String[] tagsArr = result.get("tags", String[].class);
-        List<String> tags = List.of(tagsArr);
+        List<String> tags;
+
+        if (tagsArr != null) {
+            tags = Arrays.stream(tagsArr)
+                .filter(Objects::nonNull)
+                .toList();
+        }else{
+            tags = List.of();
+        }
+
+
 
         String[] productUrlsArr = result.get("urls", String[].class);
-        List<String> productUrls = List.of(productUrlsArr);
+        List<String> productUrls;
+
+        if (productUrlsArr != null) {
+            productUrls = Arrays.stream(productUrlsArr)
+                .filter(Objects::nonNull)
+                .toList();
+        }else{
+            productUrls = List.of();
+        }
 
         return Optional.of(new GetProductPostResponse(
             result.get(PRODUCT_POST.ID, Long.class),
