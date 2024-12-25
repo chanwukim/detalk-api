@@ -15,7 +15,6 @@ import static net.detalk.jooq.tables.JTag.TAG;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -27,6 +26,7 @@ import net.detalk.api.controller.v1.response.GetProductPostResponse.Media;
 import net.detalk.api.domain.ProductPost;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.jooq.impl.DSL;
 import org.springframework.stereotype.Repository;
 
@@ -252,92 +252,11 @@ public class ProductPostRepository {
 
         // 첫 번째 쿼리 결과에서 스냅샷 ID 추출
         List<Long> snapshotIds = result.getValues("snapshotId", Long.class);
-        Map<Long, List<Media>> imagesMap;
+        Map<Long, List<Media>> imagesMap = fetchImagesForSnapshots(snapshotIds);
 
-        // 2. 게시글 정보에 대한 썸네일 사진, 사진 sequence 조회
-        if (!snapshotIds.isEmpty()) {
-            var imagesResult = dsl.select(
-                    PRODUCT_POST.ID.as("postId"),
-                    PRODUCT_POST_SNAPSHOT_ATTACHMENT_FILE.SEQUENCE.as("sequence"),
-                    ATTACHMENT_FILE.URL.as("imageUrl")
-                )
-                .from(PRODUCT_POST_SNAPSHOT_ATTACHMENT_FILE)
-                .join(ATTACHMENT_FILE)
-                    .on(PRODUCT_POST_SNAPSHOT_ATTACHMENT_FILE.ATTACHMENT_FILE_ID.eq(ATTACHMENT_FILE.ID))
-                .join(PRODUCT_POST_SNAPSHOT)
-                    .on(PRODUCT_POST_SNAPSHOT_ATTACHMENT_FILE.SNAPSHOT_ID.eq(PRODUCT_POST_SNAPSHOT.ID))
-                .join(PRODUCT_POST_LAST_SNAPSHOT)
-                    .on(PRODUCT_POST_SNAPSHOT.ID.eq(PRODUCT_POST_LAST_SNAPSHOT.SNAPSHOT_ID))
-                .join(PRODUCT_POST)
-                    .on(PRODUCT_POST_LAST_SNAPSHOT.POST_ID.eq(PRODUCT_POST.ID))
-                .where(PRODUCT_POST_SNAPSHOT_ATTACHMENT_FILE.SNAPSHOT_ID.in(snapshotIds))
-                .orderBy(PRODUCT_POST.ID.asc(), PRODUCT_POST_SNAPSHOT_ATTACHMENT_FILE.SEQUENCE.asc())
-                .fetch();
-
-            /*
-             * K : postId
-             * V : List<Media>
-             *
-             * [Media(url=fooUrl1, sequence=0), Media(url=fooUrl2, sequence=1)]
-             */
-            imagesMap = imagesResult.stream()
-                .collect(Collectors.groupingBy(
-                    record -> record.get("postId", Long.class),
-                    Collectors.mapping(
-                        record -> new Media(
-                            record.get("imageUrl", String.class),
-                            record.get("sequence", Integer.class)
-                        ),
-                       Collectors.toList()
-                    )
-                ));
-        } else {
-            imagesMap = new HashMap<>();
-        }
-
-        return result.map(record -> {
-
-            String[] tagsArr = record.get("tags", String[].class);
-            List<String> tags;
-
-            if (tagsArr != null) {
-                tags = Arrays.stream(tagsArr)
-                    .filter(Objects::nonNull)
-                    .toList();
-            }else{
-                tags = List.of();
-            }
-
-            Long postId = record.get(PRODUCT_POST.ID);
-            List<Media> images = imagesMap.getOrDefault(postId, List.of());
-
-            String[] productUrlsArr = record.get("urls", String[].class);
-            List<String> productUrls;
-
-            if (productUrlsArr != null) {
-                productUrls = Arrays.stream(productUrlsArr)
-                    .filter(Objects::nonNull)
-                    .toList();
-            }else{
-                productUrls = List.of();
-            }
-
-            return new GetProductPostResponse(
-                record.get("id", Long.class),
-                record.get("nickname", String.class),
-                record.get("userHandle", String.class),
-                record.get("createdAt", Instant.class),
-                record.get("isMaker", Boolean.class),
-                record.get("avatarUrl", String.class),
-                record.get("title", String.class),
-                record.get("description", String.class),
-                record.get("pricingPlan", String.class),
-                record.get("recommendCount", Integer.class),
-                tags,
-                images,
-                productUrls);
-        });
+        return result.map(record -> mapRecordToResponse(record, imagesMap));
     }
+
 
     public boolean existsById(Long id) {
         Integer count = dsl.selectCount()
@@ -352,5 +271,75 @@ public class ProductPostRepository {
             .set(PRODUCT_POST.RECOMMEND_COUNT, PRODUCT_POST.RECOMMEND_COUNT.plus(1))
             .where(PRODUCT_POST.ID.eq(postId))
             .execute();
+    }
+
+    // 스냅샷 ID로 이미지 조회 후 sequence 그룹화
+    private Map<Long, List<Media>> fetchImagesForSnapshots(List<Long> snapshotIds) {
+
+        if (snapshotIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        var imagesResult = dsl.select(
+                PRODUCT_POST.ID.as("postId"),
+                PRODUCT_POST_SNAPSHOT_ATTACHMENT_FILE.SEQUENCE.as("sequence"),
+                ATTACHMENT_FILE.URL.as("imageUrl")
+            )
+            .from(PRODUCT_POST_SNAPSHOT_ATTACHMENT_FILE)
+            .join(ATTACHMENT_FILE)
+            .on(PRODUCT_POST_SNAPSHOT_ATTACHMENT_FILE.ATTACHMENT_FILE_ID.eq(ATTACHMENT_FILE.ID))
+            .join(PRODUCT_POST_SNAPSHOT)
+            .on(PRODUCT_POST_SNAPSHOT_ATTACHMENT_FILE.SNAPSHOT_ID.eq(PRODUCT_POST_SNAPSHOT.ID))
+            .join(PRODUCT_POST_LAST_SNAPSHOT)
+            .on(PRODUCT_POST_SNAPSHOT.ID.eq(PRODUCT_POST_LAST_SNAPSHOT.SNAPSHOT_ID))
+            .join(PRODUCT_POST)
+            .on(PRODUCT_POST_LAST_SNAPSHOT.POST_ID.eq(PRODUCT_POST.ID))
+            .where(PRODUCT_POST_SNAPSHOT_ATTACHMENT_FILE.SNAPSHOT_ID.eq(PRODUCT_POST_SNAPSHOT.ID))
+            .orderBy(PRODUCT_POST_SNAPSHOT_ATTACHMENT_FILE.SEQUENCE.asc())
+            .fetch();
+
+        return imagesResult.stream()
+            .collect(Collectors.groupingBy(
+                record -> record.get("postId", Long.class),
+                Collectors.mapping(
+                    record -> new Media(
+                        record.get("imageUrl", String.class),
+                        record.get("sequence", Integer.class)
+                    ),
+                    Collectors.toList()
+                )
+            ));
+    }
+
+    // Record to DTO
+    private GetProductPostResponse mapRecordToResponse(Record record, Map<Long, List<Media>> imagesMap) {
+        String[] tagsArr = record.get("tags", String[].class);
+        List<String> tags = tagsArr != null ? Arrays.stream(tagsArr)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList()) : Collections.emptyList();
+
+        Long postId = record.get(PRODUCT_POST.ID);
+        List<Media> images = imagesMap.getOrDefault(postId, Collections.emptyList());
+
+        String[] productUrlsArr = record.get("urls", String[].class);
+        List<String> productUrls = productUrlsArr != null ? Arrays.stream(productUrlsArr)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList()) : Collections.emptyList();
+
+        return new GetProductPostResponse(
+            record.get("id", Long.class),
+            record.get("nickname", String.class),
+            record.get("userHandle", String.class),
+            record.get("createdAt", Instant.class),
+            record.get("isMaker", Boolean.class),
+            record.get("avatarUrl", String.class),
+            record.get("title", String.class),
+            record.get("description", String.class),
+            record.get("pricingPlan", String.class),
+            record.get("recommendCount", Integer.class),
+            tags,
+            images,
+            productUrls
+        );
     }
 }
