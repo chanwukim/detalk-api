@@ -156,11 +156,7 @@ public class ProductPostService {
      */
     public CursorPageData<GetProductPostResponse> getProductPosts(int pageSize, Long nextId) {
 
-        // 요청 size가 1보다 작을 경우 예외 발생
-        if (pageSize < 1) {
-            log.warn("잘못된 페이지 사이즈 요청입니다={}", pageSize);
-            throw new ApiException(BAD_REQUEST);
-        }
+        validatePageSize(pageSize);
 
         // hasNext 판별하기 위해 pageSize + 1
         List<GetProductPostResponse> result = productPostRepository.findProductPosts(
@@ -182,6 +178,40 @@ public class ProductPostService {
 
         return new CursorPageData<>(result, nextPageId, hasNext);
     }
+
+    /**
+     * 로그인한 회원 제품 게시글 목록 조회
+     *
+     * @param memberId 로그인회원 ID
+     * @param pageSize 요청 item 개수
+     * @param nextId   다음 페이지 item id
+     * @return 로그인한 회원 제품 게시글 커서 페이징 목록
+     */
+    public CursorPageData<GetProductPostResponse> getProductPostsByMember(Long memberId,
+        int pageSize, Long nextId) {
+
+        validatePageSize(pageSize);
+
+        // hasNext 판별하기 위해 pageSize + 1
+        List<GetProductPostResponse> result = productPostRepository.findProductPostsByMember(
+            memberId, pageSize + 1, nextId);
+
+        boolean hasNext = false;
+        Long nextPageId = null;
+
+        // +1 했는데, 조회가 되었다면 다음 데이터가 있음
+        if (result.size() > pageSize) {
+            // 마지막 item 추출
+            GetProductPostResponse lastItem = result.get(pageSize - 1);
+            nextPageId = lastItem.id();
+            hasNext = true;
+            // 클라이언트에 반환할 데이터는 요청한 size만큼
+            result = result.subList(0, pageSize);
+        }
+
+        return new CursorPageData<>(result, nextPageId, hasNext);
+    }
+
 
     /**
      * 제품 게시글 상세 조회
@@ -299,6 +329,9 @@ public class ProductPostService {
         return newSnapshotId;
     }
 
+
+
+
     /**
      * 제품 게시글 존재하는지 검증
      * @param id 검증할 제품 게시글 ID
@@ -310,6 +343,7 @@ public class ProductPostService {
         }
     }
 
+
     /**
      * 제품 게시글 추천수 증가
      * @param id 증가할 제품 게시글 ID
@@ -317,6 +351,17 @@ public class ProductPostService {
     public void incrementRecommendCount(Long id) {
         validatePostExists(id);
         productPostRepository.incrementRecommendCount(id);
+    }
+
+    /**
+     * 페이지 사이즈 검증 1이하라면 에러
+     * @param pageSize 검증할 사이즈
+     */
+    private void validatePageSize(int pageSize) {
+        if (pageSize < 1) {
+            log.warn("잘못된 페이지 사이즈 요청입니다={}", pageSize);
+            throw new ApiException(BAD_REQUEST);
+        }
     }
 
 }
