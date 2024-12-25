@@ -1,10 +1,14 @@
 package net.detalk.api.controller.v1;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
 import lombok.RequiredArgsConstructor;
 import net.detalk.api.controller.v1.request.RegisterProfileRequest;
+import net.detalk.api.controller.v1.response.GetProductPostResponse;
 import net.detalk.api.domain.MemberDetail;
 import net.detalk.api.service.MemberService;
+import net.detalk.api.service.ProductPostService;
+import net.detalk.api.support.CursorPageData;
 import net.detalk.api.support.security.HasRole;
 import net.detalk.api.support.security.SecurityRole;
 import net.detalk.api.support.security.SecurityUser;
@@ -15,7 +19,9 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/members")
 @RequiredArgsConstructor
 public class MemberController {
+
     private final MemberService memberService;
+    private final ProductPostService productPostService;
 
     @GetMapping("/me")
     public ResponseEntity<MemberDetail> me(
@@ -32,5 +38,15 @@ public class MemberController {
     ) {
         MemberDetail memberDetail = memberService.registerProfile(user.getId(), registerProfile.userhandle(), registerProfile.nickname());
         return ResponseEntity.ok().body(memberDetail);
+    }
+
+    @GetMapping("/me/posts")
+    public ResponseEntity<CursorPageData<GetProductPostResponse>> getMyPosts(
+        @RequestParam(name = "size", defaultValue = "5") @Max(20) int pageSize,
+        @RequestParam(name = "startId", required = false) Long nextId,
+        @HasRole(SecurityRole.MEMBER) SecurityUser user
+    ) {
+        CursorPageData<GetProductPostResponse> result = productPostService.getProductPostsByMember(user.getId(), pageSize, nextId);
+        return ResponseEntity.ok(result);
     }
 }
