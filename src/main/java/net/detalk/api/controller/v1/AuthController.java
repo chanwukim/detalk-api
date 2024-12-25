@@ -21,8 +21,9 @@ import java.util.Arrays;
 import static net.detalk.api.support.Constant.COOKIE_ACCESS_TOKEN;
 import static net.detalk.api.support.Constant.COOKIE_REFRESH_TOKEN;
 
-@RestController
-@RequestMapping("/api/v1/auth")
+@Deprecated
+//@RestController
+//@RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 public class AuthController {
     private final AuthService authService;

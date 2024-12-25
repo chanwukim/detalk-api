@@ -33,6 +33,7 @@ public class SecurityConfig {
     private final SessionAuthService sessionAuthService;
     private final SessionOAuthSuccessHandler sessionOAuthSuccessHandler;
     private final OAuthFailHandler oAuthFailHandler;
+    private final CustomLogoutSuccessHandler logoutSuccessHandler;
 
     @Bean
     protected AuthenticationEntryPoint unauthorizedHandler() {
@@ -61,28 +62,33 @@ public class SecurityConfig {
     @Bean
     protected SecurityFilterChain securityFilterChain(HttpSecurity http, TokenProvider tokenProvider) throws Exception {
         http
-                .csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
-                .httpBasic(AbstractHttpConfigurer::disable)
-                .formLogin(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.OPTIONS).permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/refresh").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/members/me").hasRole("MEMBER")
-                        .anyRequest().authenticated())
-                /**
-                 * sign-in: /oauth2/authorization/{registrationId}
-                 * redirect: /login/oauth2/code/{registrationId}
-                 */
-                .oauth2Login(oauth2 -> oauth2
-                        .userInfoEndpoint(userInfoEndpointConfig -> userInfoEndpointConfig.userService(sessionAuthService))
-                        .successHandler(sessionOAuthSuccessHandler)
-                        .failureHandler(oAuthFailHandler))
+            .csrf(AbstractHttpConfigurer::disable)
+            .sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+            .httpBasic(AbstractHttpConfigurer::disable)
+            .formLogin(AbstractHttpConfigurer::disable)
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers(HttpMethod.OPTIONS).permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/v1/auth/refresh").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/members/me").hasRole("MEMBER")
+                .anyRequest().authenticated())
+            /**
+             * sign-in: /oauth2/authorization/{registrationId}
+             * redirect: /login/oauth2/code/{registrationId}
+             */
+            .oauth2Login(oauth2 -> oauth2
+                .userInfoEndpoint(userInfoEndpointConfig -> userInfoEndpointConfig.userService(
+                    sessionAuthService))
+                .successHandler(sessionOAuthSuccessHandler)
+                .failureHandler(oAuthFailHandler))
+            .logout(logout -> logout
+                .logoutUrl("/api/v1/auth/sign-out")
+                .logoutSuccessHandler(logoutSuccessHandler)
+            )
             //.addFilterBefore(new TokenFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class)
-                .exceptionHandling(config -> config
-                        .authenticationEntryPoint(unauthorizedHandler())
-                        .accessDeniedHandler(accessDeniedHandler()));
+            .exceptionHandling(config -> config
+                .authenticationEntryPoint(unauthorizedHandler())
+                .accessDeniedHandler(accessDeniedHandler()));
 
         return http.build();
     }
