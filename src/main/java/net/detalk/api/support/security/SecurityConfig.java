@@ -73,6 +73,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/v1/products/posts/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/products/posts").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/members/me").hasRole("MEMBER")
+                .requestMatchers(HttpMethod.GET, "/api/v1/members/me/posts").hasRole("MEMBER")
                 .anyRequest().authenticated())
             /**
              * sign-in: /oauth2/authorization/{registrationId}
