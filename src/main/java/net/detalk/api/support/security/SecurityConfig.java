@@ -75,6 +75,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/v1/members/me").hasRole("MEMBER")
                 .requestMatchers(HttpMethod.GET, "/api/v1/members/me/posts").hasRole("MEMBER")
                 .requestMatchers(HttpMethod.GET, "/api/v1/members/{userhandle}/posts").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/members/{userhandle}/recommended-posts").permitAll()
                 .anyRequest().authenticated())
             /**
              * sign-in: /oauth2/authorization/{registrationId}
