@@ -36,7 +36,8 @@ public class MemberController {
         @HasRole(SecurityRole.MEMBER) SecurityUser user,
         @Valid @RequestBody RegisterProfileRequest registerProfile
     ) {
-        MemberDetail memberDetail = memberService.registerProfile(user.getId(), registerProfile.userhandle(), registerProfile.nickname());
+        MemberDetail memberDetail = memberService.registerProfile(user.getId(),
+            registerProfile.userhandle(), registerProfile.nickname());
         return ResponseEntity.ok().body(memberDetail);
     }
 
@@ -63,5 +64,19 @@ public class MemberController {
             productPostService.getProductPostsByMemberId(memberId, pageSize, nextId);
 
         return ResponseEntity.ok(posts);
+    }
+
+    @GetMapping("/{userhandle}/recommended-posts")
+    public ResponseEntity<CursorPageData<GetProductPostResponse>> getRecommendedPosts(
+        @PathVariable("userhandle") String userhandle,
+        @RequestParam(name = "size", defaultValue = "5") @Max(20) int pageSize,
+        @RequestParam(name = "startId", required = false) Long nextId
+    ) {
+        Long memberId = memberService.findIdByUserHandle(userhandle);
+
+        CursorPageData<GetProductPostResponse> result =
+            productPostService.getRecommendedPostsByMemberId(memberId, pageSize, nextId);
+
+        return ResponseEntity.ok(result);
     }
 }
