@@ -180,20 +180,20 @@ public class ProductPostService {
     }
 
     /**
-     * 로그인한 회원 제품 게시글 목록 조회
+     * 회원ID로 제품 게시글 목록 조회
      *
-     * @param memberId 로그인회원 ID
+     * @param memberId 조회하려는 회원 ID
      * @param pageSize 요청 item 개수
      * @param nextId   다음 페이지 item id
-     * @return 로그인한 회원 제품 게시글 커서 페이징 목록
+     * @return 회원 제품 게시글 커서 페이징 목록
      */
-    public CursorPageData<GetProductPostResponse> getProductPostsByMember(Long memberId,
+    public CursorPageData<GetProductPostResponse> getProductPostsByMemberId(Long memberId,
         int pageSize, Long nextId) {
 
         validatePageSize(pageSize);
 
         // hasNext 판별하기 위해 pageSize + 1
-        List<GetProductPostResponse> result = productPostRepository.findProductPostsByMember(
+        List<GetProductPostResponse> result = productPostRepository.findProductPostsByMemberId(
             memberId, pageSize + 1, nextId);
 
         boolean hasNext = false;
@@ -328,9 +328,6 @@ public class ProductPostService {
 
         return newSnapshotId;
     }
-
-
-
 
     /**
      * 제품 게시글 존재하는지 검증
