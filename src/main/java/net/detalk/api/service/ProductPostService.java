@@ -329,6 +329,28 @@ public class ProductPostService {
         return newSnapshotId;
     }
 
+
+    public CursorPageData<GetProductPostResponse> getRecommendedPostsByMemberId(Long memberId,
+        int pageSize, Long nextId) {
+
+        validatePageSize(pageSize);
+
+        List<GetProductPostResponse> result =
+            productPostRepository.findRecommendedPostsByMemberId(memberId, pageSize + 1, nextId);
+
+        boolean hasNext = false;
+        Long nextPageId = null;
+
+        if (result.size() > pageSize) {
+            GetProductPostResponse lastItem = result.get(pageSize - 1);
+            nextPageId = lastItem.id();
+            hasNext = true;
+            result = result.subList(0, pageSize);
+        }
+        return new CursorPageData<>(result, nextPageId, hasNext);
+    }
+
+
     /**
      * 제품 게시글 존재하는지 검증
      * @param id 검증할 제품 게시글 ID

@@ -10,6 +10,8 @@ import static net.detalk.jooq.tables.JProductPostLastSnapshot.PRODUCT_POST_LAST_
 import static net.detalk.jooq.tables.JProductPostSnapshot.PRODUCT_POST_SNAPSHOT;
 import static net.detalk.jooq.tables.JProductPostSnapshotAttachmentFile.PRODUCT_POST_SNAPSHOT_ATTACHMENT_FILE;
 import static net.detalk.jooq.tables.JProductPostSnapshotTag.PRODUCT_POST_SNAPSHOT_TAG;
+import static net.detalk.jooq.tables.JRecommend.RECOMMEND;
+import static net.detalk.jooq.tables.JRecommendProduct.*;
 import static net.detalk.jooq.tables.JTag.TAG;
 
 import java.time.Instant;
@@ -313,6 +315,80 @@ public class ProductPostRepository {
                 PRICING_PLAN.NAME,
                 PRODUCT_POST.RECOMMEND_COUNT,
                 PRODUCT_POST_SNAPSHOT.ID
+            )
+            .orderBy(PRODUCT_POST.CREATED_AT.desc(), PRODUCT_POST.ID.desc())
+            .limit(pageSize)
+            .fetch();
+
+        List<Long> snapshotIds = result.getValues("snapshotId", Long.class);
+        Map<Long, List<Media>> imagesMap = fetchImagesForSnapshots(snapshotIds);
+
+        return result.map(record -> mapRecordToResponse(record, imagesMap));
+    }
+
+
+    public List<GetProductPostResponse> findRecommendedPostsByMemberId(Long memberId, int pageSize,
+        Long nextId) {
+
+        Condition condition = RECOMMEND_PRODUCT.MEMBER_ID.eq(memberId);
+
+        if (nextId != null) {
+            condition = condition.and(PRODUCT_POST.ID.lt(nextId));
+        }
+
+        var result = dsl.select(
+                PRODUCT_POST.ID,
+                MEMBER_PROFILE.NICKNAME,
+                MEMBER_PROFILE.USERHANDLE.as("userHandle"),
+                PRODUCT_POST_SNAPSHOT.CREATED_AT.as("createdAt"),
+                DSL.when(PRODUCT_MAKER.ID.isNotNull(), true).otherwise(false).as("isMaker"),
+                ATTACHMENT_FILE.URL.as("avatarUrl"),
+                PRODUCT_POST_SNAPSHOT.TITLE,
+                PRODUCT_POST_SNAPSHOT.DESCRIPTION,
+                PRICING_PLAN.NAME.as("pricingPlan"),
+                DSL.arrayAgg(TAG.NAME).as("tags"),
+                PRODUCT_POST.RECOMMEND_COUNT.as("recommendCount"),
+                PRODUCT_POST_SNAPSHOT.ID.as("snapshotId"),
+                DSL.arrayAggDistinct(PRODUCT_LINK.URL).as("urls"),
+                RECOMMEND.VALUE.as("reason")
+            )
+            .from(PRODUCT_POST)
+            .join(RECOMMEND_PRODUCT)
+            .on(RECOMMEND_PRODUCT.PRODUCT_POST_ID.eq(PRODUCT_POST.ID))
+            .join(RECOMMEND)
+            .on(RECOMMEND_PRODUCT.RECOMMEND_ID.eq(RECOMMEND.ID))
+            .join(PRODUCT_POST_LAST_SNAPSHOT)
+            .on(PRODUCT_POST.ID.eq(PRODUCT_POST_LAST_SNAPSHOT.POST_ID))
+            .join(PRODUCT_POST_SNAPSHOT)
+            .on(PRODUCT_POST_LAST_SNAPSHOT.SNAPSHOT_ID.eq(PRODUCT_POST_SNAPSHOT.ID))
+            .join(PRICING_PLAN)
+            .on(PRODUCT_POST_SNAPSHOT.PRICING_PLAN_ID.eq(PRICING_PLAN.ID))
+            .leftJoin(PRODUCT_POST_SNAPSHOT_TAG)
+            .on(PRODUCT_POST_SNAPSHOT_TAG.POST_ID.eq(PRODUCT_POST_SNAPSHOT.ID))
+            .leftJoin(TAG)
+            .on(TAG.ID.eq(PRODUCT_POST_SNAPSHOT_TAG.TAG_ID))
+            .leftJoin(MEMBER_PROFILE)
+            .on(MEMBER_PROFILE.MEMBER_ID.eq(PRODUCT_POST.WRITER_ID))
+            .leftJoin(PRODUCT_MAKER)
+            .on(PRODUCT_MAKER.PRODUCT_ID.eq(PRODUCT_POST.PRODUCT_ID))
+            .leftJoin(ATTACHMENT_FILE)
+            .on(ATTACHMENT_FILE.ID.eq(MEMBER_PROFILE.AVATAR_ID))
+            .leftJoin(PRODUCT_LINK)
+            .on(PRODUCT_LINK.PRODUCT_ID.eq(PRODUCT_POST.PRODUCT_ID))
+            .where(condition)
+            .groupBy(
+                PRODUCT_POST.ID,
+                MEMBER_PROFILE.NICKNAME,
+                MEMBER_PROFILE.USERHANDLE,
+                PRODUCT_POST_SNAPSHOT.CREATED_AT,
+                PRODUCT_MAKER.ID,
+                ATTACHMENT_FILE.URL,
+                PRODUCT_POST_SNAPSHOT.TITLE,
+                PRODUCT_POST_SNAPSHOT.DESCRIPTION,
+                PRICING_PLAN.NAME,
+                PRODUCT_POST.RECOMMEND_COUNT,
+                PRODUCT_POST_SNAPSHOT.ID,
+                RECOMMEND.VALUE
             )
             .orderBy(PRODUCT_POST.CREATED_AT.desc(), PRODUCT_POST.ID.desc())
             .limit(pageSize)
