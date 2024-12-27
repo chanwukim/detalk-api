@@ -83,4 +83,14 @@ public class MemberService {
             .description(memberProfile.getDescription())
             .build();
     }
+
+    public Long findIdByUserHandle(String userHandle) {
+        MemberProfile memberProfile = memberProfileRepository.findByUserHandle(userHandle)
+            .orElseThrow(() -> {
+                    log.error("[findMemberIdByUserHandle] 회원 userHandle {}은 존재하지 않는 회원입니다", userHandle);
+                    return new ApiException(ErrorCode.NOT_FOUND);
+                }
+            );
+        return memberProfile.getMemberId();
+    }
 }
