@@ -257,7 +257,7 @@ public class ProductPostRepository {
         return result.map(record -> mapRecordToResponse(record, imagesMap));
     }
 
-    public List<GetProductPostResponse> findProductPostsByMember(Long memberId, int pageSize, Long nextId) {
+    public List<GetProductPostResponse> findProductPostsByMemberId(Long memberId, int pageSize, Long nextId) {
 
         // 로그인 회원 ID에 해당하는 게시글 조건문
         Condition condition = PRODUCT_POST.WRITER_ID.eq(memberId);
