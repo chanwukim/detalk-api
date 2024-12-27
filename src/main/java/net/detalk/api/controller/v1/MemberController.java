@@ -46,7 +46,22 @@ public class MemberController {
         @RequestParam(name = "startId", required = false) Long nextId,
         @HasRole(SecurityRole.MEMBER) SecurityUser user
     ) {
-        CursorPageData<GetProductPostResponse> result = productPostService.getProductPostsByMember(user.getId(), pageSize, nextId);
+        CursorPageData<GetProductPostResponse> result = productPostService.getProductPostsByMemberId(
+            user.getId(), pageSize, nextId);
         return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/{userhandle}/posts")
+    public ResponseEntity<CursorPageData<GetProductPostResponse>> getPostsByUserHandle(
+        @PathVariable("userhandle") String userhandle,
+        @RequestParam(name = "size", defaultValue = "5") @Max(20) int pageSize,
+        @RequestParam(name = "startId", required = false) Long nextId
+    ) {
+        Long memberId = memberService.findIdByUserHandle(userhandle);
+
+        CursorPageData<GetProductPostResponse> posts =
+            productPostService.getProductPostsByMemberId(memberId, pageSize, nextId);
+
+        return ResponseEntity.ok(posts);
     }
 }
