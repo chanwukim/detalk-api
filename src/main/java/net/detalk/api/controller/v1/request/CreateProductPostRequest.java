@@ -9,7 +9,7 @@ import jakarta.validation.constraints.Pattern;
 import lombok.Builder;
 
 @Builder
-public record ProductPostCreate(
+public record CreateProductPostRequest(
 
     @NotBlank(message = "Name is required")
     @Size(max = 255, message = "Name must be less than or equal to 255 characters")
