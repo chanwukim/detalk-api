@@ -3,7 +3,7 @@ package net.detalk.api.controller.v1;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import lombok.RequiredArgsConstructor;
-import net.detalk.api.controller.v1.request.UpdateProductPost;
+import net.detalk.api.controller.v1.request.UpdateProductPostRequest;
 import net.detalk.api.controller.v1.response.CreateProductPostResponse;
 import net.detalk.api.controller.v1.response.GetProductPostResponse;
 import net.detalk.api.controller.v1.request.CreateRecommendRequest;
@@ -60,10 +60,10 @@ public class ProductPostController {
     @PutMapping("/{id}")
     public ResponseEntity<Void> updateProductPost(
         @PathVariable("id") Long id,
-        @Valid @RequestBody UpdateProductPost updateProductPost,
+        @Valid @RequestBody UpdateProductPostRequest updateProductPostRequest,
         @HasRole(SecurityRole.MEMBER) SecurityUser user
     ) {
-        productPostService.update(id, updateProductPost, user.getId());
+        productPostService.update(id, updateProductPostRequest, user.getId());
         return ResponseEntity.noContent().build();
     }
 

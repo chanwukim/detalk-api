@@ -7,7 +7,7 @@ import java.util.List;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.detalk.api.controller.v1.request.UpdateProductPost;
+import net.detalk.api.controller.v1.request.UpdateProductPostRequest;
 import net.detalk.api.controller.v1.response.GetProductPostResponse;
 import net.detalk.api.support.CursorPageData;
 import net.detalk.api.domain.ProductMaker;
@@ -231,10 +231,10 @@ public class ProductPostService {
      * 제품 게시글 업데이트
      *
      * @param postId                수정할 제품 게시글
-     * @param updateProductPost 제품 수정 요청 dto
+     * @param updateProductPostRequest 제품 수정 요청 dto
      * @param memberId          요청 회원 postId
      */
-    public Long update(Long postId, UpdateProductPost updateProductPost, Long memberId) {
+    public Long update(Long postId, UpdateProductPostRequest updateProductPostRequest, Long memberId) {
 
         Instant now = timeHolder.now();
 
@@ -251,13 +251,14 @@ public class ProductPostService {
         }
 
         // 2. 제품 조회 또는 재사용
-        String productName = updateProductPost.name();
+        String productName = updateProductPostRequest.name();
         Product product = productRepository.findByName(productName)
-            .orElseGet(() -> productRepository.save(updateProductPost.name(), now));
+            .orElseGet(() -> productRepository.save(updateProductPostRequest.name(), now));
         Long productId = product.getId();
 
         // 3. 가격 정책 조회
-        PricingPlan pricingPlan = pricingPlanService.findById(updateProductPost.pricingPlan().toUpperCase());
+        PricingPlan pricingPlan = pricingPlanService.findById(
+            updateProductPostRequest.pricingPlan().toUpperCase());
 
         // 4. 새 스냅샷 생성
         ProductPostSnapshot newSnapshot = productPostSnapshotRepository.save(
@@ -265,7 +266,7 @@ public class ProductPostService {
                 .postId(postId)
                 .pricingPlanId(pricingPlan.getId())
                 .title(productName)
-                .description(updateProductPost.description())
+                .description(updateProductPostRequest.description())
                 .createdAt(now)
                 .build()
         );
@@ -273,7 +274,7 @@ public class ProductPostService {
         Long newSnapshotId = newSnapshot.getId();
 
         // 5. 새 스냅샷 태그 추가
-        List<String> tags = updateProductPost.tags();
+        List<String> tags = updateProductPostRequest.tags();
         List<ProductPostSnapshotTag> snapshotTags = tags.stream()
             .map(tagService::getOrCreateTag)
             .map(tag -> ProductPostSnapshotTag.builder()
@@ -285,14 +286,14 @@ public class ProductPostService {
         productPostSnapshotTagRepository.saveAll(snapshotTags);
 
         // 6. 링크 업데이트
-        String url = updateProductPost.url();
+        String url = updateProductPostRequest.url();
         if (url != null && !url.isEmpty()) {
             productLinkRepository.findByUrl(url)
                 .orElseGet(() -> productLinkRepository.save(productId, url, now));
         }
 
         // 7. 이미지 업데이트
-        List<String> imageIds = updateProductPost.imageIds();
+        List<String> imageIds = updateProductPostRequest.imageIds();
         for (int sequence = 0; sequence < imageIds.size(); sequence++) {
             String attachmentFileId = imageIds.get(sequence);
 
@@ -303,7 +304,7 @@ public class ProductPostService {
         }
 
         // 8. 제품 메이커 확인 (메이커 요청일 경우)
-        if (updateProductPost.isMaker()) {
+        if (updateProductPostRequest.isMaker()) {
             productMakerRepository.findByProductIdAndMemberId(productId, memberId)
                 .orElseGet(() -> {
                     // 새 메이커 요청일 경우
