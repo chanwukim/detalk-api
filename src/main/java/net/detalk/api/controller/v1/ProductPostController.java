@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import net.detalk.api.controller.v1.request.UpdateProductPost;
 import net.detalk.api.controller.v1.response.CreateProductPostResponse;
 import net.detalk.api.controller.v1.response.GetProductPostResponse;
-import net.detalk.api.controller.v1.request.CreateRecommend;
+import net.detalk.api.controller.v1.request.CreateRecommendRequest;
 import net.detalk.api.service.RecommendService;
 import net.detalk.api.support.CursorPageData;
 import net.detalk.api.controller.v1.request.ProductPostCreate;
@@ -70,10 +70,10 @@ public class ProductPostController {
     @PostMapping("/{id}/recommend")
     public ResponseEntity<Void> createRecommend(
         @PathVariable("id") Long postId,
-        @Valid @RequestBody CreateRecommend createRecommend,
+        @Valid @RequestBody CreateRecommendRequest createRecommendRequest,
         @HasRole(SecurityRole.MEMBER) SecurityUser user
         ) {
-        recommendService.addRecommendation(postId, user.getId(), createRecommend);
+        recommendService.addRecommendation(postId, user.getId(), createRecommendRequest);
         return ResponseEntity.noContent().build();
     }
 }

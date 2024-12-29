@@ -4,7 +4,7 @@ import java.time.Instant;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.detalk.api.controller.v1.request.CreateRecommend;
+import net.detalk.api.controller.v1.request.CreateRecommendRequest;
 import net.detalk.api.domain.Recommend;
 import net.detalk.api.repository.RecommendProductRepository;
 import net.detalk.api.repository.RecommendRepository;
@@ -25,10 +25,10 @@ public class RecommendService {
     private final TimeHolder timeHolder;
 
     @Transactional
-    public void addRecommendation(Long postId, Long memberId, CreateRecommend createRecommend) {
+    public void addRecommendation(Long postId, Long memberId, CreateRecommendRequest createRecommendRequest) {
 
         Instant now = timeHolder.now();
-        String reason = createRecommend.reason();
+        String reason = createRecommendRequest.reason();
 
         // 추천 하려는 게시글이 존재하는지 검증
         productPostService.validatePostExists(postId);
@@ -36,7 +36,7 @@ public class RecommendService {
         // 추천 이유 존재하면 그대로 사용, 없으면 DB 저장
         Long recommendId = findByReason(reason)
             .map(Recommend::getId)
-            .orElseGet(() -> save(createRecommend, now).getId());
+            .orElseGet(() -> save(createRecommendRequest, now).getId());
 
         // 중복 추천 예외
         if (recommendProductRepository.isAlreadyRecommended(memberId, recommendId, postId)) {
@@ -52,8 +52,8 @@ public class RecommendService {
         productPostService.incrementRecommendCount(postId);
     }
 
-    public Recommend save(CreateRecommend createRecommend, Instant now) {
-        return recommendRepository.save(createRecommend, now);
+    public Recommend save(CreateRecommendRequest createRecommendRequest, Instant now) {
+        return recommendRepository.save(createRecommendRequest, now);
     }
 
     public Optional<Recommend> findByReason(String reason) {
