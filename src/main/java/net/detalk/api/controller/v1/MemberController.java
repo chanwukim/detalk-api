@@ -3,7 +3,7 @@ package net.detalk.api.controller.v1;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import lombok.RequiredArgsConstructor;
-import net.detalk.api.controller.v1.request.RegisterProfileRequest;
+import net.detalk.api.controller.v1.request.CreateProfileRequest;
 import net.detalk.api.controller.v1.response.GetProductPostResponse;
 import net.detalk.api.domain.MemberDetail;
 import net.detalk.api.service.MemberService;
@@ -34,7 +34,7 @@ public class MemberController {
     @PostMapping("/profile")
     public ResponseEntity<MemberDetail> registerProfile(
         @HasRole(SecurityRole.MEMBER) SecurityUser user,
-        @Valid @RequestBody RegisterProfileRequest registerProfile
+        @Valid @RequestBody CreateProfileRequest registerProfile
     ) {
         MemberDetail memberDetail = memberService.registerProfile(user.getId(),
             registerProfile.userhandle(), registerProfile.nickname());

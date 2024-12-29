@@ -4,7 +4,7 @@ import java.util.List;
 import lombok.Builder;
 
 @Builder
-public record UpdateProductPost(
+public record UpdateProductPostRequest(
     String name,
     String pricingPlan,
     String description,

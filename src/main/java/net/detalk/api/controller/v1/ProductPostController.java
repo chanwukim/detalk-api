@@ -3,13 +3,13 @@ package net.detalk.api.controller.v1;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import lombok.RequiredArgsConstructor;
-import net.detalk.api.controller.v1.request.UpdateProductPost;
+import net.detalk.api.controller.v1.request.UpdateProductPostRequest;
 import net.detalk.api.controller.v1.response.CreateProductPostResponse;
 import net.detalk.api.controller.v1.response.GetProductPostResponse;
-import net.detalk.api.controller.v1.request.CreateRecommend;
+import net.detalk.api.controller.v1.request.CreateRecommendRequest;
 import net.detalk.api.service.RecommendService;
 import net.detalk.api.support.CursorPageData;
-import net.detalk.api.controller.v1.request.ProductPostCreate;
+import net.detalk.api.controller.v1.request.CreateProductPostRequest;
 import net.detalk.api.service.ProductPostService;
 import net.detalk.api.support.security.HasRole;
 import net.detalk.api.support.security.SecurityRole;
@@ -35,10 +35,10 @@ public class ProductPostController {
 
     @PostMapping
     public ResponseEntity<CreateProductPostResponse> create(
-        @Valid @RequestBody ProductPostCreate productPostCreate,
+        @Valid @RequestBody CreateProductPostRequest createProductPostRequest,
         @HasRole(SecurityRole.MEMBER) SecurityUser user
         ) {
-        Long productPostId = productPostService.create(productPostCreate, user.getId());
+        Long productPostId = productPostService.create(createProductPostRequest, user.getId());
         return ResponseEntity.ok(new CreateProductPostResponse(productPostId));
     }
 
@@ -60,20 +60,20 @@ public class ProductPostController {
     @PutMapping("/{id}")
     public ResponseEntity<Void> updateProductPost(
         @PathVariable("id") Long id,
-        @Valid @RequestBody UpdateProductPost updateProductPost,
+        @Valid @RequestBody UpdateProductPostRequest updateProductPostRequest,
         @HasRole(SecurityRole.MEMBER) SecurityUser user
     ) {
-        productPostService.update(id, updateProductPost, user.getId());
+        productPostService.update(id, updateProductPostRequest, user.getId());
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{id}/recommend")
     public ResponseEntity<Void> createRecommend(
         @PathVariable("id") Long postId,
-        @Valid @RequestBody CreateRecommend createRecommend,
+        @Valid @RequestBody CreateRecommendRequest createRecommendRequest,
         @HasRole(SecurityRole.MEMBER) SecurityUser user
         ) {
-        recommendService.addRecommendation(postId, user.getId(), createRecommend);
+        recommendService.addRecommendation(postId, user.getId(), createRecommendRequest);
         return ResponseEntity.noContent().build();
     }
 }
