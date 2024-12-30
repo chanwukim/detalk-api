@@ -110,6 +110,7 @@ CREATE TABLE "product_link" (
         CONSTRAINT "product_link_pkey" PRIMARY KEY ("id"),
         FOREIGN KEY ("product_id") REFERENCES "product" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
+CREATE INDEX idx_product_link_product_id ON product_link(product_id);
 
 CREATE TABLE "product_post" (
         "id" BIGINT GENERATED ALWAYS AS IDENTITY,
@@ -151,6 +152,7 @@ CREATE TABLE "product_post_snapshot_tag" (
         FOREIGN KEY ("post_id") REFERENCES "product_post_snapshot" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY ("tag_id") REFERENCES "tag" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
+CREATE INDEX idx_product_post_snapshot_tag_post_id_tag_id ON product_post_snapshot_tag(post_id, tag_id);
 
 CREATE TABLE "product_post_snapshot_attachment_file" (
         "id" BIGINT GENERATED ALWAYS AS IDENTITY,
