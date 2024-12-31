@@ -2,8 +2,8 @@ package net.detalk.api.controller.v1;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import net.detalk.api.domain.UploadFileMetadata;
-import net.detalk.api.domain.FileWithPresigned;
+import net.detalk.api.controller.v1.request.PreSignedUrlRequest;
+import net.detalk.api.domain.PreSignedData;
 import net.detalk.api.service.FileService;
 import net.detalk.api.support.security.HasRole;
 import net.detalk.api.support.security.SecurityRole;
@@ -20,12 +20,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class FileController {
     private final FileService fileService;
 
-    @PostMapping("/pre-signed")
-    public ResponseEntity<FileWithPresigned> createPreSignedUrl(
+    @PostMapping("/signed-url")
+    public ResponseEntity<PreSignedData> createPreSignedUrl(
         @HasRole(SecurityRole.MEMBER) SecurityUser user,
-        @Valid @RequestBody UploadFileMetadata uploadFileMetadata
-    ) {
-        FileWithPresigned result = fileService.createPreSignedUrl(user.getId(), uploadFileMetadata);
+        @Valid @RequestBody PreSignedUrlRequest body
+        ) {
+        PreSignedData result = fileService.createPreSignedUrl(user.getId(), body.fileName(), body.fileType(), body.type());
         return ResponseEntity.ok().body(result);
     }
 }
