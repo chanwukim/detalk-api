@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class CustomLogoutSuccessHandler implements LogoutSuccessHandler {
+public class SessionLogoutSuccessHandler implements LogoutSuccessHandler {
 
     private final ObjectMapper objectMapper;
 

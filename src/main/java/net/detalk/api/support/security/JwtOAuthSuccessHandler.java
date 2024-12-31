@@ -23,7 +23,7 @@ import static net.detalk.api.support.Constant.COOKIE_REFRESH_TOKEN;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class OAuthSuccessHandler implements AuthenticationSuccessHandler {
+public class JwtOAuthSuccessHandler implements AuthenticationSuccessHandler {
     private final AppProperties appProperties;
     private final RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
     private final Environment env;

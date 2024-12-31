@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import net.detalk.api.service.AuthService;
-import net.detalk.api.service.SessionAuthService;
 import net.detalk.api.support.error.ErrorCode;
 import net.detalk.api.support.error.ErrorMessage;
 import org.springframework.context.annotation.Bean;
@@ -27,13 +26,14 @@ import java.io.PrintWriter;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    //private final AuthService userService;
-    //private final TokenProvider tokenProvider;
-    //private final OAuthSuccessHandler oAuthSuccessHandler;
-    private final SessionAuthService sessionAuthService;
-    private final SessionOAuthSuccessHandler sessionOAuthSuccessHandler;
     private final OAuthFailHandler oAuthFailHandler;
-    private final CustomLogoutSuccessHandler logoutSuccessHandler;
+    private final AuthService authService;
+    private final TokenProvider tokenProvider;
+    private final JwtOAuthSuccessHandler oAuthSuccessHandler;
+    // SESSION
+    //private final SessionAuthService authService;
+    //private final SessionOAuthSuccessHandler oAuthSuccessHandler;
+    //private final SessionLogoutSuccessHandler logoutSuccessHandler;
 
     @Bean
     protected AuthenticationEntryPoint unauthorizedHandler() {
@@ -64,7 +64,7 @@ public class SecurityConfig {
         http
             .csrf(AbstractHttpConfigurer::disable)
             .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .httpBasic(AbstractHttpConfigurer::disable)
             .formLogin(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth
@@ -76,6 +76,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/v1/members/me/posts").hasRole("MEMBER")
                 .requestMatchers(HttpMethod.GET, "/api/v1/members/{userhandle}/posts").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/members/{userhandle}/recommended-posts").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/tags").permitAll()
                 .anyRequest().authenticated())
             /**
              * sign-in: /oauth2/authorization/{registrationId}
@@ -83,14 +84,14 @@ public class SecurityConfig {
              */
             .oauth2Login(oauth2 -> oauth2
                 .userInfoEndpoint(userInfoEndpointConfig -> userInfoEndpointConfig.userService(
-                    sessionAuthService))
-                .successHandler(sessionOAuthSuccessHandler)
+                    authService))
+                .successHandler(oAuthSuccessHandler)
                 .failureHandler(oAuthFailHandler))
-            .logout(logout -> logout
-                .logoutUrl("/api/v1/auth/sign-out")
-                .logoutSuccessHandler(logoutSuccessHandler)
-            )
-            //.addFilterBefore(new TokenFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class)
+//            .logout(logout -> logout
+//                .logoutUrl("/api/v1/auth/sign-out")
+//                .logoutSuccessHandler(logoutSuccessHandler)
+//            )
+            .addFilterBefore(new TokenFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class)
             .exceptionHandling(config -> config
                 .authenticationEntryPoint(unauthorizedHandler())
                 .accessDeniedHandler(accessDeniedHandler()));
