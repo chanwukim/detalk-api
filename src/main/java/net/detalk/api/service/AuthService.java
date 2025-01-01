@@ -1,12 +1,15 @@
 package net.detalk.api.service;
 
 import jakarta.transaction.Transactional;
+import java.util.UUID;
 import net.detalk.api.domain.*;
+import net.detalk.api.repository.AttachmentFileRepository;
 import net.detalk.api.repository.AuthRefreshTokenRepository;
 import net.detalk.api.repository.MemberExternalRepository;
 import net.detalk.api.repository.MemberProfileRepository;
 import net.detalk.api.repository.MemberRepository;
 import net.detalk.api.support.TimeHolder;
+import net.detalk.api.support.UUIDGenerator;
 import net.detalk.api.support.error.ApiException;
 import net.detalk.api.support.error.ErrorCode;
 import net.detalk.api.support.security.*;
@@ -29,12 +32,15 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class AuthService extends DefaultOAuth2UserService {
+
     private final MemberRepository memberRepository;
     private final MemberProfileRepository memberProfileRepository;
     private final MemberExternalRepository memberExternalRepository;
     private final AuthRefreshTokenRepository authRefreshTokenRepository;
+    private final AttachmentFileRepository fileRepository;
     private final TokenProvider tokenProvider;
     private final TimeHolder timeHolder;
+    private final UUIDGenerator uuidGenerator;
 
     @Override
     @Transactional
@@ -46,13 +52,14 @@ public class AuthService extends DefaultOAuth2UserService {
 
         OAuth2User user = super.loadUser(userRequest);
         String providerId = extractProviderId(provider, user);
+        String pictureUrl = user.getAttribute("picture");
 
         log.debug("[loadUser] provider: {}, providerId: {}", provider, providerId);
 
         // 소셜 계정 정보 조회 또는 신규 회원 등록
         MemberExternal memberExternal = memberExternalRepository
             .findByTypeAndUid(provider, providerId)
-            .orElseGet(() -> register(provider, providerId));
+            .orElseGet(() -> register(provider, providerId, pictureUrl));
 
         // TODO: ADMIN 권한 확인
         List<String> authorities = List.of(SecurityRole.MEMBER.getName());
@@ -92,7 +99,7 @@ public class AuthService extends DefaultOAuth2UserService {
         };
     }
 
-    private MemberExternal register(OAuthProvider provider, String providerId) {
+    private MemberExternal register(OAuthProvider provider, String providerId,String pictureUrl) {
         log.info("[register] 새 소셜회원가입 provider {}", provider);
 
         Instant now = Instant.now();
@@ -106,11 +113,29 @@ public class AuthService extends DefaultOAuth2UserService {
                 .updatedAt(now)
                 .build());
 
+        UUID avatarId = null;
+        if (pictureUrl != null && !pictureUrl.isEmpty()) {
+            avatarId = uuidGenerator.generateV7();
+            String randomFileName = String.valueOf(uuidGenerator.generateV7());
+            fileRepository.save(
+                AttachmentFile.builder()
+                    .id(avatarId)
+                    .uploaderId(member.getId())
+                    .name(randomFileName)
+                    .extension(null)
+                    .url(pictureUrl)
+                    .createdAt(timeHolder.now())
+                    .build()
+            );
+        }
+
+
         memberProfileRepository.save(
             MemberProfile.builder()
                 .memberId(member.getId())
                 .userhandle(StringUtil.generateMixedCaseAndNumber(64))
                 .updatedAt(now)
+                .avatarId(avatarId)
                 .build());
 
         return memberExternalRepository.save(
