@@ -1,4 +1,4 @@
-package net.detalk.api.support.security;
+package net.detalk.api.support.security.oauth;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;

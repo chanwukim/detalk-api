@@ -1,4 +1,4 @@
-package net.detalk.api.support.security;
+package net.detalk.api.support.security.oauth;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 
-import static net.detalk.api.support.security.OAuth2AuthorizationRequestRepository.REDIRECT_URI_COOKIE_NAME;
+import static net.detalk.api.support.security.oauth.OAuth2AuthorizationRequestRepository.REDIRECT_URI_COOKIE_NAME;
 
 @Slf4j
 @RequiredArgsConstructor

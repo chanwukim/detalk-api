@@ -1,4 +1,4 @@
-package net.detalk.api.support.security;
+package net.detalk.api.support.security.oauth;
 
 import java.util.List;
 import java.util.Map;

@@ -2,7 +2,7 @@ package net.detalk.api.domain;
 
 import lombok.Builder;
 import lombok.Getter;
-import net.detalk.api.support.security.OAuthProvider;
+import net.detalk.api.support.security.oauth.OAuthProvider;
 
 import java.time.Instant;
 

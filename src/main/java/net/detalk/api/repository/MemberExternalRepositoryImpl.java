@@ -1,7 +1,7 @@
 package net.detalk.api.repository;
 
 import net.detalk.api.domain.MemberExternal;
-import net.detalk.api.support.security.OAuthProvider;
+import net.detalk.api.support.security.oauth.OAuthProvider;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Repository;
 

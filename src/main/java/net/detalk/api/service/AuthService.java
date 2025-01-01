@@ -14,6 +14,8 @@ import net.detalk.api.support.error.ApiException;
 import net.detalk.api.support.error.ErrorCode;
 import net.detalk.api.support.security.*;
 
+import net.detalk.api.support.security.oauth.OAuthProvider;
+import net.detalk.api.support.security.oauth.OAuthUser;
 import net.detalk.api.support.util.StringUtil;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
