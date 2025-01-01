@@ -13,5 +13,4 @@ public record UpdateProductPostRequest(
     List<String> imageIds,
     boolean isMaker
 ) {
-
 }

@@ -27,6 +27,7 @@ import java.io.PrintWriter;
 public class SecurityConfig {
 
     private final OAuthFailHandler oAuthFailHandler;
+    private final OAuth2AuthorizationRequestRepository authorizationRequestRepository;
     private final AuthService authService;
     private final TokenProvider tokenProvider;
     private final JwtOAuthSuccessHandler oAuthSuccessHandler;
@@ -83,14 +84,16 @@ public class SecurityConfig {
              * redirect: /login/oauth2/code/{registrationId}
              */
             .oauth2Login(oauth2 -> oauth2
+                .authorizationEndpoint(authorizationEndpointConfig ->
+                    authorizationEndpointConfig.authorizationRequestRepository(authorizationRequestRepository))
                 .userInfoEndpoint(userInfoEndpointConfig -> userInfoEndpointConfig.userService(
                     authService))
                 .successHandler(oAuthSuccessHandler)
                 .failureHandler(oAuthFailHandler))
-//            .logout(logout -> logout
-//                .logoutUrl("/api/v1/auth/sign-out")
-//                .logoutSuccessHandler(logoutSuccessHandler)
-//            )
+            //.logout(logout -> logout
+            //  .logoutUrl("/api/v1/auth/sign-out")
+            //  .logoutSuccessHandler(logoutSuccessHandler)
+            //)
             .addFilterBefore(new TokenFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class)
             .exceptionHandling(config -> config
                 .authenticationEntryPoint(unauthorizedHandler())

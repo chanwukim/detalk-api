@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.detalk.api.support.AppProperties;
+import net.detalk.api.support.util.CookieUtil;
 import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
@@ -15,10 +16,13 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 import static net.detalk.api.support.Constant.COOKIE_ACCESS_TOKEN;
 import static net.detalk.api.support.Constant.COOKIE_REFRESH_TOKEN;
+import static net.detalk.api.support.security.OAuth2AuthorizationRequestRepository.REDIRECT_URI_COOKIE_NAME;
 
 @Slf4j
 @Component
@@ -55,6 +59,12 @@ public class JwtOAuthSuccessHandler implements AuthenticationSuccessHandler {
         response.addHeader("Set-Cookie", accessTokenCookie.toString());
         response.addHeader("Set-Cookie", refreshTokenCookie.toString());
 
-        redirectStrategy.sendRedirect(request, response, appProperties.getBaseUrl());
+        String redirectUrl = CookieUtil.getCookie(REDIRECT_URI_COOKIE_NAME, request)
+            .map(cookie -> URLDecoder.decode(cookie.getValue(), StandardCharsets.UTF_8))
+            .orElse(appProperties.getBaseUrl());
+
+        String finalRedirectUrl = redirectUrl + "?ok=true" + "&access-token=" + oAuth2User.getAccessToken();
+
+        redirectStrategy.sendRedirect(request, response, finalRedirectUrl);
     }
 }

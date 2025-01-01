@@ -17,7 +17,7 @@ public class CookieUtil {
             .findFirst();
     }
 
-    public static void deleteCookie( String name, HttpServletRequest request, HttpServletResponse response) {
+    public static void deleteCookie(String name, HttpServletRequest request, HttpServletResponse response) {
         getCookie(name, request).ifPresent(cookie -> {
             Cookie deleteCookie = new Cookie(cookie.getName(), null);
             deleteCookie.setPath(cookie.getPath() != null ? cookie.getPath() : "/");
