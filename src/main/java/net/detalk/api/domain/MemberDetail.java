@@ -9,13 +9,15 @@ public class MemberDetail {
     private String userhandle;
     private String nickname;
     private String description;
-    // TODO: 아바타
+    private String avatarUrl;
 
     @Builder
-    public MemberDetail(Long id, String userhandle, String nickname, String description) {
+    public MemberDetail(Long id, String userhandle, String nickname, String description,
+        String avatarUrl) {
         this.id = id;
         this.userhandle = userhandle;
         this.nickname = nickname;
         this.description = description;
+        this.avatarUrl = avatarUrl;
     }
 }
