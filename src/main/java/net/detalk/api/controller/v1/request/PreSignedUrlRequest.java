@@ -1,9 +1,9 @@
-package net.detalk.api.domain;
+package net.detalk.api.controller.v1.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-public record UploadFileMetadata(
+public record PreSignedUrlRequest(
     /**
      * 확장자가 포함된 파일 이름
      */
@@ -12,6 +12,10 @@ public record UploadFileMetadata(
     String fileName,
 
     @Size(max = 16)
-    String contentType
+    String fileType,
+
+    @NotBlank
+    @Size(max = 255)
+    String type
 ) {
 }

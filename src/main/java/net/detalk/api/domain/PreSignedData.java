@@ -6,15 +6,15 @@ import lombok.Getter;
 import java.util.UUID;
 
 @Getter
-public class FileWithPresigned {
+public class PreSignedData {
     private UUID id;
-    private String url;
+    private String path;
     private String preSignedUrl;
 
     @Builder
-    public FileWithPresigned(UUID id, String url, String preSignedUrl) {
+    public PreSignedData(UUID id, String path, String preSignedUrl) {
         this.id = id;
-        this.url = url;
+        this.path = path;
         this.preSignedUrl = preSignedUrl;
     }
 }
