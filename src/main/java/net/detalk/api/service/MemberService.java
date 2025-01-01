@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class MemberService {
+
     private final MemberRepository memberRepository;
     private final MemberProfileRepository memberProfileRepository;
     private final TimeHolder timeHolder;
@@ -33,16 +34,9 @@ public class MemberService {
             throw new ApiException(ErrorCode.NEED_SIGN_UP);
         }
 
-        MemberProfile memberProfile = memberProfileRepository.findByMemberId(member.getId()).orElseThrow(
+        return memberProfileRepository.findWithAvatarByMemberId(member.getId()).orElseThrow(
             () -> new InvalidStateException("[me] 회원 " + member.getId() + "의 프로필이 존재하지 않습니다")
         );
-
-        return MemberDetail.builder()
-            .id(member.getId())
-            .userhandle(memberProfile.getUserhandle())
-            .nickname(memberProfile.getNickname())
-            .description(memberProfile.getDescription())
-            .build();
     }
 
     @Transactional
