@@ -59,12 +59,20 @@ public class JwtOAuthSuccessHandler implements AuthenticationSuccessHandler {
         response.addHeader("Set-Cookie", accessTokenCookie.toString());
         response.addHeader("Set-Cookie", refreshTokenCookie.toString());
 
-        String redirectUrl = CookieUtil.getCookie(REDIRECT_URI_COOKIE_NAME, request)
+        String requestedRedirectUri = CookieUtil.getCookie(REDIRECT_URI_COOKIE_NAME, request)
             .map(cookie -> URLDecoder.decode(cookie.getValue(), StandardCharsets.UTF_8))
             .orElse(appProperties.getBaseUrl());
 
-        String finalRedirectUrl = redirectUrl + "?ok=true" + "&access-token=" + oAuth2User.getAccessToken();
+        // 인증 요청 시 전달된 redirect_to가 허용된 도메인이 아닌 경우
+        // 악의적인 피싱 사이트로의 리다이렉션을 방지하기 위해 기본 URL로 리다이렉트
+        String redirectUrl = isValidRedirectUri(requestedRedirectUri)
+            ? requestedRedirectUri + "?ok=true&access-token=" + oAuth2User.getAccessToken()
+            : appProperties.getBaseUrl();
 
-        redirectStrategy.sendRedirect(request, response, finalRedirectUrl);
+        redirectStrategy.sendRedirect(request, response, redirectUrl);
+    }
+
+    private boolean isValidRedirectUri(String redirectUrl) {
+        return redirectUrl.startsWith(appProperties.getBaseUrl());
     }
 }

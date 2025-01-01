@@ -32,7 +32,7 @@ public class OAuth2AuthorizationRequestRepository
 
     public static final String REDIRECT_URI_COOKIE_NAME = "oauth2-redirect-uri";
     // 클라이언트가 보낸 oauth 처리후 redirect uri
-    private static final String REDIRECT_URI_PARAM = "redirect-uri";
+    private static final String REDIRECT_URI_PARAM = "redirect_to";
     private static final int COOKIE_EXPIRE_SECONDS = 30; // 30초
 
     // 스프링 시큐리티 기본 세션 기반 OAuth2 인증 요청 저장소
