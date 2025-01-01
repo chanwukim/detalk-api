@@ -6,6 +6,9 @@ import lombok.RequiredArgsConstructor;
 import net.detalk.api.service.AuthService;
 import net.detalk.api.support.error.ErrorCode;
 import net.detalk.api.support.error.ErrorMessage;
+import net.detalk.api.support.security.oauth.JwtOAuthSuccessHandler;
+import net.detalk.api.support.security.oauth.OAuth2AuthorizationRequestRepository;
+import net.detalk.api.support.security.oauth.OAuthFailHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -27,6 +30,7 @@ import java.io.PrintWriter;
 public class SecurityConfig {
 
     private final OAuthFailHandler oAuthFailHandler;
+    private final OAuth2AuthorizationRequestRepository authorizationRequestRepository;
     private final AuthService authService;
     private final TokenProvider tokenProvider;
     private final JwtOAuthSuccessHandler oAuthSuccessHandler;
@@ -83,14 +87,16 @@ public class SecurityConfig {
              * redirect: /login/oauth2/code/{registrationId}
              */
             .oauth2Login(oauth2 -> oauth2
+                .authorizationEndpoint(authorizationEndpointConfig ->
+                    authorizationEndpointConfig.authorizationRequestRepository(authorizationRequestRepository))
                 .userInfoEndpoint(userInfoEndpointConfig -> userInfoEndpointConfig.userService(
                     authService))
                 .successHandler(oAuthSuccessHandler)
                 .failureHandler(oAuthFailHandler))
-//            .logout(logout -> logout
-//                .logoutUrl("/api/v1/auth/sign-out")
-//                .logoutSuccessHandler(logoutSuccessHandler)
-//            )
+            //.logout(logout -> logout
+            //  .logoutUrl("/api/v1/auth/sign-out")
+            //  .logoutSuccessHandler(logoutSuccessHandler)
+            //)
             .addFilterBefore(new TokenFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class)
             .exceptionHandling(config -> config
                 .authenticationEntryPoint(unauthorizedHandler())

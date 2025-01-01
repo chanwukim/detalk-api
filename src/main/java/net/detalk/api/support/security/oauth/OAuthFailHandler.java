@@ -1,4 +1,4 @@
-package net.detalk.api.support.security;
+package net.detalk.api.support.security.oauth;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.detalk.api.support.AppProperties;
+import net.detalk.api.support.util.CookieUtil;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.RedirectStrategy;
@@ -13,6 +14,10 @@ import org.springframework.security.web.authentication.AuthenticationFailureHand
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+
+import static net.detalk.api.support.security.oauth.OAuth2AuthorizationRequestRepository.REDIRECT_URI_COOKIE_NAME;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -24,7 +29,11 @@ public class OAuthFailHandler implements AuthenticationFailureHandler {
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception)
         throws ServletException, IOException {
-        String url = appProperties.getBaseUrl() + "?oauth=fail";
-        redirectStrategy.sendRedirect(request, response, url);
+
+        String redirectUrl = CookieUtil.getCookie(REDIRECT_URI_COOKIE_NAME, request)
+            .map(cookie -> URLDecoder.decode(cookie.getValue(), StandardCharsets.UTF_8))
+            .orElse(appProperties.getBaseUrl());
+
+        redirectStrategy.sendRedirect(request, response, redirectUrl + "?ok=false");
     }
 }
