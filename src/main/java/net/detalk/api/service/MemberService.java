@@ -72,6 +72,7 @@ public class MemberService {
                 .memberId(member.getId())
                 .userhandle(userhandle)
                 .nickname(nickname)
+                .avatarId(memberProfile.getAvatarId())
                 .updatedAt(timeHolder.now())
                 .build()
         );
