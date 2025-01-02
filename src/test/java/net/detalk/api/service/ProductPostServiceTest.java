@@ -222,5 +222,36 @@ class ProductPostServiceTest {
         assertThat(result).isEqualTo(1L);
     }
 
+    @DisplayName("성공[create] - 새 링크 저장 후, 게시글 생성")
+    @Test
+    void create_success_newLink() {
+
+        // given
+        CreateProductPostRequest request = CreateProductPostRequest.builder()
+            .name(productName)
+            .url("https://newlink.com")
+            .description("ai skills")
+            .imageIds(List.of(imageId))
+            .isMaker(false)
+            .tags(List.of("ai"))
+            .pricingPlan(plan)
+            .build();
+
+        when(productRepository.findByName(productName)).thenReturn(Optional.of(product));
+        when(postRepository.save(memberId, productId, timeHolder.now())).thenReturn(productPost);
+        when(planService.findByName(plan)).thenReturn(pricingPlan);
+        when(postSnapshotRepository.save(any(ProductPostSnapshot.class))).thenReturn(productPostSnapshot);
+        when(postLastSnapshotRepository.save(productPostId, productPostSnapshotId)).thenReturn(null);
+        when(linkRepository.findByUrl("https://newlink.com")).thenReturn(Optional.empty());
+        when(linkRepository.save(productId, "https://newlink.com", timeHolder.now())).thenReturn(productLink);
+        when(tagService.getOrCreateTag(tagName)).thenReturn(tag);
+
+        // when
+        Long result = productPostService.create(request, memberId);
+
+        // then
+        assertThat(result).isEqualTo(1L);
+    }
+
 
 }
