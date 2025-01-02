@@ -193,4 +193,34 @@ class ProductPostServiceTest {
         // then
         assertThat(result).isEqualTo(1L);
     }
+
+
+    @DisplayName("성공[create] - 기존 제품 이용하여 게시글 생성")
+    @Test
+    void create_success() {
+
+        // given
+        CreateProductPostRequest request = CreateProductPostRequest.builder()
+            .name("chatGpt")
+            .url(productUrl)
+            .description("ai skills")
+            .imageIds(List.of(imageId))
+            .isMaker(false)
+            .tags(List.of("ai"))
+            .pricingPlan(plan)
+            .build();
+
+        when(productRepository.findByName(productName)).thenReturn(Optional.ofNullable(product));
+        when(postRepository.save(memberId, productId, timeHolder.now())).thenReturn(productPost);
+        when(planService.findByName(plan)).thenReturn(pricingPlan);
+        when(postSnapshotRepository.save(any(ProductPostSnapshot.class))).thenReturn(productPostSnapshot);
+        when(postLastSnapshotRepository.save(productPostId, productPostSnapshotId)).thenReturn(null);
+        when(linkRepository.findByUrl(request.url())).thenReturn(Optional.ofNullable(productLink));
+        when(tagService.getOrCreateTag(tagName)).thenReturn(tag);
+
+        Long result = productPostService.create(request, memberId);
+        assertThat(result).isEqualTo(1L);
+    }
+
+
 }
