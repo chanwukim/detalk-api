@@ -3,7 +3,6 @@ package net.detalk.api.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
@@ -252,6 +251,42 @@ class ProductPostServiceTest {
         // then
         assertThat(result).isEqualTo(1L);
     }
+
+
+    @DisplayName("성공[create] - 새로운 태그가 생성됨")
+    @Test
+    void create_success_newTag() {
+        // given
+        CreateProductPostRequest request = CreateProductPostRequest.builder()
+            .name(productName)
+            .url(productUrl)
+            .description("ai skills")
+            .imageIds(List.of(imageId))
+            .isMaker(false)
+            .tags(List.of("newTag"))
+            .pricingPlan(plan)
+            .build();
+
+        Tag newTag = Tag.builder()
+            .id(2L)
+            .name("newTag")
+            .build();
+
+        when(productRepository.findByName(productName)).thenReturn(Optional.of(product));
+        when(postRepository.save(memberId, productId, timeHolder.now())).thenReturn(productPost);
+        when(planService.findByName(plan)).thenReturn(pricingPlan);
+        when(postSnapshotRepository.save(any(ProductPostSnapshot.class))).thenReturn(productPostSnapshot);
+        when(postLastSnapshotRepository.save(productPostId, productPostSnapshotId)).thenReturn(null);
+        when(linkRepository.findByUrl(productUrl)).thenReturn(Optional.of(productLink));
+        when(tagService.getOrCreateTag("newTag")).thenReturn(newTag);
+
+        // when
+        Long result = productPostService.create(request, memberId);
+
+        // then
+        assertThat(result).isEqualTo(1L);
+    }
+
 
 
 }
