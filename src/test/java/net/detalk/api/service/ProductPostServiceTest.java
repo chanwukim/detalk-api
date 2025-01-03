@@ -706,4 +706,42 @@ class ProductPostServiceTest {
 
     }
 
+    @DisplayName("성공[getRecommendedPostsByMemberId]")
+    @Test
+    void getRecommendedPostsByMemberId_success() {
+
+        // given
+        int pageSize = 5;
+        Long nextId = null;
+
+        GetProductPostResponse postResponse = GetProductPostResponse.builder()
+            .id(productId)
+            .nickname(nickname)
+            .userHandle(userhandle)
+            .createdAt(timeHolder.now())
+            .isMaker(true)
+            .avatarUrl(avatarUrl)
+            .title(productPostSnapshot.getTitle())
+            .description(productPostSnapshot.getDescription())
+            .pricingPlan(pricingPlan.getName())
+            .recommendCount(0)
+            .tags(List.of(String.valueOf(tag)))
+            .media(mediaList)
+            .urls(List.of(productUrl))
+            .build();
+
+        List<GetProductPostResponse> mockResponses = List.of(postResponse);
+
+        when(postRepository.findRecommendedPostsByMemberId(memberId, pageSize + 1,
+            nextId)).thenReturn(mockResponses);
+
+        // when
+        CursorPageData<GetProductPostResponse> recommendedPostsByMemberId = productPostService.getRecommendedPostsByMemberId(
+            memberId, pageSize, nextId);
+
+        // then
+        assertThat(recommendedPostsByMemberId.getNextId()).isNull();
+    }
+
+
 }
