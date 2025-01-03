@@ -15,7 +15,7 @@ public class PricingPlanService {
 
     private final PricingPlanRepository pricingPlanRepository;
 
-    public PricingPlan findById(String name) {
+    public PricingPlan findByName(String name) {
         return pricingPlanRepository.findByName(name).orElseThrow(() -> {
             log.error("[findById] 가격 정책 없음 NAME : {}", name);
             return new ApiException(ErrorCode.NOT_FOUND);

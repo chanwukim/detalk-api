@@ -2,7 +2,9 @@ package net.detalk.api.controller.v1.response;
 
 import java.time.Instant;
 import java.util.List;
+import lombok.Builder;
 
+@Builder
 public record GetProductPostResponse(
     Long id,
     String nickname,
