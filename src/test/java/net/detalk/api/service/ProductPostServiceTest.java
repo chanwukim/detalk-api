@@ -1,6 +1,7 @@
 package net.detalk.api.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
@@ -32,6 +33,7 @@ import net.detalk.api.repository.ProductRepository;
 import net.detalk.api.support.CursorPageData;
 import net.detalk.api.support.TimeHolder;
 import net.detalk.api.support.UUIDGenerator;
+import net.detalk.api.support.error.ApiException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -388,6 +390,19 @@ class ProductPostServiceTest {
 
     }
 
+    @DisplayName("실패[getProductPosts] - pageSize가 0일 때 예외 발생")
+    @Test
+    void getProductPosts_fail_invalidPageSize() {
 
+        // given
+        int pageSize = 0;
+        Long nextId = null;
 
+        // when
+        ApiException exception = assertThrows(ApiException.class,
+            () -> productPostService.getProductPosts(pageSize, nextId));
+
+        // then
+        assertThat(exception.getMessage()).isEqualTo("Bad Request.");
+    }
 }
