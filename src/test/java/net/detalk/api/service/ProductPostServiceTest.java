@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import net.detalk.api.controller.v1.request.CreateProductPostRequest;
+import net.detalk.api.controller.v1.request.UpdateProductPostRequest;
 import net.detalk.api.controller.v1.response.GetProductPostResponse;
 import net.detalk.api.controller.v1.response.GetProductPostResponse.Media;
 import net.detalk.api.domain.PricingPlan;
@@ -77,7 +78,8 @@ class ProductPostServiceTest {
      * fake random classes
      */
     private TimeHolder timeHolder = new FakeTimeHolder(Instant.parse("2025-01-01T12:00:00Z"));
-    private UUIDGenerator uuidGenerator = new FakeUUIDGenerator(UUID.fromString("123e4567-e89b-12d3-a456-426614174000"));
+    private UUIDGenerator uuidGenerator = new FakeUUIDGenerator(
+        UUID.fromString("123e4567-e89b-12d3-a456-426614174000"));
 
     /**
      * objects
@@ -191,7 +193,6 @@ class ProductPostServiceTest {
             .pricingPlan(plan)
             .build();
 
-
         Product newProduct = Product.builder()
             .id(2L)
             .name("newProduct")
@@ -203,7 +204,8 @@ class ProductPostServiceTest {
         when(productRepository.save("newProduct", timeHolder.now())).thenReturn(newProduct);
         when(postRepository.save(memberId, 2L, timeHolder.now())).thenReturn(productPost);
         when(planService.findByName(plan)).thenReturn(pricingPlan);
-        when(postSnapshotRepository.save(any(ProductPostSnapshot.class))).thenReturn(productPostSnapshot);
+        when(postSnapshotRepository.save(any(ProductPostSnapshot.class))).thenReturn(
+            productPostSnapshot);
         when(postLastSnapshotRepository.save(anyLong(), anyLong())).thenReturn(null);
         when(linkRepository.findByUrl(request.url())).thenReturn(Optional.ofNullable(productLink));
         when(tagService.getOrCreateTag("newTag")).thenReturn(tag);
@@ -234,8 +236,10 @@ class ProductPostServiceTest {
         when(productRepository.findByName(productName)).thenReturn(Optional.ofNullable(product));
         when(postRepository.save(memberId, productId, timeHolder.now())).thenReturn(productPost);
         when(planService.findByName(plan)).thenReturn(pricingPlan);
-        when(postSnapshotRepository.save(any(ProductPostSnapshot.class))).thenReturn(productPostSnapshot);
-        when(postLastSnapshotRepository.save(productPostId, productPostSnapshotId)).thenReturn(null);
+        when(postSnapshotRepository.save(any(ProductPostSnapshot.class))).thenReturn(
+            productPostSnapshot);
+        when(postLastSnapshotRepository.save(productPostId, productPostSnapshotId)).thenReturn(
+            null);
         when(linkRepository.findByUrl(request.url())).thenReturn(Optional.ofNullable(productLink));
         when(tagService.getOrCreateTag(tagName)).thenReturn(tag);
 
@@ -261,10 +265,13 @@ class ProductPostServiceTest {
         when(productRepository.findByName(productName)).thenReturn(Optional.of(product));
         when(postRepository.save(memberId, productId, timeHolder.now())).thenReturn(productPost);
         when(planService.findByName(plan)).thenReturn(pricingPlan);
-        when(postSnapshotRepository.save(any(ProductPostSnapshot.class))).thenReturn(productPostSnapshot);
-        when(postLastSnapshotRepository.save(productPostId, productPostSnapshotId)).thenReturn(null);
+        when(postSnapshotRepository.save(any(ProductPostSnapshot.class))).thenReturn(
+            productPostSnapshot);
+        when(postLastSnapshotRepository.save(productPostId, productPostSnapshotId)).thenReturn(
+            null);
         when(linkRepository.findByUrl("https://newlink.com")).thenReturn(Optional.empty());
-        when(linkRepository.save(productId, "https://newlink.com", timeHolder.now())).thenReturn(productLink);
+        when(linkRepository.save(productId, "https://newlink.com", timeHolder.now())).thenReturn(
+            productLink);
         when(tagService.getOrCreateTag(tagName)).thenReturn(tag);
 
         // when
@@ -297,8 +304,10 @@ class ProductPostServiceTest {
         when(productRepository.findByName(productName)).thenReturn(Optional.of(product));
         when(postRepository.save(memberId, productId, timeHolder.now())).thenReturn(productPost);
         when(planService.findByName(plan)).thenReturn(pricingPlan);
-        when(postSnapshotRepository.save(any(ProductPostSnapshot.class))).thenReturn(productPostSnapshot);
-        when(postLastSnapshotRepository.save(productPostId, productPostSnapshotId)).thenReturn(null);
+        when(postSnapshotRepository.save(any(ProductPostSnapshot.class))).thenReturn(
+            productPostSnapshot);
+        when(postLastSnapshotRepository.save(productPostId, productPostSnapshotId)).thenReturn(
+            null);
         when(linkRepository.findByUrl(productUrl)).thenReturn(Optional.of(productLink));
         when(tagService.getOrCreateTag("newTag")).thenReturn(newTag);
 
@@ -338,7 +347,8 @@ class ProductPostServiceTest {
 
         when(postRepository.findProductPosts(pageSize + 1, nextId)).thenReturn(mockPosts);
 
-        CursorPageData<GetProductPostResponse> result = productPostService.getProductPosts(pageSize, nextId);
+        CursorPageData<GetProductPostResponse> result = productPostService.getProductPosts(pageSize,
+            nextId);
 
         assertThat(result.getItems()).hasSize(1);
         assertThat(result.getNextId()).isNull();
@@ -380,7 +390,8 @@ class ProductPostServiceTest {
         when(postRepository.findProductPosts(pageSize + 1, nextId)).thenReturn(responses);
 
         // When
-        CursorPageData<GetProductPostResponse> result = productPostService.getProductPosts(pageSize, nextId);
+        CursorPageData<GetProductPostResponse> result = productPostService.getProductPosts(pageSize,
+            nextId);
 
         // Then
         assertThat(result.getItems()).hasSize(pageSize); // 5개만 반환
@@ -443,10 +454,12 @@ class ProductPostServiceTest {
             responses.add(response);
         }
 
-        when(postRepository.findProductPostsByMemberId(memberId, pageSize + 1, nextId)).thenReturn(responses);
+        when(postRepository.findProductPostsByMemberId(memberId, pageSize + 1, nextId)).thenReturn(
+            responses);
 
         // When
-        CursorPageData<GetProductPostResponse> result = productPostService.getProductPostsByMemberId(memberId, pageSize, nextId);
+        CursorPageData<GetProductPostResponse> result = productPostService.getProductPostsByMemberId(
+            memberId, pageSize, nextId);
 
         // Then
         assertThat(result.getItems()).hasSize(pageSize);
@@ -528,4 +541,169 @@ class ProductPostServiceTest {
         // then
         assertThat(exception.getMessage()).isEqualTo("Not Found.");
     }
+
+    @DisplayName("성공[update]")
+    @Test
+    void update_success() {
+        String newImgId = String.valueOf(uuidGenerator.generateV7());
+        String newPlanName = "PAY";
+        Long newPlanId = 2L;
+        Long newSnapshotId = 2L;
+        String newDescription = "new description";
+
+        String newTag1 = "newTag1";
+        String newTag2 = "newTag2";
+        List<String> newTags = List.of(newTag1, newTag2);
+        String newUrl = "newUrl";
+
+        PricingPlan newPlan = PricingPlan.builder()
+            .id(newPlanId)
+            .name(newPlanName)
+            .build();
+
+        UpdateProductPostRequest updateRequest = UpdateProductPostRequest.builder()
+            .name(productPostSnapshot.getTitle())
+            .pricingPlan(newPlanName)
+            .description(newDescription)
+            .tags(newTags)
+            .url(newUrl)
+            .imageIds(List.of(newImgId))
+            .isMaker(true)
+            .build();
+
+        when(postRepository.findById(productPostId)).thenReturn(Optional.ofNullable(productPost));
+        when(productRepository.findByName(productName)).thenReturn(Optional.ofNullable(product));
+        when(planService.findByName(newPlanName)).thenReturn(newPlan);
+
+        ProductPostSnapshot newSnapshot = ProductPostSnapshot.builder()
+            .id(newSnapshotId)
+            .postId(productPostId)
+            .pricingPlanId(newPlanId)
+            .title(productPostSnapshot.getTitle())
+            .description(newDescription)
+            .createdAt(timeHolder.now())
+            .build();
+
+        when(postSnapshotRepository.save(any())).thenReturn(newSnapshot);
+
+        when(tagService.getOrCreateTag("newTag1")).thenReturn(
+            Tag.builder()
+                .id(1L)
+                .name(newTag1)
+                .build()
+        );
+
+        when(tagService.getOrCreateTag("newTag2")).thenReturn(
+            Tag.builder()
+                .id(2L)
+                .name(newTag2)
+                .build()
+        );
+
+        when(postLastSnapshotRepository.update(productPostId, newSnapshot)).thenReturn(1);
+
+        // when
+        Long result = productPostService.update(productPostId, updateRequest, memberId);
+
+        // then
+        assertThat(result).isEqualTo(newSnapshotId);
+    }
+
+    @DisplayName("실패[update] - 게시글이 존재하지 않음")
+    @Test
+    void update_fail_NotExistsPost() {
+
+        String newImgId = String.valueOf(uuidGenerator.generateV7());
+        String newPlanName = "PAY";
+        String newDescription = "new description";
+
+        String newTag1 = "newTag1";
+        String newTag2 = "newTag2";
+        List<String> newTags = List.of(newTag1, newTag2);
+        String newUrl = "newUrl";
+
+        Long notExistsId = 9999L;
+
+        UpdateProductPostRequest updateRequest = UpdateProductPostRequest.builder()
+            .name(productPostSnapshot.getTitle())
+            .pricingPlan(newPlanName)
+            .description(newDescription)
+            .tags(newTags)
+            .url(newUrl)
+            .imageIds(List.of(newImgId))
+            .isMaker(true)
+            .build();
+
+        ApiException exception = assertThrows(ApiException.class,
+            () -> productPostService.update(notExistsId, updateRequest, memberId));
+
+        assertThat(exception.getMessage()).isEqualTo("Not Found.");
+    }
+
+    @DisplayName("실패[update] - 최근 스냅샷 업데이트 실패")
+    @Test
+    void update_fail_LastSnapShotUpdate() {
+
+        String newImgId = String.valueOf(uuidGenerator.generateV7());
+        String newPlanName = "PAY";
+        Long newPlanId = 2L;
+        Long newSnapshotId = 2L;
+        String newDescription = "new description";
+
+        String newTag1 = "newTag1";
+        String newTag2 = "newTag2";
+        List<String> newTags = List.of(newTag1, newTag2);
+        String newUrl = "newUrl";
+
+        PricingPlan newPlan = PricingPlan.builder()
+            .id(newPlanId)
+            .name(newPlanName)
+            .build();
+
+        UpdateProductPostRequest updateRequest = UpdateProductPostRequest.builder()
+            .name(productPostSnapshot.getTitle())
+            .pricingPlan(newPlanName)
+            .description(newDescription)
+            .tags(newTags)
+            .url(newUrl)
+            .imageIds(List.of(newImgId))
+            .isMaker(true)
+            .build();
+
+        when(postRepository.findById(productPostId)).thenReturn(Optional.ofNullable(productPost));
+        when(productRepository.findByName(productName)).thenReturn(Optional.ofNullable(product));
+        when(planService.findByName(newPlanName)).thenReturn(newPlan);
+
+        ProductPostSnapshot newSnapshot = ProductPostSnapshot.builder()
+            .id(newSnapshotId)
+            .postId(productPostId)
+            .pricingPlanId(newPlanId)
+            .title(productPostSnapshot.getTitle())
+            .description(newDescription)
+            .createdAt(timeHolder.now())
+            .build();
+
+        when(postSnapshotRepository.save(any())).thenReturn(newSnapshot);
+
+        when(tagService.getOrCreateTag("newTag1")).thenReturn(
+            Tag.builder()
+                .id(1L)
+                .name(newTag1)
+                .build()
+        );
+
+        when(tagService.getOrCreateTag("newTag2")).thenReturn(
+            Tag.builder()
+                .id(2L)
+                .name(newTag2)
+                .build()
+        );
+
+        ApiException exception = assertThrows(ApiException.class,
+            () -> productPostService.update(productPostId, updateRequest, memberId));
+
+        assertThat(exception.getMessage()).isEqualTo("Bad Request.");
+
+    }
+
 }
