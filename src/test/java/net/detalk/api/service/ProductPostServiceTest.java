@@ -390,19 +390,87 @@ class ProductPostServiceTest {
 
     }
 
-    @DisplayName("실패[getProductPosts] - pageSize가 0일 때 예외 발생")
+    @DisplayName("실패[getProductPosts] - 잘못된 pageSize")
     @Test
     void getProductPosts_fail_invalidPageSize() {
 
         // given
+        int pageSizeZero = 0;
+        int pageSizeNegative = -99;
+        Long nextId = null;
+
+        // when
+        ApiException exceptionZero = assertThrows(ApiException.class,
+            () -> productPostService.getProductPosts(pageSizeZero, nextId));
+        ApiException exceptionNegative = assertThrows(ApiException.class,
+            () -> productPostService.getProductPosts(pageSizeNegative, nextId));
+
+        // then
+        assertThat(exceptionZero.getMessage()).isEqualTo("Bad Request.");
+        assertThat(exceptionNegative.getMessage()).isEqualTo("Bad Request.");
+
+    }
+
+
+    @DisplayName("성공[getProductPostsByMemberId] - pageSize=5, 데이터가 6개일 때(hasNext=true)")
+    @Test
+    void getProductPostsByMemberId_success_hasNext() {
+        // Given
+        Long memberId = 1L;
+        int pageSize = 5;
+        Long nextId = null;
+        int numOfData = 6;
+
+        List<GetProductPostResponse> responses = new ArrayList<>();
+
+        for (int i = 1; i <= numOfData; i++) {
+            long currentId = i;
+            GetProductPostResponse response = GetProductPostResponse.builder()
+                .id(currentId)
+                .nickname("nickname" + currentId)
+                .userHandle("userHandle" + currentId)
+                .createdAt(timeHolder.now())
+                .isMaker(currentId % 2 == 0)
+                .avatarUrl("https://avatar.url/" + currentId)
+                .title("Title " + currentId)
+                .description("Description " + currentId)
+                .pricingPlan(pricingPlan.getName())
+                .recommendCount(0)
+                .tags(List.of("tag" + currentId))
+                .media(mediaList)
+                .urls(List.of(productUrl))
+                .build();
+            responses.add(response);
+        }
+
+        when(postRepository.findProductPostsByMemberId(memberId, pageSize + 1, nextId)).thenReturn(responses);
+
+        // When
+        CursorPageData<GetProductPostResponse> result = productPostService.getProductPostsByMemberId(memberId, pageSize, nextId);
+
+        // Then
+        assertThat(result.getItems()).hasSize(pageSize);
+        assertThat(result.getNextId()).isEqualTo(5L);
+        assertThat(result.hasNext()).isTrue();
+    }
+
+
+    @DisplayName("실패[getProductPostsByMemberId] - 유효하지 않은 pageSize 입력 시 예외 발생")
+    @Test
+    void getProductPostsByMemberId_fail_invalidPageSize() {
+
+        // given
+        Long memberId = 1L;
         int pageSize = 0;
         Long nextId = null;
 
         // when
         ApiException exception = assertThrows(ApiException.class,
-            () -> productPostService.getProductPosts(pageSize, nextId));
+            () -> productPostService.getProductPostsByMemberId(memberId, pageSize, nextId));
 
         // then
         assertThat(exception.getMessage()).isEqualTo("Bad Request.");
     }
+
+
 }
