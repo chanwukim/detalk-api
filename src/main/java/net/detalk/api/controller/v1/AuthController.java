@@ -59,8 +59,8 @@ public class AuthController {
             response.addHeader("Set-Cookie", refreshTokenCookie.toString());
 
             return ResponseEntity
-                .noContent()
-                .build();
+                .ok()
+                .body(authToken);
         } catch (ApiException e) {
             CookieUtil.deleteCookie(COOKIE_ACCESS_TOKEN, request, response);
             CookieUtil.deleteCookie(COOKIE_REFRESH_TOKEN, request, response);
