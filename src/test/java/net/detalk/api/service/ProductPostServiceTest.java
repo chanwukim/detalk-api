@@ -1,6 +1,7 @@
 package net.detalk.api.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -741,6 +742,34 @@ class ProductPostServiceTest {
 
         // then
         assertThat(recommendedPostsByMemberId.getNextId()).isNull();
+    }
+
+    @DisplayName("성공[validatePostExists] - 게시글이 존재할경우 아무것도 안한다")
+    @Test
+    void validatePostExists_WhenPostExists_ShouldDoNothing() {
+
+        // given
+        Long existsId = 1L;
+        when(postRepository.existsById(existsId)).thenReturn(true);
+
+        // when & then
+        assertDoesNotThrow(() -> productPostService.validatePostExists(existsId));
+    }
+
+
+    @DisplayName("성공[validatePostExists] - 게시글이 존재할경우 예외가 발생한다")
+    @Test
+    void validatePostExists_WhenPostDoesNotExist_ShouldThrowApiException() {
+
+        // given
+        Long nonExistingId = 1L;
+        when(postRepository.existsById(nonExistingId)).thenReturn(false);
+
+        // when
+        ApiException exception = assertThrows(ApiException.class,
+            () -> productPostService.validatePostExists(nonExistingId));
+
+        assertThat(exception.getMessage()).isEqualTo("Not Found.");
     }
 
 
