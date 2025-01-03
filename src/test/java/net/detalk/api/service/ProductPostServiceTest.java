@@ -473,4 +473,59 @@ class ProductPostServiceTest {
     }
 
 
+    @DisplayName("성공[getProductPostDetailsById]")
+    @Test
+    void getProductPostDetailsById() {
+
+        // given
+        GetProductPostResponse postResponse = GetProductPostResponse.builder()
+            .id(productId)
+            .nickname(nickname)
+            .userHandle(userhandle)
+            .createdAt(timeHolder.now())
+            .isMaker(true)
+            .avatarUrl(avatarUrl)
+            .title(productPostSnapshot.getTitle())
+            .description(productPostSnapshot.getDescription())
+            .pricingPlan(pricingPlan.getName())
+            .recommendCount(0)
+            .tags(List.of(String.valueOf(tag)))
+            .media(mediaList)
+            .urls(List.of(productUrl))
+            .build();
+        Long id = 1L;
+
+        when(postRepository.findDetailsById(id)).thenReturn(Optional.ofNullable(postResponse));
+
+        // when
+        GetProductPostResponse result = productPostService.getProductPostDetailsById(
+            id);
+
+        // then
+        assertThat(result.id()).isEqualTo(productId);
+        assertThat(result.nickname()).isEqualTo(nickname);
+        assertThat(result.userHandle()).isEqualTo(userhandle);
+        assertThat(result.createdAt()).isEqualTo(timeHolder.now());
+        assertThat(result.avatarUrl()).isEqualTo(avatarUrl);
+        assertThat(result.description()).isEqualTo(productPostSnapshot.getDescription());
+        assertThat(result.pricingPlan()).isEqualTo(plan);
+        assertThat(result.tags()).isEqualTo(List.of(String.valueOf(tag)));
+        assertThat(result.media()).isEqualTo(mediaList);
+        assertThat(result.urls()).isEqualTo(List.of(productUrl));
+    }
+
+    @DisplayName("실패[getProductPostDetailsById] - 존재하지 않는 게시글 ID")
+    @Test
+    void getProductPostDetailsById_Fail_NotExistsId() {
+
+        // given
+        Long id = 9999L;
+
+        // when
+        ApiException exception = assertThrows(ApiException.class,
+            () -> productPostService.getProductPostDetailsById(id));
+
+        // then
+        assertThat(exception.getMessage()).isEqualTo("Not Found.");
+    }
 }
