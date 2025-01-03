@@ -6,10 +6,13 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import net.detalk.api.controller.v1.request.CreateProductPostRequest;
+import net.detalk.api.controller.v1.response.GetProductPostResponse;
+import net.detalk.api.controller.v1.response.GetProductPostResponse.Media;
 import net.detalk.api.domain.PricingPlan;
 import net.detalk.api.domain.Product;
 import net.detalk.api.domain.ProductLink;
@@ -26,6 +29,7 @@ import net.detalk.api.repository.ProductPostSnapshotAttachmentFileRepository;
 import net.detalk.api.repository.ProductPostSnapshotRepository;
 import net.detalk.api.repository.ProductPostSnapshotTagRepository;
 import net.detalk.api.repository.ProductRepository;
+import net.detalk.api.support.CursorPageData;
 import net.detalk.api.support.TimeHolder;
 import net.detalk.api.support.UUIDGenerator;
 import org.junit.jupiter.api.BeforeEach;
@@ -90,10 +94,14 @@ class ProductPostServiceTest {
     private Long planId = 1L;
     private Long linkId = 1L;
     private Long tagId = 1L;
-    private String productName = "chatGpt";
-    private String plan = "FREE";
-    private String productUrl = "https://openai.com";
-    private String tagName = "ai";
+    private String productName;
+    private String plan;
+    private String productUrl;
+    private String tagName;
+    private String nickname;
+    private String userhandle;
+    private String avatarUrl = String.valueOf(uuidGenerator.generateV7());
+    private List<Media> mediaList;
 
     @BeforeEach
     void setUp() {
@@ -148,10 +156,22 @@ class ProductPostServiceTest {
             .createdAt(timeHolder.now())
             .build();
 
+        productName = "chatGpt";
+        plan = "FREE";
+        productUrl = "https://openai.com";
+        tagName = "ai";
+        nickname = "foo";
+        userhandle = "foo_handle";
+
         tag = Tag.builder()
             .id(tagId)
             .name(tagName)
             .build();
+
+        mediaList = List.of(
+            new Media("https://image1.com", 1),
+            new Media("https://image2.com", 2)
+        );
     }
 
     @DisplayName("성공[create] - 제품이 존재하지 않아 새제품 생성 후 게시글 생성")
@@ -285,6 +305,87 @@ class ProductPostServiceTest {
 
         // then
         assertThat(result).isEqualTo(1L);
+    }
+
+
+    @DisplayName("성공[getProductPosts] - 다음 데이터가 없으면 hasNext,nextId null 을 반환한다")
+    @Test
+    void getProductPosts_success_lessThanPageSize() {
+
+        // given
+        int pageSize = 5;
+        Long nextId = null;
+
+        GetProductPostResponse postResponse = GetProductPostResponse.builder()
+            .id(productId)
+            .nickname(nickname)
+            .userHandle(userhandle)
+            .createdAt(timeHolder.now())
+            .isMaker(true)
+            .avatarUrl(avatarUrl)
+            .title(productPostSnapshot.getTitle())
+            .description(productPostSnapshot.getDescription())
+            .pricingPlan(pricingPlan.getName())
+            .recommendCount(0)
+            .tags(List.of(String.valueOf(tag)))
+            .media(mediaList)
+            .urls(List.of(productUrl))
+            .build();
+
+        List<GetProductPostResponse> mockPosts = List.of(postResponse);
+
+        when(postRepository.findProductPosts(pageSize + 1, nextId)).thenReturn(mockPosts);
+
+        CursorPageData<GetProductPostResponse> result = productPostService.getProductPosts(pageSize, nextId);
+
+        assertThat(result.getItems()).hasSize(1);
+        assertThat(result.getNextId()).isNull();
+        assertThat(result.hasNext()).isFalse();
+    }
+
+    @DisplayName("성공[getProductPosts] - pageSize=5, 데이터가 6개일 때 다음 데이터가 있어야 한다")
+    @Test
+    void getProductPosts_success() {
+
+        // given
+        int pageSize = 5;
+        Long nextId = null;
+        int numOfData = 6; // pageSize + 1
+        long startId = 0L; // 시작 ID
+
+        List<GetProductPostResponse> responses = new ArrayList<>();
+
+        for (int i = 1; i <= numOfData; i++) {
+            long currentId = startId + i;
+            GetProductPostResponse response = GetProductPostResponse.builder()
+                .id(currentId)
+                .nickname("nickname" + currentId)
+                .userHandle("userHandle" + currentId)
+                .createdAt(timeHolder.now())
+                .isMaker(currentId % 2 == 0)
+                .avatarUrl("https://avatar.url/" + currentId)
+                .title("Title " + currentId)
+                .description("Description " + currentId)
+                .pricingPlan(pricingPlan.getName())
+                .recommendCount(0)
+                .tags(List.of("tag" + currentId))
+                .media(mediaList)
+                .urls(List.of(productUrl))
+                .build();
+            responses.add(response);
+        }
+
+        when(postRepository.findProductPosts(pageSize + 1, nextId)).thenReturn(responses);
+
+        // When
+        CursorPageData<GetProductPostResponse> result = productPostService.getProductPosts(pageSize, nextId);
+
+        // Then
+        assertThat(result.getItems()).hasSize(pageSize); // 5개만 반환
+        assertThat(result.getNextId()).isEqualTo(5L); // 5번째 게시글의 ID
+        assertThat(result.hasNext()).isTrue(); // 다음 페이지 존재
+
+
     }
 
 
