@@ -46,8 +46,9 @@ public class TokenFilter extends OncePerRequestFilter {
         String path = request.getRequestURI();
         String method = request.getMethod();
 
-        return path.equals("/api/v1/auth/refresh") &&
-            method.equalsIgnoreCase("POST");
+        return (path.equals("/api/v1/auth/refresh") && method.equalsIgnoreCase("POST")) ||
+            (path.equals("/api/v1/auth/sign-out")  && method.equalsIgnoreCase("POST")) ||
+            path.equals("/api/health");
     }
 
     @Override
