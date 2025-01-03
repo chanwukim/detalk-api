@@ -82,7 +82,7 @@ public class ProductPostService {
         /*
          * 요청 가격 정책 조회
          */
-        PricingPlan pricingPlan = pricingPlanService.findById(
+        PricingPlan pricingPlan = pricingPlanService.findByName(
             createProductPostRequest.pricingPlan().toUpperCase());
 
         /*
@@ -257,7 +257,7 @@ public class ProductPostService {
         Long productId = product.getId();
 
         // 3. 가격 정책 조회
-        PricingPlan pricingPlan = pricingPlanService.findById(
+        PricingPlan pricingPlan = pricingPlanService.findByName(
             updateProductPostRequest.pricingPlan().toUpperCase());
 
         // 4. 새 스냅샷 생성
