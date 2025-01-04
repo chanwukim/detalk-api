@@ -35,5 +35,17 @@ public class PricingPlanRepository {
             .fetch(PRICING_PLAN.NAME);
     }
 
+    public void saveAll(List<PricingPlan> planList) {
+        BatchBindStep batch = dsl.batch(
+            dsl.insertInto(PRICING_PLAN)
+                .set(PRICING_PLAN.NAME, (String) null)
+        );
 
+        for (PricingPlan plan : planList) {
+            batch.bind(plan.getName());
+        }
+
+        batch.execute();
+
+    }
 }
