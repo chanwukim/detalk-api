@@ -2,9 +2,11 @@ package net.detalk.api.repository;
 
 import static net.detalk.jooq.tables.JPricingPlan.PRICING_PLAN;
 
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import net.detalk.api.domain.PricingPlan;
+import org.jooq.BatchBindStep;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Repository;
 
@@ -26,5 +28,12 @@ public class PricingPlanRepository {
             .returning()
             .fetchOneInto(PricingPlan.class);
     }
+
+    public List<String> findAllNames() {
+        return dsl.select(PRICING_PLAN.NAME)
+            .from(PRICING_PLAN)
+            .fetch(PRICING_PLAN.NAME);
+    }
+
 
 }
