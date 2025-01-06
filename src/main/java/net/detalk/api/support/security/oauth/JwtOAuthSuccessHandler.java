@@ -66,7 +66,9 @@ public class JwtOAuthSuccessHandler implements AuthenticationSuccessHandler {
         // 인증 요청 시 전달된 redirect_to가 허용된 도메인이 아닌 경우
         // 악의적인 피싱 사이트로의 리다이렉션을 방지하기 위해 기본 URL로 리다이렉트
         String redirectUrl = isValidRedirectUri(requestedRedirectUri)
-            ? requestedRedirectUri + "?ok=true&access-token=" + oAuth2User.getAccessToken()
+            ? requestedRedirectUri + "?ok=true&token="
+            + oAuth2User.getAccessToken()
+            + "&isNew=" + oAuth2User.isNew()
             : appProperties.getBaseUrl();
 
         redirectStrategy.sendRedirect(request, response, redirectUrl);
