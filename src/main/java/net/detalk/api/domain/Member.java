@@ -29,8 +29,13 @@ public class Member {
         return loginType == LoginType.EXTERNAL && status == MemberStatus.PENDING;
     }
 
+    public boolean isNewMember() {
+        return status == MemberStatus.PENDING;
+    }
+
     public void active(TimeHolder timeHolder) {
         status = MemberStatus.ACTIVE;
         this.updatedAt = timeHolder.now();
     }
+
 }
