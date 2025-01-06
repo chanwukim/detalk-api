@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
+  <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+
   <springProperty scope="context" name="consolePattern" source="logging.pattern.console"/>
   <springProperty scope="context" name="filePattern" source="logging.pattern.console"/>
   <springProperty scope="context" name="LOG_PATH" source="logging.file.path"/>
