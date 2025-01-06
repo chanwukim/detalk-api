@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import net.detalk.api.service.AuthService;
 import net.detalk.api.support.error.ErrorCode;
 import net.detalk.api.support.error.ErrorMessage;
+import net.detalk.api.support.filter.MDCFilter;
 import net.detalk.api.support.security.oauth.JwtOAuthSuccessHandler;
 import net.detalk.api.support.security.oauth.OAuth2AuthorizationRequestRepository;
 import net.detalk.api.support.security.oauth.OAuthFailHandler;
@@ -34,10 +35,18 @@ public class SecurityConfig {
     private final AuthService authService;
     private final TokenProvider tokenProvider;
     private final JwtOAuthSuccessHandler oAuthSuccessHandler;
+    private final MDCFilter mdcFilter;
+
     // SESSION
     //private final SessionAuthService authService;
     //private final SessionOAuthSuccessHandler oAuthSuccessHandler;
     //private final SessionLogoutSuccessHandler logoutSuccessHandler;
+
+
+    @Bean
+    public TokenFilter tokenFilter() {
+        return new TokenFilter(tokenProvider);
+    }
 
     @Bean
     protected AuthenticationEntryPoint unauthorizedHandler() {
@@ -98,7 +107,8 @@ public class SecurityConfig {
             //  .logoutUrl("/api/v1/auth/sign-out")
             //  .logoutSuccessHandler(logoutSuccessHandler)
             //)
-            .addFilterBefore(new TokenFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class)
+            .addFilterBefore(mdcFilter,UsernamePasswordAuthenticationFilter.class)
+            .addFilterBefore(tokenFilter(), UsernamePasswordAuthenticationFilter.class)
             .exceptionHandling(config -> config
                 .authenticationEntryPoint(unauthorizedHandler())
                 .accessDeniedHandler(accessDeniedHandler()));

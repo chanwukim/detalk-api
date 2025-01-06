@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+  <springProperty scope="context" name="consolePattern" source="logging.pattern.console"/>
+  <springProperty scope="context" name="filePattern" source="logging.pattern.console"/>
+  <springProperty scope="context" name="LOG_PATH" source="logging.file.path"/>
+  <springProperty scope="context" name="LOG_FILE" source="logging.file.name"/>
+  <springProperty scope="context" name="LOG_FILE_NAME" source="logging.file.file-name"/>
+  <springProperty scope="context" name="LOGBACK_ROLLINGPOLICY_MAX_HISTORY" source="logging.logback.rollingPolicy.max-history"/>
+  <springProperty scope="context" name="LOGBACK_ROLLINGPOLICY_TOTAL_SIZE_CAP" source="logging.logback.rollingPolicy.total-size-cap"/>
+  <springProperty scope="context" name="LOGBACK_ROLLINGPOLICY_MAX_FILE_SIZE" source="logging.logback.rollingPolicy.max-file-size"/>
+
+
+  <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>${consolePattern}</pattern>
+    </encoder>
+  </appender>
+
+
+  <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${LOG_PATH}/${LOG_FILE}.log</file>
+    <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+      <fileNamePattern>${LOG_PATH}/${LOG_FILE_NAME}.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+      <maxHistory>${LOGBACK_ROLLINGPOLICY_MAX_HISTORY}</maxHistory>
+      <totalSizeCap>${LOGBACK_ROLLINGPOLICY_TOTAL_SIZE_CAP}</totalSizeCap>
+      <maxFileSize>${LOGBACK_ROLLINGPOLICY_MAX_FILE_SIZE}</maxFileSize>
+    </rollingPolicy>
+    <encoder>
+      <pattern>${consolePattern}</pattern>
+    </encoder>
+  </appender>
+
+  <!-- 루트 로거 레벨을 YAML에서 정의한 값으로 설정 -->
+  <root level="${logging.level.root}">
+    <appender-ref ref="CONSOLE" />
+    <appender-ref ref="FILE" />
+  </root>
+
+  <!-- 특정 로거 레벨을 YAML에서 정의한 값으로 설정 -->
+  <logger name="org.jooq.tools.LoggerListener" level="${logging.level.org.jooq.tools.LoggerListener}" />
+  <logger name="net.detalk.api" level="${logging.level.net.detalk.api}" />
+
+</configuration>
