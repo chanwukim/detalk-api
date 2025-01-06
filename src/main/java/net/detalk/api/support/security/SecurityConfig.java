@@ -42,6 +42,12 @@ public class SecurityConfig {
     //private final SessionOAuthSuccessHandler oAuthSuccessHandler;
     //private final SessionLogoutSuccessHandler logoutSuccessHandler;
 
+
+    @Bean
+    public TokenFilter tokenFilter() {
+        return new TokenFilter(tokenProvider);
+    }
+
     @Bean
     protected AuthenticationEntryPoint unauthorizedHandler() {
         return (request, response, authException) -> {
@@ -102,7 +108,7 @@ public class SecurityConfig {
             //  .logoutSuccessHandler(logoutSuccessHandler)
             //)
             .addFilterBefore(mdcFilter,UsernamePasswordAuthenticationFilter.class)
-            .addFilterBefore(new TokenFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class)
+            .addFilterBefore(tokenFilter(), UsernamePasswordAuthenticationFilter.class)
             .exceptionHandling(config -> config
                 .authenticationEntryPoint(unauthorizedHandler())
                 .accessDeniedHandler(accessDeniedHandler()));
