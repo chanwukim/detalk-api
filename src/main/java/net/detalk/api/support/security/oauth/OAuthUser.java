@@ -15,15 +15,18 @@ public class OAuthUser implements OAuth2User {
     private final String accessToken;
     private final String refreshToken;
     private final String username;
+    private final boolean isNew;
     private final List<GrantedAuthority> authorities;
     private final Map<String, Object> attributes;
 
     @Builder
-    public OAuthUser(Long id, String accessToken, String refreshToken, String username, List<GrantedAuthority> authorities, Map<String, Object> attributes) {
+    public OAuthUser(Long id, String accessToken, String refreshToken, String username,
+        boolean isNew, List<GrantedAuthority> authorities, Map<String, Object> attributes) {
         this.id = id;
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
         this.username = username;
+        this.isNew = isNew;
         this.authorities = authorities;
         this.attributes = attributes;
     }

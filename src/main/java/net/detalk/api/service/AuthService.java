@@ -63,6 +63,11 @@ public class AuthService extends DefaultOAuth2UserService {
             .findByTypeAndUid(provider, providerId)
             .orElseGet(() -> register(provider, providerId, pictureUrl));
 
+        // member 첫 회원가입 상태여부
+        boolean isNewMember = memberRepository.findById(memberExternal.getMemberId())
+            .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND))
+            .isNewMember();
+
         // TODO: ADMIN 권한 확인
         List<String> authorities = List.of(SecurityRole.MEMBER.getName());
         AccessToken accessToken = tokenProvider.createAccessToken(memberExternal.getMemberId(), authorities);
@@ -79,6 +84,7 @@ public class AuthService extends DefaultOAuth2UserService {
         return OAuthUser.builder()
             .id(memberExternal.getMemberId())
             .username("username")
+            .isNew(isNewMember)
             .accessToken(accessToken.getValue())
             .refreshToken(refreshToken.getValue())
             .authorities(AuthorityUtils.createAuthorityList(authorities.toArray(String[]::new)))
