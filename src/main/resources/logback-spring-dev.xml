@@ -4,7 +4,7 @@
   <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
 
   <springProperty scope="context" name="consolePattern" source="logging.pattern.console"/>
-  <springProperty scope="context" name="filePattern" source="logging.pattern.console"/>
+  <springProperty scope="context" name="filePattern" source="logging.pattern.file"/>
   <springProperty scope="context" name="LOG_PATH" source="logging.file.path"/>
   <springProperty scope="context" name="LOG_FILE" source="logging.file.name"/>
   <springProperty scope="context" name="LOG_FILE_NAME" source="logging.file.file-name"/>
@@ -29,7 +29,7 @@
       <maxFileSize>${LOGBACK_ROLLINGPOLICY_MAX_FILE_SIZE}</maxFileSize>
     </rollingPolicy>
     <encoder>
-      <pattern>${consolePattern}</pattern>
+      <pattern>${filePattern}</pattern>
     </encoder>
   </appender>
 
