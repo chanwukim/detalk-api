@@ -72,7 +72,7 @@ public class ProductPostRepository {
                 PRODUCT_POST_SNAPSHOT.TITLE,
                 PRODUCT_POST_SNAPSHOT.DESCRIPTION,
                 PRICING_PLAN.NAME.as("pricingPlan"),
-                DSL.arrayAgg(TAG.NAME).as("tags"),
+                DSL.arrayAggDistinct(TAG.NAME).as("tags"),
                 PRODUCT_POST.RECOMMEND_COUNT.as("recommendCount"),
                 PRODUCT_POST_SNAPSHOT.ID.as("snapshotId"),
                 DSL.arrayAggDistinct(PRODUCT_LINK.URL).as("urls")
@@ -209,7 +209,7 @@ public class ProductPostRepository {
                 PRODUCT_POST_SNAPSHOT.TITLE,
                 PRODUCT_POST_SNAPSHOT.DESCRIPTION,
                 PRICING_PLAN.NAME.as("pricingPlan"),
-                DSL.arrayAgg(TAG.NAME).as("tags"),
+                DSL.arrayAggDistinct(TAG.NAME).as("tags"),
                 PRODUCT_POST.RECOMMEND_COUNT.as("recommendCount"),
                 PRODUCT_POST_SNAPSHOT.ID.as("snapshotId"),
                 DSL.arrayAggDistinct(PRODUCT_LINK.URL).as("urls")
@@ -247,7 +247,7 @@ public class ProductPostRepository {
                 PRODUCT_POST.RECOMMEND_COUNT,
                 PRODUCT_POST_SNAPSHOT.ID
             )
-            .orderBy(PRODUCT_POST.CREATED_AT.desc(), PRODUCT_POST.ID.desc())
+            .orderBy(PRODUCT_POST.ID.desc(),PRODUCT_POST.CREATED_AT.desc())
             .limit(pageSize)
             .fetch();
 
@@ -278,7 +278,7 @@ public class ProductPostRepository {
                 PRODUCT_POST_SNAPSHOT.TITLE,
                 PRODUCT_POST_SNAPSHOT.DESCRIPTION,
                 PRICING_PLAN.NAME.as("pricingPlan"),
-                DSL.arrayAgg(TAG.NAME).as("tags"),
+                DSL.arrayAggDistinct(TAG.NAME).as("tags"),
                 PRODUCT_POST.RECOMMEND_COUNT.as("recommendCount"),
                 PRODUCT_POST_SNAPSHOT.ID.as("snapshotId"),
                 DSL.arrayAggDistinct(PRODUCT_LINK.URL).as("urls")
@@ -316,7 +316,7 @@ public class ProductPostRepository {
                 PRODUCT_POST.RECOMMEND_COUNT,
                 PRODUCT_POST_SNAPSHOT.ID
             )
-            .orderBy(PRODUCT_POST.CREATED_AT.desc(), PRODUCT_POST.ID.desc())
+            .orderBy(PRODUCT_POST.ID.desc(), PRODUCT_POST.CREATED_AT.desc())
             .limit(pageSize)
             .fetch();
 
@@ -346,7 +346,7 @@ public class ProductPostRepository {
                 PRODUCT_POST_SNAPSHOT.TITLE,
                 PRODUCT_POST_SNAPSHOT.DESCRIPTION,
                 PRICING_PLAN.NAME.as("pricingPlan"),
-                DSL.arrayAgg(TAG.NAME).as("tags"),
+                DSL.arrayAggDistinct(TAG.NAME).as("tags"),
                 PRODUCT_POST.RECOMMEND_COUNT.as("recommendCount"),
                 PRODUCT_POST_SNAPSHOT.ID.as("snapshotId"),
                 DSL.arrayAggDistinct(PRODUCT_LINK.URL).as("urls"),
@@ -390,7 +390,7 @@ public class ProductPostRepository {
                 PRODUCT_POST_SNAPSHOT.ID,
                 RECOMMEND.VALUE
             )
-            .orderBy(PRODUCT_POST.CREATED_AT.desc(), PRODUCT_POST.ID.desc())
+            .orderBy(PRODUCT_POST.ID.desc(), PRODUCT_POST.CREATED_AT.desc())
             .limit(pageSize)
             .fetch();
 
