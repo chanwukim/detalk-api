@@ -247,7 +247,7 @@ public class ProductPostRepository {
                 PRODUCT_POST.RECOMMEND_COUNT,
                 PRODUCT_POST_SNAPSHOT.ID
             )
-            .orderBy(PRODUCT_POST.CREATED_AT.desc(), PRODUCT_POST.ID.desc())
+            .orderBy(PRODUCT_POST.ID.desc(),PRODUCT_POST.CREATED_AT.desc())
             .limit(pageSize)
             .fetch();
 
@@ -316,7 +316,7 @@ public class ProductPostRepository {
                 PRODUCT_POST.RECOMMEND_COUNT,
                 PRODUCT_POST_SNAPSHOT.ID
             )
-            .orderBy(PRODUCT_POST.CREATED_AT.desc(), PRODUCT_POST.ID.desc())
+            .orderBy(PRODUCT_POST.ID.desc(), PRODUCT_POST.CREATED_AT.desc())
             .limit(pageSize)
             .fetch();
 
@@ -390,7 +390,7 @@ public class ProductPostRepository {
                 PRODUCT_POST_SNAPSHOT.ID,
                 RECOMMEND.VALUE
             )
-            .orderBy(PRODUCT_POST.CREATED_AT.desc(), PRODUCT_POST.ID.desc())
+            .orderBy(PRODUCT_POST.ID.desc(), PRODUCT_POST.CREATED_AT.desc())
             .limit(pageSize)
             .fetch();
 
