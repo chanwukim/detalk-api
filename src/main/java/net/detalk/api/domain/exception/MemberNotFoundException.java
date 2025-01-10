@@ -5,8 +5,8 @@ import org.springframework.http.HttpStatus;
 
 public class MemberNotFoundException extends ApiException {
 
-    public MemberNotFoundException(Long memberId) {
-        super(String.format("회원(ID: %d)을 찾을 수 없습니다.", memberId));
+    public MemberNotFoundException() {
+        super("해당 회원을 찾을 수 없습니다.");
     }
 
     @Override

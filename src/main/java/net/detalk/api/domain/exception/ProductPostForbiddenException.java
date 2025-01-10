@@ -5,8 +5,8 @@ import org.springframework.http.HttpStatus;
 
 public class ProductPostForbiddenException extends ApiException {
 
-    public ProductPostForbiddenException(Long postId, Long memberId) {
-        super(String.format("작성자와 요청자가 다릅니다. productPostId=%d, memberId=%d", postId, memberId));
+    public ProductPostForbiddenException() {
+        super("제품 게시물 수정 권한이 없습니다.");
     }
 
     @Override

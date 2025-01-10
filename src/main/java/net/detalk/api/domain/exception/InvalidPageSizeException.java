@@ -5,8 +5,11 @@ import org.springframework.http.HttpStatus;
 
 public class InvalidPageSizeException extends ApiException {
 
+    private static final int MIN_PAGE_SIZE = 1;
+    private static final int MAX_PAGE_SIZE = 20;
+
     public InvalidPageSizeException(int pageSize) {
-        super(String.format("잘못된 페이지 사이즈 요청입니다: [%d], 페이지 사이즈는 1 이상이어야 합니다.", pageSize));
+        super(String.format("잘못된 페이지 크기입니다: %d (허용 범위: %d-%d)", pageSize, MIN_PAGE_SIZE, MAX_PAGE_SIZE));
     }
 
     @Override

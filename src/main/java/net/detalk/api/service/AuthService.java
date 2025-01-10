@@ -66,7 +66,7 @@ public class AuthService extends DefaultOAuth2UserService {
 
         // member 첫 회원가입 상태여부
         boolean isNewMember = memberRepository.findById(memberExternal.getMemberId())
-            .orElseThrow(() -> new MemberNotFoundException(memberExternal.getMemberId()))
+            .orElseThrow(MemberNotFoundException::new)
             .isNewMember();
 
         // TODO: ADMIN 권한 확인
@@ -162,7 +162,7 @@ public class AuthService extends DefaultOAuth2UserService {
         AuthRefreshToken authRefreshToken = authRefreshTokenRepository.findByToken(verifiedRefreshToken.getValue())
             .orElseThrow(() -> {
                 log.error("[refresh] 서버에 존재하지 않는 토큰 : {}", originalRefreshToken);
-                return new RefreshTokenNotFoundException(originalRefreshToken);
+                return new RefreshTokenNotFoundException();
             });
 
         Long memberId = authRefreshToken.getMemberId();
@@ -194,7 +194,7 @@ public class AuthService extends DefaultOAuth2UserService {
         AuthRefreshToken authRefreshToken = authRefreshTokenRepository.findByToken(verifiedRefreshToken.getValue())
             .orElseThrow(() -> {
                 log.error("[signOut] 서버에 존재하지 않는 토큰 : {}", refreshToken);
-                return new RefreshTokenNotFoundException(refreshToken);
+                return new RefreshTokenNotFoundException();
             });
         authRefreshToken.revoked(timeHolder);
         authRefreshTokenRepository.update(authRefreshToken);

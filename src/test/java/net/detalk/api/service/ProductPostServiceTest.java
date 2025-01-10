@@ -418,8 +418,8 @@ class ProductPostServiceTest {
             () -> productPostService.getProductPosts(pageSizeNegative, nextId));
 
         // then
-        assertThat(exceptionZero.getMessage()).isEqualTo("잘못된 페이지 사이즈 요청입니다: [0], 페이지 사이즈는 1 이상이어야 합니다.");
-        assertThat(exceptionNegative.getMessage()).isEqualTo("잘못된 페이지 사이즈 요청입니다: [-99], 페이지 사이즈는 1 이상이어야 합니다.");
+        assertThat(exceptionZero.getMessage()).isEqualTo("잘못된 페이지 크기입니다: 0 (허용 범위: 1-20)");
+        assertThat(exceptionNegative.getMessage()).isEqualTo("잘못된 페이지 크기입니다: -99 (허용 범위: 1-20)");
 
     }
 
@@ -483,7 +483,7 @@ class ProductPostServiceTest {
             () -> productPostService.getProductPostsByMemberId(memberId, pageSize, nextId));
 
         // then
-        assertThat(exception.getMessage()).isEqualTo("잘못된 페이지 사이즈 요청입니다: [0], 페이지 사이즈는 1 이상이어야 합니다.");
+        assertThat(exception.getMessage()).isEqualTo("잘못된 페이지 크기입니다: 0 (허용 범위: 1-20)");
     }
 
 

@@ -14,9 +14,7 @@ import net.detalk.api.domain.exception.UserHandleDuplicatedException;
 import net.detalk.api.repository.MemberProfileRepository;
 import net.detalk.api.repository.MemberRepository;
 import net.detalk.api.support.TimeHolder;
-import net.detalk.api.support.error.ApiException;
 import net.detalk.api.support.error.InvalidStateException;
-import net.detalk.api.support.error.ErrorCode;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -31,7 +29,7 @@ public class MemberService {
     public MemberDetail me(Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> {
             log.error("[me] 회원 ID {}는 존재하지 않는 회원입니다", memberId);
-            return new MemberNotFoundException(memberId);
+            return new MemberNotFoundException();
         });
 
         if (member.isPendingExternalMember()) {
@@ -55,7 +53,7 @@ public class MemberService {
 
         Member member = memberRepository.findById(memberId).orElseThrow(() -> {
             log.error("[registerProfile] 회원 ID {}는 존재하지 않는 회원입니다", memberId);
-            return new MemberNotFoundException(memberId);
+            return new MemberNotFoundException();
         });
 
         if (!member.isPendingExternalMember()) {
