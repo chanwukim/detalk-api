@@ -4,9 +4,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import net.detalk.api.domain.AuthToken;
+import net.detalk.api.domain.exception.RefreshTokenUnauthorizedException;
 import net.detalk.api.service.AuthService;
 import net.detalk.api.support.error.ApiException;
-import net.detalk.api.support.error.ErrorCode;
 import net.detalk.api.support.error.ErrorMessage;
 import net.detalk.api.support.util.CookieUtil;
 import org.springframework.core.env.Environment;
@@ -32,7 +32,7 @@ public class AuthController {
     public ResponseEntity<?> refresh(HttpServletRequest request, HttpServletResponse response) {
         try {
             String refreshToken = CookieUtil.getCookie(COOKIE_REFRESH_TOKEN, request)
-                .orElseThrow(() -> new ApiException(ErrorCode.UNAUTHORIZED))
+                .orElseThrow(RefreshTokenUnauthorizedException::new)
                 .getValue();
 
             AuthToken authToken = authService.refresh(refreshToken);
@@ -65,15 +65,15 @@ public class AuthController {
             CookieUtil.deleteCookie(COOKIE_ACCESS_TOKEN, request, response);
             CookieUtil.deleteCookie(COOKIE_REFRESH_TOKEN, request, response);
             return ResponseEntity
-                .status(e.getErrorCode().getStatus())
-                .body(new ErrorMessage(e.getErrorCode()));
+                .status(e.getHttpStatus())
+                .body(new ErrorMessage(e.getErrorCode(), e.getMessage()));
         }
     }
 
     @PostMapping("/sign-out")
     public ResponseEntity<Void> signOut(HttpServletRequest request, HttpServletResponse response) {
         String refreshToken = CookieUtil.getCookie(COOKIE_REFRESH_TOKEN, request)
-            .orElseThrow(() -> new ApiException(ErrorCode.UNAUTHORIZED))
+            .orElseThrow(RefreshTokenUnauthorizedException::new)
             .getValue();
 
         authService.signOut(refreshToken);
