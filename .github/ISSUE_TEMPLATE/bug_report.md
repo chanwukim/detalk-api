@@ -1,7 +1,7 @@
 ---
 name: Bug report
 about: Create a report to help us improve
-title: "[BUG]"
+title: "[BUG] !! 오른쪽 Labels중 중요도를 설정하기"
 labels: BUG, P1, P2, P3, P4
 assignees: ''
 
