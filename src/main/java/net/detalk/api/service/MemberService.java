@@ -6,6 +6,11 @@ import lombok.extern.slf4j.Slf4j;
 import net.detalk.api.domain.Member;
 import net.detalk.api.domain.MemberDetail;
 import net.detalk.api.domain.MemberProfile;
+import net.detalk.api.domain.exception.InvalidMemberStatusException;
+import net.detalk.api.domain.exception.MemberNeedSignUpException;
+import net.detalk.api.domain.exception.MemberNotFoundException;
+import net.detalk.api.domain.exception.MemberProfileNotFoundException;
+import net.detalk.api.domain.exception.UserHandleDuplicatedException;
 import net.detalk.api.repository.MemberProfileRepository;
 import net.detalk.api.repository.MemberRepository;
 import net.detalk.api.support.TimeHolder;
@@ -26,12 +31,13 @@ public class MemberService {
     public MemberDetail me(Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> {
             log.error("[me] 회원 ID {}는 존재하지 않는 회원입니다", memberId);
-            return new ApiException(ErrorCode.UNAUTHORIZED);
+            return new MemberNotFoundException(memberId);
         });
 
         if (member.isPendingExternalMember()) {
             log.debug("[me] 회원가입이 필요한 외부 회원");
-            throw new ApiException(ErrorCode.NEED_SIGN_UP);
+            throw new MemberNeedSignUpException(memberId, member.getLoginType(),
+                member.getStatus());
         }
 
         return memberProfileRepository.findWithAvatarByMemberId(member.getId()).orElseThrow(
@@ -43,16 +49,17 @@ public class MemberService {
     public MemberDetail registerProfile(Long memberId, String userhandle, String nickname) {
         log.debug("[registerProfile] userhandle 중복검사 {}", userhandle);
         memberProfileRepository.findByUserHandle(userhandle).ifPresent(m -> {
-            throw new ApiException(ErrorCode.CONFLICT);
+            log.error("[registerProfile] 이미 존재하는 userhandle({}) 입니다.", userhandle);
+            throw new UserHandleDuplicatedException(userhandle);
         });
 
         Member member = memberRepository.findById(memberId).orElseThrow(() -> {
             log.error("[registerProfile] 회원 ID {}는 존재하지 않는 회원입니다", memberId);
-            return new ApiException(ErrorCode.UNAUTHORIZED);
+            return new MemberNotFoundException(memberId);
         });
 
         if (!member.isPendingExternalMember()) {
-            throw new ApiException(ErrorCode.BAD_REQUEST);
+            throw new InvalidMemberStatusException(memberId, member.getStatus());
         }
 
         member.active(timeHolder);
@@ -83,7 +90,7 @@ public class MemberService {
         MemberProfile memberProfile = memberProfileRepository.findByUserHandle(userHandle)
             .orElseThrow(() -> {
                     log.error("[findMemberIdByUserHandle] 회원 userHandle {}은 존재하지 않는 회원입니다", userHandle);
-                    return new ApiException(ErrorCode.NOT_FOUND);
+                    return new MemberProfileNotFoundException(userHandle);
                 }
             );
         return memberProfile.getMemberId();
