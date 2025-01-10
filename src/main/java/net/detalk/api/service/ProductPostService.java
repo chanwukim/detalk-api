@@ -250,7 +250,7 @@ public class ProductPostService {
         // 작성자 검증
         if (!productPost.isAuthor(memberId)) {
             log.error("[update] 작성자와 요청자가 다릅니다 memberId={}", memberId);
-            throw new ProductPostForbiddenException(postId, memberId);
+            throw new ProductPostForbiddenException();
         }
 
         // 2. 제품 조회 또는 재사용
@@ -380,7 +380,7 @@ public class ProductPostService {
      * 페이지 사이즈 검증 1이하라면 에러
      * @param pageSize 검증할 사이즈
      */
-    public void validatePageSize(int pageSize) {
+    private void validatePageSize(int pageSize) {
         if (pageSize < 1) {
             log.warn("잘못된 페이지 사이즈 요청입니다={}", pageSize);
             throw new InvalidPageSizeException(pageSize);

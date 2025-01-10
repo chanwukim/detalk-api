@@ -5,8 +5,8 @@ import org.springframework.http.HttpStatus;
 
 public class RefreshTokenNotFoundException extends ApiException {
 
-    public RefreshTokenNotFoundException(String tokenIdentifier) {
-        super(String.format("리프레시 토큰을 찾을 수 없습니다: %s", tokenIdentifier));
+    public RefreshTokenNotFoundException() {
+        super("존재하지 않는 리프레시 토큰입니다.");
     }
 
     @Override
