@@ -118,7 +118,7 @@ class MemberServiceTest {
         ApiException exception = assertThrows(ApiException.class,
             () -> memberService.me(notExistsId));
 
-        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.UNAUTHORIZED);
+        assertThat(exception.getErrorCode()).isEqualTo("member_not_found");
     }
 
     @DisplayName("실패[me] - 가입이 필요한 외부 회원")
@@ -140,7 +140,7 @@ class MemberServiceTest {
             () -> memberService.me(externalMemberId));
 
         // then
-        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.NEED_SIGN_UP);
+        assertThat(exception.getErrorCode()).isEqualTo("need_sign_up");
 
     }
 
@@ -218,7 +218,7 @@ class MemberServiceTest {
             () -> memberService.registerProfile(memberId, userHandle, nickname));
 
         // then
-        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.CONFLICT);
+        assertThat(exception.getErrorCode()).isEqualTo("user_handle_conflict");
     }
 
     @DisplayName("실패[registerProfile] - 존재하지 않는 회원")
@@ -234,7 +234,7 @@ class MemberServiceTest {
             () -> memberService.registerProfile(notExistsId, userHandle, nickname));
 
         // then
-        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.UNAUTHORIZED);
+        assertThat(exception.getErrorCode()).isEqualTo("member_not_found");
     }
 
 
