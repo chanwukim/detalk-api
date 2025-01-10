@@ -3,6 +3,9 @@ package net.detalk.api.service;
 import jakarta.transaction.Transactional;
 import java.util.UUID;
 import net.detalk.api.domain.*;
+import net.detalk.api.domain.exception.MemberNotFoundException;
+import net.detalk.api.domain.exception.ProviderUnsupportedException;
+import net.detalk.api.domain.exception.RefreshTokenNotFoundException;
 import net.detalk.api.repository.AttachmentFileRepository;
 import net.detalk.api.repository.AuthRefreshTokenRepository;
 import net.detalk.api.repository.MemberExternalRepository;
@@ -10,8 +13,6 @@ import net.detalk.api.repository.MemberProfileRepository;
 import net.detalk.api.repository.MemberRepository;
 import net.detalk.api.support.TimeHolder;
 import net.detalk.api.support.UUIDGenerator;
-import net.detalk.api.support.error.ApiException;
-import net.detalk.api.support.error.ErrorCode;
 import net.detalk.api.support.security.*;
 
 import net.detalk.api.support.security.oauth.OAuthProvider;
@@ -65,7 +66,7 @@ public class AuthService extends DefaultOAuth2UserService {
 
         // member 첫 회원가입 상태여부
         boolean isNewMember = memberRepository.findById(memberExternal.getMemberId())
-            .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND))
+            .orElseThrow(() -> new MemberNotFoundException(memberExternal.getMemberId()))
             .isNewMember();
 
         // TODO: ADMIN 권한 확인
@@ -97,7 +98,7 @@ public class AuthService extends DefaultOAuth2UserService {
             return OAuthProvider.valueOf(registrationId.toUpperCase());
         } catch (Exception e) {
             log.error("[validateAndGetProvider] 알 수 없는 OAuth Provider: {}", registrationId);
-            throw new ApiException(ErrorCode.PROVIDER_UNSUPPORTED);
+            throw new ProviderUnsupportedException(registrationId);
         }
     }
 
@@ -161,7 +162,7 @@ public class AuthService extends DefaultOAuth2UserService {
         AuthRefreshToken authRefreshToken = authRefreshTokenRepository.findByToken(verifiedRefreshToken.getValue())
             .orElseThrow(() -> {
                 log.error("[refresh] 서버에 존재하지 않는 토큰 : {}", originalRefreshToken);
-                return new ApiException(ErrorCode.UNAUTHORIZED);
+                return new RefreshTokenNotFoundException(originalRefreshToken);
             });
 
         Long memberId = authRefreshToken.getMemberId();
@@ -193,7 +194,7 @@ public class AuthService extends DefaultOAuth2UserService {
         AuthRefreshToken authRefreshToken = authRefreshTokenRepository.findByToken(verifiedRefreshToken.getValue())
             .orElseThrow(() -> {
                 log.error("[signOut] 서버에 존재하지 않는 토큰 : {}", refreshToken);
-                return new ApiException(ErrorCode.UNAUTHORIZED);
+                return new RefreshTokenNotFoundException(refreshToken);
             });
         authRefreshToken.revoked(timeHolder);
         authRefreshTokenRepository.update(authRefreshToken);

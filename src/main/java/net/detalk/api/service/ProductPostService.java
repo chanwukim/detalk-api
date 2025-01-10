@@ -1,6 +1,5 @@
 package net.detalk.api.service;
 
-import static net.detalk.api.support.error.ErrorCode.BAD_REQUEST;
 
 import java.time.Instant;
 import java.util.List;
@@ -9,6 +8,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.detalk.api.controller.v1.request.UpdateProductPostRequest;
 import net.detalk.api.controller.v1.response.GetProductPostResponse;
+import net.detalk.api.domain.exception.InvalidPageSizeException;
+import net.detalk.api.domain.exception.ProductPostForbiddenException;
+import net.detalk.api.domain.exception.ProductPostNotFoundException;
+import net.detalk.api.domain.exception.ProductPostSnapshotUpdateException;
 import net.detalk.api.support.CursorPageData;
 import net.detalk.api.domain.ProductMaker;
 import net.detalk.api.domain.ProductPostSnapshotAttachmentFile;
@@ -222,7 +225,7 @@ public class ProductPostService {
     public GetProductPostResponse getProductPostDetailsById(Long id) {
         return productPostRepository.findDetailsById(id).orElseThrow(() -> {
             log.error("[getProductPostDetailsById] 제품 게시글 없음 ID: {}", id);
-            return new ApiException(ErrorCode.NOT_FOUND);
+            return new ProductPostNotFoundException(id);
         });
     }
 
@@ -241,13 +244,13 @@ public class ProductPostService {
         // 1. 게시글 존재
         ProductPost productPost = productPostRepository.findById(postId).orElseThrow(() -> {
             log.error("[update] 제품 게시글을 찾지 못했습니다 postId={}", postId);
-            return new ApiException(ErrorCode.NOT_FOUND);
+            return new ProductPostNotFoundException(postId);
         });
 
         // 작성자 검증
         if (!productPost.isAuthor(memberId)) {
             log.error("[update] 작성자와 요청자가 다릅니다 memberId={}", memberId);
-            throw new ApiException(ErrorCode.FORBIDDEN);
+            throw new ProductPostForbiddenException(postId, memberId);
         }
 
         // 2. 제품 조회 또는 재사용
@@ -324,7 +327,7 @@ public class ProductPostService {
         if (updateResult == 0) {
             log.error("[update] 게시글 수정에 실패했습니다. postId={}, newSnapshotId={}", postId,
                 newSnapshot.getId());
-            throw new ApiException(ErrorCode.BAD_REQUEST);
+            throw new ProductPostSnapshotUpdateException(postId, newSnapshot.getId());
         }
 
         return newSnapshotId;
@@ -358,8 +361,8 @@ public class ProductPostService {
      */
     public void validatePostExists(Long id) {
         if (!productPostRepository.existsById(id)) {
-            log.error("[addRecommendation] 게시글이 존재하지 않습니다 : {}" , id);
-            throw new ApiException(ErrorCode.NOT_FOUND);
+            log.error("[validatePostExists] 게시글이 존재하지 않습니다 : {}" , id);
+            throw new ProductPostNotFoundException(id);
         }
     }
 
@@ -377,10 +380,10 @@ public class ProductPostService {
      * 페이지 사이즈 검증 1이하라면 에러
      * @param pageSize 검증할 사이즈
      */
-    private void validatePageSize(int pageSize) {
+    public void validatePageSize(int pageSize) {
         if (pageSize < 1) {
             log.warn("잘못된 페이지 사이즈 요청입니다={}", pageSize);
-            throw new ApiException(BAD_REQUEST);
+            throw new InvalidPageSizeException(pageSize);
         }
     }
 

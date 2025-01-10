@@ -4,6 +4,7 @@ import lombok.Getter;
 
 @Getter
 public class ErrorMessage {
+
     private final String code;
     private final String message;
     private final Object details;
@@ -19,4 +20,11 @@ public class ErrorMessage {
         this.message = errorType.getMessage();
         this.details = details;
     }
+
+    public ErrorMessage(String code, String message) {
+        this.code = code;
+        this.message = message;
+        this.details = null;
+    }
+
 }
