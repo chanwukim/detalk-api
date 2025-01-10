@@ -418,8 +418,8 @@ class ProductPostServiceTest {
             () -> productPostService.getProductPosts(pageSizeNegative, nextId));
 
         // then
-        assertThat(exceptionZero.getMessage()).isEqualTo("Bad Request.");
-        assertThat(exceptionNegative.getMessage()).isEqualTo("Bad Request.");
+        assertThat(exceptionZero.getMessage()).isEqualTo("잘못된 페이지 사이즈 요청입니다: [0], 페이지 사이즈는 1 이상이어야 합니다.");
+        assertThat(exceptionNegative.getMessage()).isEqualTo("잘못된 페이지 사이즈 요청입니다: [-99], 페이지 사이즈는 1 이상이어야 합니다.");
 
     }
 
@@ -483,7 +483,7 @@ class ProductPostServiceTest {
             () -> productPostService.getProductPostsByMemberId(memberId, pageSize, nextId));
 
         // then
-        assertThat(exception.getMessage()).isEqualTo("Bad Request.");
+        assertThat(exception.getMessage()).isEqualTo("잘못된 페이지 사이즈 요청입니다: [0], 페이지 사이즈는 1 이상이어야 합니다.");
     }
 
 
@@ -540,7 +540,7 @@ class ProductPostServiceTest {
             () -> productPostService.getProductPostDetailsById(id));
 
         // then
-        assertThat(exception.getMessage()).isEqualTo("Not Found.");
+        assertThat(exception.getMessage()).isEqualTo("상품-게시글(ID: 9999)을 찾을 수 없습니다.");
     }
 
     @DisplayName("성공[update]")
@@ -638,7 +638,7 @@ class ProductPostServiceTest {
         ApiException exception = assertThrows(ApiException.class,
             () -> productPostService.update(notExistsId, updateRequest, memberId));
 
-        assertThat(exception.getMessage()).isEqualTo("Not Found.");
+        assertThat(exception.getMessage()).isEqualTo("상품-게시글(ID: 9999)을 찾을 수 없습니다.");
     }
 
     @DisplayName("실패[update] - 최근 스냅샷 업데이트 실패")
@@ -703,7 +703,7 @@ class ProductPostServiceTest {
         ApiException exception = assertThrows(ApiException.class,
             () -> productPostService.update(productPostId, updateRequest, memberId));
 
-        assertThat(exception.getMessage()).isEqualTo("Bad Request.");
+        assertThat(exception.getMessage()).isEqualTo("스냅샷 업데이트에 실패했습니다. postId=1, newPostSnapshot=2");
 
     }
 
@@ -769,7 +769,7 @@ class ProductPostServiceTest {
         ApiException exception = assertThrows(ApiException.class,
             () -> productPostService.validatePostExists(nonExistingId));
 
-        assertThat(exception.getMessage()).isEqualTo("Not Found.");
+        assertThat(exception.getMessage()).isEqualTo("상품-게시글(ID: 1)을 찾을 수 없습니다.");
     }
 
 
