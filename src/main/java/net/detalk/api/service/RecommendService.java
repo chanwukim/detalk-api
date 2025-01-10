@@ -6,11 +6,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.detalk.api.controller.v1.request.CreateRecommendRequest;
 import net.detalk.api.domain.Recommend;
+import net.detalk.api.domain.exception.DuplicateRecommendationException;
 import net.detalk.api.repository.RecommendProductRepository;
 import net.detalk.api.repository.RecommendRepository;
 import net.detalk.api.support.TimeHolder;
-import net.detalk.api.support.error.ApiException;
-import net.detalk.api.support.error.ErrorCode;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,7 +41,7 @@ public class RecommendService {
         if (recommendProductRepository.isAlreadyRecommended(memberId, recommendId, postId)) {
             log.warn("[addRecommendation] 중복 추천 시도 : 회원 ID={}, 게시글 ID={}, 추천 이유 ID={}, 추천 이유={}",
                 memberId, postId, recommendId, reason);
-            throw new ApiException(ErrorCode.CONFLICT);
+            throw new DuplicateRecommendationException(memberId, postId, recommendId, reason);
         }
 
         // 게시글 추천, 게시글 연관관계 맺기
