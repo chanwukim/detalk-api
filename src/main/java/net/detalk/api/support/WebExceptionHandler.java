@@ -24,10 +24,13 @@ public class WebExceptionHandler {
 
     @ExceptionHandler(ApiException.class)
     public ResponseEntity<ErrorMessage> handleApiException(ApiException e) {
-        log.error("API exception. {}", e.getMessage());
+        if (e.isNecessaryToLog()) {
+            log.error("API exception. {}", e.getMessage());
+        }
+        ErrorMessage errorMessage = new ErrorMessage(e.getErrorCode(), e.getMessage());
         return ResponseEntity
-            .status(e.getErrorCode().getStatus())
-            .body(new ErrorMessage(e.getErrorCode()));
+            .status(e.getHttpStatus())
+            .body(errorMessage);
     }
 
     @ExceptionHandler(InvalidStateException.class)
