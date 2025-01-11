@@ -47,7 +47,7 @@ public class DetalkInitializer implements ApplicationRunner {
     }
 
     private List<String> getPlans() {
-        return List.of("FREE", "PAID", "PAID WITH FREE TRIAL OR PLAN");
+        return List.of("Free","Paid","Paid with free trial or plan");
     }
 
 }
