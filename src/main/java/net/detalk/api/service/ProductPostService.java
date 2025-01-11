@@ -55,9 +55,24 @@ public class ProductPostService {
     private final UUIDGenerator uuidGenerator;
 
     /**
-     * 게시글 생성
-     * @param createProductPostRequest 게시글 생성 데이터
-     * @return 생성된 게시글 ID
+     * Creates a new product post with comprehensive details.
+     *
+     * This method handles the complete workflow of creating a product post, including:
+     * - Product retrieval or creation
+     * - Product post creation
+     * - Pricing plan association
+     * - Snapshot generation
+     * - Optional product link saving
+     * - Image attachment handling
+     * - Maker status tracking
+     * - Tag processing
+     *
+     * @param createProductPostRequest The request containing all details for creating a product post
+     * @param memberId The unique identifier of the member creating the post
+     * @return The unique identifier of the newly created product post
+     *
+     * @throws ProductPostSnapshotUpdateException If there are issues creating the post snapshot
+     * @throws ProductNotFoundException If the associated product cannot be found or created
      */
     @Transactional
     public Long create(CreateProductPostRequest createProductPostRequest, Long memberId) {
@@ -231,11 +246,15 @@ public class ProductPostService {
 
 
     /**
-     * 제품 게시글 업데이트
+     * Updates an existing product post with new information.
      *
-     * @param postId                수정할 제품 게시글
-     * @param updateProductPostRequest 제품 수정 요청 dto
-     * @param memberId          요청 회원 postId
+     * @param postId The unique identifier of the product post to be updated
+     * @param updateProductPostRequest Data transfer object containing updated product post details
+     * @param memberId The identifier of the member requesting the update
+     * @return The ID of the newly created product post snapshot
+     * @throws ProductPostNotFoundException If the specified product post does not exist
+     * @throws ProductPostForbiddenException If the requesting member is not the author of the post
+     * @throws ProductPostSnapshotUpdateException If updating the last snapshot fails
      */
     public Long update(Long postId, UpdateProductPostRequest updateProductPostRequest, Long memberId) {
 

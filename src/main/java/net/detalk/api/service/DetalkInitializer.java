@@ -46,6 +46,11 @@ public class DetalkInitializer implements ApplicationRunner {
         log.info("가격 정책 초기화 완료.");
     }
 
+    /**
+     * Retrieves a list of default pricing plan names.
+     *
+     * @return A list containing three predefined pricing plan names: "Free", "Paid", and "Paid with free trial or plan"
+     */
     private List<String> getPlans() {
         return List.of("Free","Paid","Paid with free trial or plan");
     }
