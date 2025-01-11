@@ -86,7 +86,7 @@ public class ProductPostService {
          * 요청 가격 정책 조회
          */
         PricingPlan pricingPlan = pricingPlanService.findByName(
-            createProductPostRequest.pricingPlan().toUpperCase());
+            createProductPostRequest.pricingPlan());
 
         /*
          * 게시글 스냅샷 저장
@@ -261,7 +261,7 @@ public class ProductPostService {
 
         // 3. 가격 정책 조회
         PricingPlan pricingPlan = pricingPlanService.findByName(
-            updateProductPostRequest.pricingPlan().toUpperCase());
+            updateProductPostRequest.pricingPlan());
 
         // 4. 새 스냅샷 생성
         ProductPostSnapshot newSnapshot = productPostSnapshotRepository.save(
