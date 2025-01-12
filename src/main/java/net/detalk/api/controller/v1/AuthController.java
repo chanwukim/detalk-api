@@ -6,10 +6,10 @@ import lombok.RequiredArgsConstructor;
 import net.detalk.api.domain.AuthToken;
 import net.detalk.api.domain.exception.RefreshTokenUnauthorizedException;
 import net.detalk.api.service.AuthService;
+import net.detalk.api.support.EnvironmentHolder;
 import net.detalk.api.support.error.ApiException;
 import net.detalk.api.support.error.ErrorMessage;
 import net.detalk.api.support.util.CookieUtil;
-import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,8 +25,9 @@ import static net.detalk.api.support.Constant.COOKIE_REFRESH_TOKEN;
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 public class AuthController {
+
     private final AuthService authService;
-    private final Environment env;
+    private final EnvironmentHolder env;
 
     @PostMapping("/refresh")
     public ResponseEntity<?> refresh(HttpServletRequest request, HttpServletResponse response) {
