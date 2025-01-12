@@ -27,6 +27,7 @@ import net.detalk.api.mock.FakeUUIDGenerator;
 import net.detalk.api.repository.ProductLinkRepository;
 import net.detalk.api.repository.ProductMakerRepository;
 import net.detalk.api.repository.ProductPostLastSnapshotRepository;
+import net.detalk.api.repository.ProductPostLinkRepository;
 import net.detalk.api.repository.ProductPostRepository;
 import net.detalk.api.repository.ProductPostSnapshotAttachmentFileRepository;
 import net.detalk.api.repository.ProductPostSnapshotRepository;
@@ -70,6 +71,8 @@ class ProductPostServiceTest {
     private ProductPostSnapshotTagRepository postSnapshotTagRepository;
     @Mock
     private ProductPostSnapshotRepository postSnapshotRepository;
+    @Mock
+    private ProductPostLinkRepository productPostLinkRepository;
     @Mock
     private TagService tagService;
     @Mock
@@ -122,6 +125,7 @@ class ProductPostServiceTest {
             tagService,
             postSnapshotTagRepository,
             postSnapshotRepository,
+            productPostLinkRepository,
             timeHolder,
             uuidGenerator
         );

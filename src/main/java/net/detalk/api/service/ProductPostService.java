@@ -4,14 +4,17 @@ package net.detalk.api.service;
 import java.time.Instant;
 import java.util.List;
 
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.detalk.api.controller.v1.request.UpdateProductPostRequest;
 import net.detalk.api.controller.v1.response.GetProductPostResponse;
+import net.detalk.api.domain.ProductLink;
 import net.detalk.api.domain.exception.InvalidPageSizeException;
 import net.detalk.api.domain.exception.ProductPostForbiddenException;
 import net.detalk.api.domain.exception.ProductPostNotFoundException;
 import net.detalk.api.domain.exception.ProductPostSnapshotUpdateException;
+import net.detalk.api.repository.ProductPostLinkRepository;
 import net.detalk.api.support.CursorPageData;
 import net.detalk.api.domain.ProductMaker;
 import net.detalk.api.domain.ProductPostSnapshotAttachmentFile;
@@ -31,8 +34,6 @@ import net.detalk.api.repository.ProductPostSnapshotTagRepository;
 import net.detalk.api.repository.ProductRepository;
 import net.detalk.api.support.TimeHolder;
 import net.detalk.api.support.UUIDGenerator;
-import net.detalk.api.support.error.ApiException;
-import net.detalk.api.support.error.ErrorCode;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,6 +52,7 @@ public class ProductPostService {
     private final TagService tagService;
     private final ProductPostSnapshotTagRepository productPostSnapshotTagRepository;
     private final ProductPostSnapshotRepository productPostSnapshotRepository;
+    private final ProductPostLinkRepository productPostLinkRepository;
     private final TimeHolder timeHolder;
     private final UUIDGenerator uuidGenerator;
 
@@ -72,7 +74,6 @@ public class ProductPostService {
      * @return The unique identifier of the newly created product post
      *
      * @throws ProductPostSnapshotUpdateException If there are issues creating the post snapshot
-     * @throws ProductNotFoundException If the associated product cannot be found or created
      */
     @Transactional
     public Long create(CreateProductPostRequest createProductPostRequest, Long memberId) {
@@ -122,10 +123,14 @@ public class ProductPostService {
         productPostLastSnapshotRepository.save(newProductPostId, postSnapshotId);
 
         /*
-         * 링크 없으면 저장, 있으면 아무것도 안함
+         * 링크 없으면 저장, 있으면 링크 그대로 가져옴 -> 게시글과 링크 연관관계 맺기
          */
-        productLinkRepository.findByUrl(productUrl)
-            .orElseGet(() -> productLinkRepository.save(productId, productUrl, now));
+        Optional<ProductLink> optionalLink = productLinkRepository.findByUrl(productUrl);
+        ProductLink productLink = optionalLink.orElseGet(
+            () -> productLinkRepository.save(productId, productUrl, now)
+        );
+        productPostLinkRepository.save(newProductPostId, productLink.getId());
+
 
         /*
          * 이미지 파일 시퀀스 설정 및 스냅샷 저장
