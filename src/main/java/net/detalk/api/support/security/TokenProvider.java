@@ -6,6 +6,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import net.detalk.api.support.AppProperties;
+import net.detalk.api.support.UUIDGenerator;
 import net.detalk.api.support.error.ExpiredTokenException;
 import net.detalk.api.support.error.TokenException;
 import org.springframework.stereotype.Component;
@@ -20,9 +21,11 @@ public class TokenProvider {
     private static final String KEY_CLAIMS_AUTHORITIES = "authorities";
     private final AppProperties appProperties;
     private final SecretKey secretKey;
+    private final UUIDGenerator uuidGenerator;
 
-    public TokenProvider(AppProperties appProperties) {
+    public TokenProvider(AppProperties appProperties, UUIDGenerator uuidGenerator) {
         this.appProperties = appProperties;
+        this.uuidGenerator = uuidGenerator;
         byte[] keyBytes = Base64.getEncoder().encode(appProperties.getTokenSecret().getBytes());
         this.secretKey = Keys.hmacShaKeyFor(keyBytes);
     }
@@ -56,6 +59,7 @@ public class TokenProvider {
             + appProperties.getRefreshTokenExpiresInSeconds() * 1000L);
 
         Claims claims = Jwts.claims()
+            .id(uuidGenerator.generateV4().toString())
             .issuedAt(issuedAt)
             .expiration(expiresAt)
             .build();
@@ -81,6 +85,7 @@ public class TokenProvider {
 
         return Jwts.builder()
             .claims(claims)
+
             .issuedAt(claims.getIssuedAt())
             .expiration(claims.getExpiration())
             .signWith(secretKey)
