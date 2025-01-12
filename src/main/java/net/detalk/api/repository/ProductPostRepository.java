@@ -7,6 +7,7 @@ import static net.detalk.jooq.tables.JProductLink.PRODUCT_LINK;
 import static net.detalk.jooq.tables.JProductMaker.PRODUCT_MAKER;
 import static net.detalk.jooq.tables.JProductPost.PRODUCT_POST;
 import static net.detalk.jooq.tables.JProductPostLastSnapshot.PRODUCT_POST_LAST_SNAPSHOT;
+import static net.detalk.jooq.tables.JProductPostLink.PRODUCT_POST_LINK;
 import static net.detalk.jooq.tables.JProductPostSnapshot.PRODUCT_POST_SNAPSHOT;
 import static net.detalk.jooq.tables.JProductPostSnapshotAttachmentFile.PRODUCT_POST_SNAPSHOT_ATTACHMENT_FILE;
 import static net.detalk.jooq.tables.JProductPostSnapshotTag.PRODUCT_POST_SNAPSHOT_TAG;
@@ -94,8 +95,10 @@ public class ProductPostRepository {
             .on(PRODUCT_MAKER.PRODUCT_ID.eq(PRODUCT_POST.PRODUCT_ID))
             .leftJoin(ATTACHMENT_FILE)
             .on(ATTACHMENT_FILE.ID.eq(MEMBER_PROFILE.AVATAR_ID))
+            .leftJoin(PRODUCT_POST_LINK)
+            .on(PRODUCT_POST_LINK.POST_ID.eq(PRODUCT_POST.ID))
             .leftJoin(PRODUCT_LINK)
-            .on(PRODUCT_LINK.PRODUCT_ID.eq(PRODUCT_POST.PRODUCT_ID))
+            .on(PRODUCT_LINK.ID.eq(PRODUCT_POST_LINK.LINK_ID))
             .where(PRODUCT_POST.ID.eq(id))
             .groupBy(
                 PRODUCT_POST.ID,
@@ -231,8 +234,10 @@ public class ProductPostRepository {
                 .on(PRODUCT_MAKER.PRODUCT_ID.eq(PRODUCT_POST.PRODUCT_ID))
             .leftJoin(ATTACHMENT_FILE)
                 .on(ATTACHMENT_FILE.ID.eq(MEMBER_PROFILE.AVATAR_ID))
+            .leftJoin(PRODUCT_POST_LINK)
+            .on(PRODUCT_POST_LINK.POST_ID.eq(PRODUCT_POST.ID))
             .leftJoin(PRODUCT_LINK)
-                .on(PRODUCT_LINK.PRODUCT_ID.eq(PRODUCT_POST.PRODUCT_ID))
+            .on(PRODUCT_LINK.ID.eq(PRODUCT_POST_LINK.LINK_ID))
             .where(condition)
             .groupBy(
                 PRODUCT_POST.ID,
@@ -300,8 +305,10 @@ public class ProductPostRepository {
             .on(PRODUCT_MAKER.PRODUCT_ID.eq(PRODUCT_POST.PRODUCT_ID))
             .leftJoin(ATTACHMENT_FILE)
             .on(ATTACHMENT_FILE.ID.eq(MEMBER_PROFILE.AVATAR_ID))
+            .leftJoin(PRODUCT_POST_LINK)
+            .on(PRODUCT_POST_LINK.POST_ID.eq(PRODUCT_POST.ID))
             .leftJoin(PRODUCT_LINK)
-            .on(PRODUCT_LINK.PRODUCT_ID.eq(PRODUCT_POST.PRODUCT_ID))
+            .on(PRODUCT_LINK.ID.eq(PRODUCT_POST_LINK.LINK_ID))
             .where(condition)
             .groupBy(
                 PRODUCT_POST.ID,
@@ -373,8 +380,10 @@ public class ProductPostRepository {
             .on(PRODUCT_MAKER.PRODUCT_ID.eq(PRODUCT_POST.PRODUCT_ID))
             .leftJoin(ATTACHMENT_FILE)
             .on(ATTACHMENT_FILE.ID.eq(MEMBER_PROFILE.AVATAR_ID))
+            .leftJoin(PRODUCT_POST_LINK)
+            .on(PRODUCT_POST_LINK.POST_ID.eq(PRODUCT_POST.ID))
             .leftJoin(PRODUCT_LINK)
-            .on(PRODUCT_LINK.PRODUCT_ID.eq(PRODUCT_POST.PRODUCT_ID))
+            .on(PRODUCT_LINK.ID.eq(PRODUCT_POST_LINK.LINK_ID))
             .where(condition)
             .groupBy(
                 PRODUCT_POST.ID,
