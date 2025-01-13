@@ -13,6 +13,7 @@ import net.detalk.api.domain.Member;
 import net.detalk.api.domain.MemberDetail;
 import net.detalk.api.domain.MemberProfile;
 import net.detalk.api.domain.MemberStatus;
+import net.detalk.api.domain.exception.MemberProfileNotFoundException;
 import net.detalk.api.mock.FakeTimeHolder;
 import net.detalk.api.mock.FakeUUIDGenerator;
 import net.detalk.api.repository.MemberProfileRepository;
@@ -258,12 +259,12 @@ class MemberServiceTest {
         when(memberProfileRepository.findByMemberId(memberId)).thenReturn(Optional.empty());
 
         // when
-        InvalidStateException exception = assertThrows(InvalidStateException.class,
+        MemberProfileNotFoundException exception = assertThrows(MemberProfileNotFoundException.class,
             () -> memberService.registerProfile(memberId, userHandle, nickname));
 
         // then
         assertThat(exception.getMessage())
-            .isEqualTo("[me] 회원 " + memberId + "의 프로필이 존재하지 않습니다");
+            .isEqualTo("해당 회원의 프로필을 찾을 수 없습니다.");
     }
 
 }
