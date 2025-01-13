@@ -120,4 +120,27 @@ public class MemberService {
         memberProfileRepository.update(memberProfile);
     }
 
+    public Member findMemberById(Long id) {
+        return memberRepository.findById(id).orElseThrow(() -> {
+            log.error("[findMemberById] 회원 ID {}는 존재하지 않습니다", id);
+            return new MemberNotFoundException();
+        });
+    }
+
+    public MemberProfile findProfileByMemberId(Long memberId) {
+        return memberProfileRepository.findByMemberId(memberId)
+            .orElseThrow(()->{
+                log.error("[findProfileByMemberId] 존재하지 않는 회원 프로필 입니다. memberId={}", memberId);
+                return new MemberProfileNotFoundException();
+            });
+    }
+
+    public void checkDuplicateUserHandle(String userHandle) {
+        if (memberProfileRepository.existsByUserHandle(userHandle)) {
+            log.error("[duplicateUserHandleValidation] 이미 존재하는 userhandle입니다. userhandle={}",
+                userHandle);
+            throw new UserHandleDuplicatedException(userHandle);
+        }
+    }
+
 }
