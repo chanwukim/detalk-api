@@ -1,8 +1,10 @@
 package net.detalk.api.service;
 
 import jakarta.transaction.Transactional;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.detalk.api.controller.v1.request.UpdateProfileRequest;
 import net.detalk.api.domain.Member;
 import net.detalk.api.domain.MemberDetail;
 import net.detalk.api.domain.MemberProfile;
@@ -14,6 +16,7 @@ import net.detalk.api.domain.exception.UserHandleDuplicatedException;
 import net.detalk.api.repository.MemberProfileRepository;
 import net.detalk.api.repository.MemberRepository;
 import net.detalk.api.support.TimeHolder;
+import net.detalk.api.support.UUIDGenerator;
 import net.detalk.api.support.error.InvalidStateException;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +28,7 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final MemberProfileRepository memberProfileRepository;
     private final TimeHolder timeHolder;
+    private final UUIDGenerator uuidGenerator;
 
     public MemberDetail me(Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> {
@@ -93,4 +97,27 @@ public class MemberService {
             );
         return memberProfile.getMemberId();
     }
+
+    @Transactional
+    public void updateProfile(Long memberId, UpdateProfileRequest updateRequest) {
+
+        Member member = findMemberById(memberId);
+        MemberProfile memberProfile = findProfileByMemberId(member.getId());
+
+        /**
+         * 새로운 userHandle 요청이라면, 이미 존재하는지 검사한다.
+         */
+        if (!memberProfile.hasSameUserHandle(updateRequest.userHandle())) {
+            checkDuplicateUserHandle(updateRequest.userHandle());
+        }
+
+        memberProfile = memberProfile.update(
+            updateRequest,
+            uuidGenerator.fromString(updateRequest.avatarId()),
+            timeHolder.now()
+        );
+
+        memberProfileRepository.update(memberProfile);
+    }
+
 }
