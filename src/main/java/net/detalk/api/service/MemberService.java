@@ -42,9 +42,7 @@ public class MemberService {
                 member.getStatus());
         }
 
-        return memberProfileRepository.findWithAvatarByMemberId(member.getId()).orElseThrow(
-            () -> new InvalidStateException("[me] 회원 " + member.getId() + "의 프로필이 존재하지 않습니다")
-        );
+        return findMemberDetailByMemberId(member.getId());
     }
 
     /**
@@ -126,12 +124,7 @@ public class MemberService {
 
         MemberProfile memberProfile = findProfileByUserhandle(userhandle);
 
-        MemberDetail memberDetail = memberProfileRepository.findWithAvatarByMemberId(
-                memberProfile.getMemberId())
-            .orElseThrow(()->{
-                log.error("[GetMemberPublicProfileResponse] 존재하지 않는 회원 프로필 입니다. memberId={}",
-                    memberProfile.getMemberId());return new MemberProfileNotFoundException();
-            });
+        MemberDetail memberDetail = findMemberDetailByMemberId(memberProfile.getMemberId());
 
         return GetMemberPublicProfileResponse.builder()
             .userhandle(memberProfile.getUserhandle())
@@ -142,7 +135,7 @@ public class MemberService {
     }
 
     /**
-     * MemberID 회원 조회
+     * MemberId로 회원 조회
      */
     public Member findMemberById(Long id) {
         return memberRepository.findById(id).orElseThrow(() -> {
@@ -177,6 +170,18 @@ public class MemberService {
         return memberProfileRepository.findByMemberId(memberId)
             .orElseThrow(()->{
                 log.error("[findProfileByMemberId] 존재하지 않는 회원 프로필 입니다. memberId={}", memberId);
+                return new MemberProfileNotFoundException();
+            });
+    }
+
+    /**
+     * MemberId로 회원 프로필 모든 정보 조회 (avatarUrl 포함)
+     */
+    private MemberDetail findMemberDetailByMemberId(Long memberId) {
+        return memberProfileRepository.findWithAvatarByMemberId(memberId)
+            .orElseThrow(() -> {
+                log.error("[GetMemberPublicProfileResponse] 존재하지 않는 회원 프로필 입니다. memberId={}",
+                    memberId);
                 return new MemberProfileNotFoundException();
             });
     }
