@@ -90,13 +90,19 @@ public class MemberService {
         /**
          * 새로운 userHandle 요청이라면, 이미 존재하는지 검사한다.
          */
-        if (!memberProfile.hasSameUserHandle(updateRequest.userHandle())) {
-            checkDuplicateUserHandle(updateRequest.userHandle());
+        if (!memberProfile.hasSameUserHandle(updateRequest.userandle())) {
+            checkDuplicateUserHandle(updateRequest.userandle());
         }
 
+        /**
+         * avatarId는 null일 경우 기존꺼 사용
+         * 새로 요청올 경우, 새거 사용
+         */
         memberProfile = memberProfile.update(
             updateRequest,
-            uuidGenerator.fromString(updateRequest.avatarId()),
+            updateRequest.avatarId() != null
+                ? uuidGenerator.fromString(updateRequest.avatarId())
+                : memberProfile.getAvatarId(),
             timeHolder.now()
         );
 
