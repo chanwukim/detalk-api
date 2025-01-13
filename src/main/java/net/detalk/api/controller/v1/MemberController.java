@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Max;
 import lombok.RequiredArgsConstructor;
 import net.detalk.api.controller.v1.request.CreateProfileRequest;
 import net.detalk.api.controller.v1.request.UpdateProfileRequest;
+import net.detalk.api.controller.v1.response.GetMemberPublicProfileResponse;
 import net.detalk.api.controller.v1.response.GetProductPostResponse;
 import net.detalk.api.domain.MemberDetail;
 import net.detalk.api.service.MemberService;
@@ -68,7 +69,7 @@ public class MemberController {
         @RequestParam(name = "size", defaultValue = "5") @Max(20) int pageSize,
         @RequestParam(name = "startId", required = false) Long nextId
     ) {
-        Long memberId = memberService.findIdByUserHandle(userhandle);
+        Long memberId = memberService.findMemberIdByUserHandle(userhandle);
 
         CursorPageData<GetProductPostResponse> posts =
             productPostService.getProductPostsByMemberId(memberId, pageSize, nextId);
@@ -82,11 +83,19 @@ public class MemberController {
         @RequestParam(name = "size", defaultValue = "5") @Max(20) int pageSize,
         @RequestParam(name = "startId", required = false) Long nextId
     ) {
-        Long memberId = memberService.findIdByUserHandle(userhandle);
+        Long memberId = memberService.findMemberIdByUserHandle(userhandle);
 
         CursorPageData<GetProductPostResponse> result =
             productPostService.getRecommendedPostsByMemberId(memberId, pageSize, nextId);
 
         return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/{userhandle}")
+    public ResponseEntity<GetMemberPublicProfileResponse> getMemberProfile(
+        @PathVariable("userhandle") String userhandle
+    ) {
+        GetMemberPublicProfileResponse memberDetail = memberService.getMemberDetailByUserhandle(userhandle);
+        return ResponseEntity.ok(memberDetail);
     }
 }
