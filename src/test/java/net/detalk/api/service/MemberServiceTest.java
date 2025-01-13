@@ -20,7 +20,6 @@ import net.detalk.api.repository.MemberRepository;
 import net.detalk.api.support.TimeHolder;
 import net.detalk.api.support.UUIDGenerator;
 import net.detalk.api.support.error.ApiException;
-import net.detalk.api.support.error.ErrorCode;
 import net.detalk.api.support.error.InvalidStateException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -49,8 +48,9 @@ class MemberServiceTest {
     /**
      * fake random classes
      */
-    private TimeHolder timeHolder = new FakeTimeHolder(Instant.parse("2025-01-01T12:00:00Z"));
-    private UUIDGenerator uuidGenerator = new FakeUUIDGenerator(UUID.fromString("123e4567-e89b-12d3-a456-426614174000"));
+    private final TimeHolder timeHolder = new FakeTimeHolder(Instant.parse("2025-01-01T12:00:00Z"));
+    private final UUIDGenerator uuidGenerator = new FakeUUIDGenerator(
+        UUID.fromString("123e4567-e89b-12d3-a456-426614174000"));
     /**
      * objects
      */
@@ -68,7 +68,8 @@ class MemberServiceTest {
         memberService = new MemberService(
             memberRepository,
             memberProfileRepository,
-            timeHolder
+            timeHolder,
+            uuidGenerator
         );
 
         member = Member.builder()
@@ -133,7 +134,8 @@ class MemberServiceTest {
             .status(MemberStatus.PENDING)
             .build();
 
-        when(memberRepository.findById(externalMemberId)).thenReturn(Optional.of(externalPendingMember));
+        when(memberRepository.findById(externalMemberId)).thenReturn(
+            Optional.of(externalPendingMember));
 
         // then
         ApiException exception = assertThrows(ApiException.class,
@@ -158,7 +160,8 @@ class MemberServiceTest {
             () -> memberService.me(notExistsId));
 
         // then
-        assertThat(exception.getMessage()).isEqualTo("[me] 회원 " + member.getId() + "의 프로필이 존재하지 않습니다");
+        assertThat(exception.getMessage()).isEqualTo(
+            "[me] 회원 " + member.getId() + "의 프로필이 존재하지 않습니다");
     }
 
     @DisplayName("성공[registerProfile]")
@@ -176,7 +179,6 @@ class MemberServiceTest {
         when(memberProfileRepository.findByUserHandle(userHandle)).thenReturn(Optional.empty());
         when(memberRepository.findById(memberId)).thenReturn(Optional.of(pendingExternalMember));
 
-
         // 가입 후 Profile 찾기
         MemberProfile existingProfile = MemberProfile.builder()
             .id(memberProfileId)
@@ -184,7 +186,8 @@ class MemberServiceTest {
             .avatarId(uuidGenerator.generateV7())
             .updatedAt(null)
             .build();
-        when(memberProfileRepository.findByMemberId(memberId)).thenReturn(Optional.of(existingProfile));
+        when(memberProfileRepository.findByMemberId(memberId)).thenReturn(
+            Optional.of(existingProfile));
 
         // Profile 업데이트 후 반환
         MemberProfile updatedProfile = MemberProfile.builder()
