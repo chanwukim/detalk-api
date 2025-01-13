@@ -30,6 +30,9 @@ public class MemberService {
     private final TimeHolder timeHolder;
     private final UUIDGenerator uuidGenerator;
 
+    /**
+     * 자신 프로필 조회
+     */
     public MemberDetail me(Long memberId) {
         Member member = findMemberById(memberId);
 
@@ -44,6 +47,9 @@ public class MemberService {
         );
     }
 
+    /**
+     * 프로필 생성
+     */
     @Transactional
     public MemberDetail registerProfile(Long memberId, String userhandle, String nickname) {
         log.debug("[registerProfile] userhandle 중복검사 {}", userhandle);
@@ -81,6 +87,9 @@ public class MemberService {
             .build();
     }
 
+    /**
+     * 프로필 업데이트
+     */
     @Transactional
     public void updateProfile(Long memberId, UpdateProfileRequest updateRequest) {
 
@@ -132,6 +141,9 @@ public class MemberService {
             .build();
     }
 
+    /**
+     * MemberID 회원 조회
+     */
     public Member findMemberById(Long id) {
         return memberRepository.findById(id).orElseThrow(() -> {
             log.error("[findMemberById] 회원 ID {}는 존재하지 않습니다", id);
@@ -139,26 +151,16 @@ public class MemberService {
         });
     }
 
-    public MemberProfile findProfileByMemberId(Long memberId) {
-        return memberProfileRepository.findByMemberId(memberId)
-            .orElseThrow(()->{
-                log.error("[findProfileByMemberId] 존재하지 않는 회원 프로필 입니다. memberId={}", memberId);
-                return new MemberProfileNotFoundException();
-            });
-    }
-
-    public void checkDuplicateUserHandle(String userHandle) {
-        if (memberProfileRepository.existsByUserHandle(userHandle)) {
-            log.error("[duplicateUserHandleValidation] 이미 존재하는 userhandle입니다. userhandle={}",
-                userHandle);
-            throw new UserHandleDuplicatedException(userHandle);
-        }
-    }
-
+    /**
+     * UserHandle로 MemberId 조회
+     */
     public Long findMemberIdByUserHandle(String userHandle) {
         return findProfileByUserhandle(userHandle).getId();
     }
 
+    /**
+     * Userhandle로 회원 프로필 조회
+     */
     public MemberProfile findProfileByUserhandle(String userhandle) {
         return memberProfileRepository.findByUserHandle(userhandle)
             .orElseThrow(() -> {
@@ -168,4 +170,25 @@ public class MemberService {
             );
     }
 
+    /**
+     * MemberId 로 회원 프로필 조회
+     */
+    public MemberProfile findProfileByMemberId(Long memberId) {
+        return memberProfileRepository.findByMemberId(memberId)
+            .orElseThrow(()->{
+                log.error("[findProfileByMemberId] 존재하지 않는 회원 프로필 입니다. memberId={}", memberId);
+                return new MemberProfileNotFoundException();
+            });
+    }
+
+    /**
+     * UserHandle 중복 검증
+     */
+    public void checkDuplicateUserHandle(String userHandle) {
+        if (memberProfileRepository.existsByUserHandle(userHandle)) {
+            log.error("[duplicateUserHandleValidation] 이미 존재하는 userhandle입니다. userhandle={}",
+                userHandle);
+            throw new UserHandleDuplicatedException(userHandle);
+        }
+    }
 }
