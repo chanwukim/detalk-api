@@ -31,10 +31,7 @@ public class MemberService {
     private final UUIDGenerator uuidGenerator;
 
     public MemberDetail me(Long memberId) {
-        Member member = memberRepository.findById(memberId).orElseThrow(() -> {
-            log.error("[me] 회원 ID {}는 존재하지 않는 회원입니다", memberId);
-            return new MemberNotFoundException();
-        });
+        Member member = findMemberById(memberId);
 
         if (member.isPendingExternalMember()) {
             log.debug("[me] 회원가입이 필요한 외부 회원");
@@ -55,10 +52,7 @@ public class MemberService {
             throw new UserHandleDuplicatedException(userhandle);
         });
 
-        Member member = memberRepository.findById(memberId).orElseThrow(() -> {
-            log.error("[registerProfile] 회원 ID {}는 존재하지 않는 회원입니다", memberId);
-            return new MemberNotFoundException();
-        });
+        Member member = findMemberById(memberId);
 
         if (!member.isPendingExternalMember()) {
             throw new InvalidMemberStatusException(memberId, member.getStatus());
@@ -66,8 +60,7 @@ public class MemberService {
 
         member.active(timeHolder);
         memberRepository.update(member);
-        MemberProfile memberProfile = memberProfileRepository.findByMemberId(member.getId())
-            .orElseThrow(() -> new InvalidStateException("[me] 회원 " + member.getId() + "의 프로필이 존재하지 않습니다"));
+        MemberProfile memberProfile = findProfileByMemberId(member.getId());
 
          memberProfile = memberProfileRepository.update(
             MemberProfile.builder()
@@ -86,16 +79,6 @@ public class MemberService {
             .nickname(memberProfile.getNickname())
             .description(memberProfile.getDescription())
             .build();
-    }
-
-    public Long findIdByUserHandle(String userHandle) {
-        MemberProfile memberProfile = memberProfileRepository.findByUserHandle(userHandle)
-            .orElseThrow(() -> {
-                    log.error("[findMemberIdByUserHandle] 회원 userHandle {}은 존재하지 않는 회원입니다", userHandle);
-                    return new MemberProfileNotFoundException(userHandle);
-                }
-            );
-        return memberProfile.getMemberId();
     }
 
     @Transactional
@@ -141,6 +124,16 @@ public class MemberService {
                 userHandle);
             throw new UserHandleDuplicatedException(userHandle);
         }
+    }
+
+    public Long findIdByUserHandle(String userHandle) {
+        MemberProfile memberProfile = memberProfileRepository.findByUserHandle(userHandle)
+            .orElseThrow(() -> {
+                    log.error("[findMemberIdByUserHandle] 회원 userHandle {}은 존재하지 않는 회원입니다", userHandle);
+                    return new MemberProfileNotFoundException(userHandle);
+                }
+            );
+        return memberProfile.getMemberId();
     }
 
 }
