@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import lombok.RequiredArgsConstructor;
 import net.detalk.api.controller.v1.request.CreateProfileRequest;
+import net.detalk.api.controller.v1.request.UpdateProfileRequest;
 import net.detalk.api.controller.v1.response.GetProductPostResponse;
 import net.detalk.api.domain.MemberDetail;
 import net.detalk.api.service.MemberService;
@@ -39,6 +40,15 @@ public class MemberController {
         MemberDetail memberDetail = memberService.registerProfile(user.getId(),
             registerProfile.userhandle(), registerProfile.nickname());
         return ResponseEntity.ok().body(memberDetail);
+    }
+
+    @PutMapping("/profile")
+    public ResponseEntity<Void> updateProfile(
+        @HasRole(SecurityRole.MEMBER) SecurityUser user,
+        @Valid @RequestBody UpdateProfileRequest updateProfileRequest
+    ) {
+        memberService.updateProfile(user.getId(), updateProfileRequest);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/me/posts")
