@@ -1,8 +1,10 @@
 package net.detalk.api.service;
 
 import jakarta.transaction.Transactional;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.detalk.api.controller.v1.request.UpdateProfileRequest;
 import net.detalk.api.domain.Member;
 import net.detalk.api.domain.MemberDetail;
 import net.detalk.api.domain.MemberProfile;
@@ -14,6 +16,7 @@ import net.detalk.api.domain.exception.UserHandleDuplicatedException;
 import net.detalk.api.repository.MemberProfileRepository;
 import net.detalk.api.repository.MemberRepository;
 import net.detalk.api.support.TimeHolder;
+import net.detalk.api.support.UUIDGenerator;
 import net.detalk.api.support.error.InvalidStateException;
 import org.springframework.stereotype.Service;
 
@@ -25,12 +28,10 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final MemberProfileRepository memberProfileRepository;
     private final TimeHolder timeHolder;
+    private final UUIDGenerator uuidGenerator;
 
     public MemberDetail me(Long memberId) {
-        Member member = memberRepository.findById(memberId).orElseThrow(() -> {
-            log.error("[me] 회원 ID {}는 존재하지 않는 회원입니다", memberId);
-            return new MemberNotFoundException();
-        });
+        Member member = findMemberById(memberId);
 
         if (member.isPendingExternalMember()) {
             log.debug("[me] 회원가입이 필요한 외부 회원");
@@ -51,10 +52,7 @@ public class MemberService {
             throw new UserHandleDuplicatedException(userhandle);
         });
 
-        Member member = memberRepository.findById(memberId).orElseThrow(() -> {
-            log.error("[registerProfile] 회원 ID {}는 존재하지 않는 회원입니다", memberId);
-            return new MemberNotFoundException();
-        });
+        Member member = findMemberById(memberId);
 
         if (!member.isPendingExternalMember()) {
             throw new InvalidMemberStatusException(memberId, member.getStatus());
@@ -62,8 +60,7 @@ public class MemberService {
 
         member.active(timeHolder);
         memberRepository.update(member);
-        MemberProfile memberProfile = memberProfileRepository.findByMemberId(member.getId())
-            .orElseThrow(() -> new InvalidStateException("[me] 회원 " + member.getId() + "의 프로필이 존재하지 않습니다"));
+        MemberProfile memberProfile = findProfileByMemberId(member.getId());
 
          memberProfile = memberProfileRepository.update(
             MemberProfile.builder()
@@ -84,6 +81,57 @@ public class MemberService {
             .build();
     }
 
+    @Transactional
+    public void updateProfile(Long memberId, UpdateProfileRequest updateRequest) {
+
+        Member member = findMemberById(memberId);
+        MemberProfile memberProfile = findProfileByMemberId(member.getId());
+
+        /**
+         * 새로운 userHandle 요청이라면, 이미 존재하는지 검사한다.
+         */
+        if (!memberProfile.hasSameUserHandle(updateRequest.userandle())) {
+            checkDuplicateUserHandle(updateRequest.userandle());
+        }
+
+        /**
+         * avatarId는 null일 경우 기존꺼 사용
+         * 새로 요청올 경우, 새거 사용
+         */
+        memberProfile = memberProfile.update(
+            updateRequest,
+            updateRequest.avatarId() != null
+                ? uuidGenerator.fromString(updateRequest.avatarId())
+                : memberProfile.getAvatarId(),
+            timeHolder.now()
+        );
+
+        memberProfileRepository.update(memberProfile);
+    }
+
+    public Member findMemberById(Long id) {
+        return memberRepository.findById(id).orElseThrow(() -> {
+            log.error("[findMemberById] 회원 ID {}는 존재하지 않습니다", id);
+            return new MemberNotFoundException();
+        });
+    }
+
+    public MemberProfile findProfileByMemberId(Long memberId) {
+        return memberProfileRepository.findByMemberId(memberId)
+            .orElseThrow(()->{
+                log.error("[findProfileByMemberId] 존재하지 않는 회원 프로필 입니다. memberId={}", memberId);
+                return new MemberProfileNotFoundException();
+            });
+    }
+
+    public void checkDuplicateUserHandle(String userHandle) {
+        if (memberProfileRepository.existsByUserHandle(userHandle)) {
+            log.error("[duplicateUserHandleValidation] 이미 존재하는 userhandle입니다. userhandle={}",
+                userHandle);
+            throw new UserHandleDuplicatedException(userHandle);
+        }
+    }
+
     public Long findIdByUserHandle(String userHandle) {
         MemberProfile memberProfile = memberProfileRepository.findByUserHandle(userHandle)
             .orElseThrow(() -> {
@@ -93,4 +141,5 @@ public class MemberService {
             );
         return memberProfile.getMemberId();
     }
+
 }

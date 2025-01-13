@@ -11,4 +11,5 @@ public interface MemberProfileRepository {
     Optional<MemberDetail> findWithAvatarByMemberId(Long memberId);
     Optional<MemberProfile> findByUserHandle(String handle);
     MemberProfile update(MemberProfile memberProfile);
+    boolean existsByUserHandle(String userHandle);
 }

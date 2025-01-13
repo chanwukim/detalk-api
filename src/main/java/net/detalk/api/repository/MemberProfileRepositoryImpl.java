@@ -72,4 +72,14 @@ public class MemberProfileRepositoryImpl implements MemberProfileRepository {
             .returning()
             .fetchOneInto(MemberProfile.class);
     }
+
+    @Override
+    public boolean existsByUserHandle(String userHandle) {
+        Integer count = dsl.selectCount()
+            .from(MEMBER_PROFILE)
+            .where(MEMBER_PROFILE.USERHANDLE.eq(userHandle))
+            .fetchOne(0, Integer.class);
+        return count != null && count > 0;
+    }
+
 }
