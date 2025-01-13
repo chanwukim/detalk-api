@@ -88,8 +88,11 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/v1/products/posts").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/members/me").hasRole("MEMBER")
                 .requestMatchers(HttpMethod.GET, "/api/v1/members/me/posts").hasRole("MEMBER")
+                .requestMatchers(HttpMethod.PUT, "/api/v1/members/me/profile").hasRole("MEMBER")
+                .requestMatchers(HttpMethod.POST, "/api/v1/members/me/profile").hasRole("MEMBER")
                 .requestMatchers(HttpMethod.GET, "/api/v1/members/{userhandle}/posts").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/members/{userhandle}/recommended-posts").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/members/{userhandle}").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/tags").permitAll()
                 .anyRequest().authenticated())
             /**
