@@ -1,7 +1,9 @@
 package net.detalk.api.service;
 
 import jakarta.transaction.Transactional;
+
 import java.util.UUID;
+
 import net.detalk.api.domain.*;
 import net.detalk.api.domain.exception.MemberNotFoundException;
 import net.detalk.api.domain.exception.ProviderUnsupportedException;
@@ -108,7 +110,7 @@ public class AuthService extends DefaultOAuth2UserService {
         };
     }
 
-    private MemberExternal register(OAuthProvider provider, String providerId,String pictureUrl) {
+    private MemberExternal register(OAuthProvider provider, String providerId, String pictureUrl) {
         log.info("[register] 새 소셜회원가입 provider {}", provider);
 
         Instant now = Instant.now();
@@ -190,12 +192,20 @@ public class AuthService extends DefaultOAuth2UserService {
     }
 
     public void signOut(String refreshToken) {
-        RefreshToken verifiedRefreshToken = tokenProvider.parseRefreshToken(refreshToken);
-        AuthRefreshToken authRefreshToken = authRefreshTokenRepository.findByToken(verifiedRefreshToken.getValue())
-            .orElseThrow(() -> {
-                log.error("[signOut] 서버에 존재하지 않는 토큰 : {}", refreshToken);
-                return new RefreshTokenNotFoundException();
-            });
+        AuthRefreshToken authRefreshToken;
+
+        try {
+            RefreshToken verifiedRefreshToken = tokenProvider.parseRefreshToken(refreshToken);
+            authRefreshToken = authRefreshTokenRepository.findByToken(verifiedRefreshToken.getValue())
+                .orElseThrow(() -> {
+                    log.error("[signOut] 서버에 존재하지 않는 토큰 : {}", refreshToken);
+                    return new RefreshTokenNotFoundException();
+                });
+        } catch (Exception e) {
+            log.error("[signOut] {}", e.getMessage());
+            return;
+        }
+
         authRefreshToken.revoked(timeHolder);
         authRefreshTokenRepository.update(authRefreshToken);
     }

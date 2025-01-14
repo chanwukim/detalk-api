@@ -84,6 +84,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.OPTIONS).permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/health").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/v1/auth/refresh").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/v1/auth/sign-out").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/products/posts/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/products/posts").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/members/me").hasRole("MEMBER")

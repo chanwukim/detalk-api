@@ -1,5 +1,6 @@
 package net.detalk.api.controller.v1;
 
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 import static net.detalk.api.support.Constant.COOKIE_ACCESS_TOKEN;
 import static net.detalk.api.support.Constant.COOKIE_REFRESH_TOKEN;
@@ -73,11 +75,11 @@ public class AuthController {
 
     @PostMapping("/sign-out")
     public ResponseEntity<Void> signOut(HttpServletRequest request, HttpServletResponse response) {
-        String refreshToken = CookieUtil.getCookie(COOKIE_REFRESH_TOKEN, request)
-            .orElseThrow(RefreshTokenUnauthorizedException::new)
-            .getValue();
+        Optional<Cookie> cookie = CookieUtil.getCookie(COOKIE_REFRESH_TOKEN, request);
 
-        authService.signOut(refreshToken);
+        if(cookie.isPresent()) {
+            authService.signOut(cookie.get().getValue());
+        }
 
         CookieUtil.deleteCookie(COOKIE_ACCESS_TOKEN, request, response);
         CookieUtil.deleteCookie(COOKIE_REFRESH_TOKEN, request, response);
