@@ -77,9 +77,7 @@ public class AuthController {
     public ResponseEntity<Void> signOut(HttpServletRequest request, HttpServletResponse response) {
         Optional<Cookie> cookie = CookieUtil.getCookie(COOKIE_REFRESH_TOKEN, request);
 
-        if(cookie.isPresent()) {
-            authService.signOut(cookie.get().getValue());
-        }
+        cookie.ifPresent(value -> authService.signOut(value.getValue()));
 
         CookieUtil.deleteCookie(COOKIE_ACCESS_TOKEN, request, response);
         CookieUtil.deleteCookie(COOKIE_REFRESH_TOKEN, request, response);
