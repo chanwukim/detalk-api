@@ -5,9 +5,7 @@ import jakarta.transaction.Transactional;
 import java.util.UUID;
 
 import net.detalk.api.domain.*;
-import net.detalk.api.domain.exception.MemberNotFoundException;
-import net.detalk.api.domain.exception.ProviderUnsupportedException;
-import net.detalk.api.domain.exception.RefreshTokenNotFoundException;
+import net.detalk.api.domain.exception.*;
 import net.detalk.api.repository.AttachmentFileRepository;
 import net.detalk.api.repository.AuthRefreshTokenRepository;
 import net.detalk.api.repository.MemberExternalRepository;
@@ -15,6 +13,7 @@ import net.detalk.api.repository.MemberProfileRepository;
 import net.detalk.api.repository.MemberRepository;
 import net.detalk.api.support.TimeHolder;
 import net.detalk.api.support.UUIDGenerator;
+import net.detalk.api.support.error.ExpiredTokenException;
 import net.detalk.api.support.security.*;
 
 import net.detalk.api.support.security.oauth.OAuthProvider;
@@ -160,11 +159,22 @@ public class AuthService extends DefaultOAuth2UserService {
 
     @Transactional
     public AuthToken refresh(String originalRefreshToken) {
-        RefreshToken verifiedRefreshToken = tokenProvider.parseRefreshToken(originalRefreshToken);
+        RefreshToken verifiedRefreshToken;
+
+        try {
+            verifiedRefreshToken = tokenProvider.parseRefreshToken(originalRefreshToken);
+        } catch (ExpiredTokenException e) {
+            log.warn("[refresh] 만료된 리프레시 토큰 : {}", originalRefreshToken);
+            throw new RefreshTokenExpiredException();
+        } catch (Exception e) {
+            log.error("[refresh] 잘못된 리프레시 토큰 : {}", originalRefreshToken);
+            throw new RefreshTokenUnauthorizedException();
+        }
+
         AuthRefreshToken authRefreshToken = authRefreshTokenRepository.findByToken(verifiedRefreshToken.getValue())
             .orElseThrow(() -> {
                 log.error("[refresh] 서버에 존재하지 않는 토큰 : {}", originalRefreshToken);
-                return new RefreshTokenNotFoundException();
+                return new RefreshTokenUnauthorizedException();
             });
 
         Long memberId = authRefreshToken.getMemberId();
@@ -199,10 +209,13 @@ public class AuthService extends DefaultOAuth2UserService {
             authRefreshToken = authRefreshTokenRepository.findByToken(verifiedRefreshToken.getValue())
                 .orElseThrow(() -> {
                     log.error("[signOut] 서버에 존재하지 않는 토큰 : {}", refreshToken);
-                    return new RefreshTokenNotFoundException();
+                    return new RefreshTokenUnauthorizedException();
                 });
+        } catch (ExpiredTokenException e) {
+            log.warn("[signOut] 만료된 리프레시 토큰 : {}", refreshToken);
+            return;
         } catch (Exception e) {
-            log.error("[signOut] {}", e.getMessage());
+            log.error("[signOut] 잘못된 리프레시 토큰 error : {}, token : {}", e.getMessage(), refreshToken);
             return;
         }
 
