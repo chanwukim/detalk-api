@@ -35,6 +35,11 @@ public class PricingPlanRepository {
             .fetch(PRICING_PLAN.NAME);
     }
 
+    public List<PricingPlan> findAll() {
+        return dsl.selectFrom(PRICING_PLAN)
+            .fetchInto(PricingPlan.class);
+    }
+
     public void saveAll(List<PricingPlan> planList) {
         BatchBindStep batch = dsl.batch(
             dsl.insertInto(PRICING_PLAN)
