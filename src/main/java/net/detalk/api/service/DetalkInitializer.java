@@ -23,36 +23,7 @@ public class DetalkInitializer implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) throws Exception {
         log.info("가격 정책 초기화중...");
-        List<String> dbPlans = pricingPlanRepository.findAllNames();
-        List<String> defaultPlans = getPlans();
-
-        List<PricingPlan> planList = new ArrayList<>();
-
-        for (String plan : defaultPlans) {
-            if (!dbPlans.contains(plan)) {
-                planList.add(
-                    PricingPlan.builder()
-                    .name(plan)
-                    .build()
-                );
-            }
-        }
-
-        if (!planList.isEmpty()) {
-            pricingPlanRepository.saveAll(planList);
-            log.info("총 {}건의 가격 정책이 저장되었습니다. {}",planList.size(),planList);
-        }
-
         log.info("가격 정책 초기화 완료.");
-    }
-
-    /**
-     * Retrieves a list of default pricing plan names.
-     *
-     * @return A list containing three predefined pricing plan names: "Free", "Paid", and "Paid with free trial or plan"
-     */
-    private List<String> getPlans() {
-        return List.of("Free","Paid","Paid with free trial or plan");
     }
 
 }
