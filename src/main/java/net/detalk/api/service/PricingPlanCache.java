@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * 캐시된 가격 정책
+ * TODO : 추가, 삭제 기능 및 캐시 만료 정책, 캐시 갱신
  */
 @Slf4j
 @Component
@@ -25,6 +26,7 @@ public class PricingPlanCache {
     private final PricingPlanRepository pricingPlanRepository;
 
     /**
+     * 톰캣 실행 시, 실행된다.
      * 초기 가격 정책 캐시 설정
      */
     protected void loadPricingPlans() {
