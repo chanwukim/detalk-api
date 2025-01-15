@@ -36,8 +36,7 @@ public class PricingPlanRepository {
     }
 
     public List<PricingPlan> findAll() {
-        return dsl.select(PRICING_PLAN)
-            .from(PRICING_PLAN)
+        return dsl.selectFrom(PRICING_PLAN)
             .fetchInto(PricingPlan.class);
     }
 
