@@ -68,7 +68,7 @@ public class RecommendService {
         productPostService.incrementRecommendCount(postId, recommendProducts.size());
     }
 
-    public Recommend save(String reason, Instant now) {
+    private Recommend save(String reason, Instant now) {
         return recommendRepository.save(reason, now);
     }
 
