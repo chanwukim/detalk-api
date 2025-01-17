@@ -378,14 +378,23 @@ public class ProductPostService {
     /**
      * 커서 기반 페이징 처리
      *
-     * @param result DB에서 조회한 결과 (pageSize + 1개)
+     * @param result   DB에서 조회한 결과 (pageSize + 1개)
      * @param pageSize 페이지당 표시할 아이템 수
      * @return CursorPageData 페이징 결과
      */
-    private CursorPageData<GetProductPostResponse> createCursorPage(List<GetProductPostResponse> result, int pageSize) {
+    private CursorPageData<GetProductPostResponse> createCursorPage(
+        List<GetProductPostResponse> result, int pageSize) {
+
+        // DB 조회 데이터가 없을 경우, 빈 페이지 반환
+        if (result == null) {
+            return new CursorPageData<>(List.of(), null, false);
+        }
+
         boolean hasNext = false;
         Long nextPageId = null;
 
+        // 요청+1을 조회했는데, result.size 가 요청보다 클 경우
+        // 다음 데이터가 있는거임
         if (result.size() > pageSize) {
             GetProductPostResponse lastItem = result.get(pageSize - 1);
             nextPageId = lastItem.id();
