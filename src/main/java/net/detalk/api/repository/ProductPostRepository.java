@@ -418,9 +418,9 @@ public class ProductPostRepository {
         return count != null && count > 0;
     }
 
-    public void incrementRecommendCount(Long postId) {
+    public void incrementRecommendCount(Long postId,int count) {
         dsl.update(PRODUCT_POST)
-            .set(PRODUCT_POST.RECOMMEND_COUNT, PRODUCT_POST.RECOMMEND_COUNT.plus(1))
+            .set(PRODUCT_POST.RECOMMEND_COUNT, PRODUCT_POST.RECOMMEND_COUNT.plus(count))
             .where(PRODUCT_POST.ID.eq(postId))
             .execute();
     }

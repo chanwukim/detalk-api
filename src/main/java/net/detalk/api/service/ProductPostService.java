@@ -357,11 +357,12 @@ public class ProductPostService {
 
     /**
      * 제품 게시글 추천수 증가
-     * @param id 증가할 제품 게시글 ID
+     * @param id   증가할 제품 게시글 ID
+     * @param count 추천 수
      */
-    public void incrementRecommendCount(Long id) {
-        validatePostExists(id);
-        productPostRepository.incrementRecommendCount(id);
+    public void incrementRecommendCount(Long id, int count) {
+        // validatePostExists(id); TODO : 게시글 추천에서 이미 검증하는데, 만약 다른곳 호출된다면, 고민
+        productPostRepository.incrementRecommendCount(id, count);
     }
 
     /**
