@@ -3,6 +3,7 @@ package net.detalk.api.repository;
 import static net.detalk.jooq.tables.JRecommendProduct.*;
 
 import java.time.Instant;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import net.detalk.api.domain.RecommendProduct;
 import org.jooq.DSLContext;
@@ -50,6 +51,35 @@ public class RecommendProductRepository {
             .set(RECOMMEND_PRODUCT.CREATED_AT, now)
             .returning()
             .fetchOneInto(RecommendProduct.class);
+    }
+
+    public void saveAll(List<RecommendProduct> recommendProducts) {
+
+        var baseQuery = dsl
+            .insertInto(RECOMMEND_PRODUCT,
+                RECOMMEND_PRODUCT.RECOMMEND_ID,
+                RECOMMEND_PRODUCT.PRODUCT_POST_ID,
+                RECOMMEND_PRODUCT.MEMBER_ID,
+                RECOMMEND_PRODUCT.CREATED_AT)
+            .values(
+                (Long) null,
+                (Long) null,
+                (Long)null,
+                (Instant) null
+            );
+
+        var batch = dsl.batch(baseQuery);
+
+        for (RecommendProduct rp : recommendProducts) {
+            batch.bind(
+                rp.getRecommendId(),
+                rp.getProductPostId(),
+                rp.getMemberId(),
+                rp.getCreatedAt()
+            );
+        }
+
+        batch.execute();
     }
 
 }
