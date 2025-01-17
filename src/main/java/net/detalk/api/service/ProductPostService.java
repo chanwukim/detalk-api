@@ -185,21 +185,7 @@ public class ProductPostService {
         List<GetProductPostResponse> result = productPostRepository.findProductPosts(
             pageSize + 1, nextId);
 
-        boolean hasNext = false;
-        Long nextPageId = null;
-
-        // +1 했는데, 조회가 되었다면 다음데이터가 있음
-        if (result.size() > pageSize) {
-            // 마지막 item 추출 (배열이므로 size-1)
-            GetProductPostResponse lastItem = result.get(pageSize - 1);
-            // 클라이언트가 요청해야할 다음 ID
-            nextPageId = lastItem.id();
-            hasNext = true;
-            // 클라이언트 size 요청 개수만큼 return
-            result = result.subList(0, pageSize);
-        }
-
-        return new CursorPageData<>(result, nextPageId, hasNext);
+        return createCursorPage(result, pageSize);
     }
 
     /**
@@ -219,20 +205,7 @@ public class ProductPostService {
         List<GetProductPostResponse> result = productPostRepository.findProductPostsByMemberId(
             memberId, pageSize + 1, nextId);
 
-        boolean hasNext = false;
-        Long nextPageId = null;
-
-        // +1 했는데, 조회가 되었다면 다음 데이터가 있음
-        if (result.size() > pageSize) {
-            // 마지막 item 추출
-            GetProductPostResponse lastItem = result.get(pageSize - 1);
-            nextPageId = lastItem.id();
-            hasNext = true;
-            // 클라이언트에 반환할 데이터는 요청한 size만큼
-            result = result.subList(0, pageSize);
-        }
-
-        return new CursorPageData<>(result, nextPageId, hasNext);
+        return createCursorPage(result, pageSize);
     }
 
 
@@ -366,16 +339,7 @@ public class ProductPostService {
         List<GetProductPostResponse> result =
             productPostRepository.findRecommendedPostsByMemberId(memberId, pageSize + 1, nextId);
 
-        boolean hasNext = false;
-        Long nextPageId = null;
-
-        if (result.size() > pageSize) {
-            GetProductPostResponse lastItem = result.get(pageSize - 1);
-            nextPageId = lastItem.id();
-            hasNext = true;
-            result = result.subList(0, pageSize);
-        }
-        return new CursorPageData<>(result, nextPageId, hasNext);
+        return createCursorPage(result, pageSize);
     }
 
 
@@ -409,6 +373,35 @@ public class ProductPostService {
             log.warn("잘못된 페이지 사이즈 요청입니다={}", pageSize);
             throw new InvalidPageSizeException(pageSize);
         }
+    }
+
+    /**
+     * 커서 기반 페이징 처리
+     *
+     * @param result   DB에서 조회한 결과 (pageSize + 1개)
+     * @param pageSize 페이지당 표시할 아이템 수
+     * @return CursorPageData 페이징 결과
+     */
+    private CursorPageData<GetProductPostResponse> createCursorPage(
+        List<GetProductPostResponse> result, int pageSize) {
+
+        // DB 조회 데이터가 없을 경우, 빈 페이지 반환
+        if (result == null) {
+            return new CursorPageData<>(List.of(), null, false);
+        }
+
+        boolean hasNext = false;
+        Long nextPageId = null;
+
+        // 요청+1을 조회했는데, result.size 가 요청보다 클 경우
+        // 다음 데이터가 있는거임
+        if (result.size() > pageSize) {
+            GetProductPostResponse lastItem = result.get(pageSize - 1);
+            nextPageId = lastItem.id();
+            hasNext = true;
+            result = result.subList(0, pageSize);
+        }
+        return new CursorPageData<>(result, nextPageId, hasNext);
     }
 
 }
