@@ -11,6 +11,7 @@ import net.detalk.api.controller.v1.request.UpdateProductPostRequest;
 import net.detalk.api.controller.v1.response.GetProductPostResponse;
 import net.detalk.api.domain.ProductLink;
 import net.detalk.api.domain.exception.InvalidPageSizeException;
+import net.detalk.api.domain.exception.InvalidRecommendCountRequest;
 import net.detalk.api.domain.exception.ProductPostForbiddenException;
 import net.detalk.api.domain.exception.ProductPostNotFoundException;
 import net.detalk.api.domain.exception.ProductPostSnapshotUpdateException;
@@ -357,11 +358,16 @@ public class ProductPostService {
 
     /**
      * 제품 게시글 추천수 증가
-     * @param id 증가할 제품 게시글 ID
+     * @param id   추천할 제품 게시글 ID
+     * @param count 추천 수
      */
-    public void incrementRecommendCount(Long id) {
-        validatePostExists(id);
-        productPostRepository.incrementRecommendCount(id);
+    public void incrementRecommendCount(Long id, int count) {
+        // validatePostExists(id); TODO : 게시글 추천에서 이미 검증하는데, 만약 다른곳 호출된다면, 고민
+        if (count <= 0) {
+            log.error("추천 수는 양수여야 합니다. count={}", count);
+            throw new InvalidRecommendCountRequest(count);
+        }
+        productPostRepository.incrementRecommendCount(id, count);
     }
 
     /**
