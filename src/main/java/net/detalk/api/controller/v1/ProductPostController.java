@@ -2,6 +2,7 @@ package net.detalk.api.controller.v1;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Size;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import net.detalk.api.controller.v1.request.UpdateProductPostRequest;
@@ -82,7 +83,9 @@ public class ProductPostController {
     public ResponseEntity<CursorPageData<GetProductPostResponse>> getProductsByTags(
         @RequestParam(name = "size", defaultValue = "5") @Max(20) int pageSize,
         @RequestParam(name = "startId", required = false) Long nextId,
-        @RequestParam(name = "tag") List<String> tags) {
+        @RequestParam(name = "tag")
+        @Size(min = 1, max = 5, message = "enter a min of 1 tag and a max of 5 tags.")
+        List<String> tags) {
         CursorPageData<GetProductPostResponse> result = productPostService.getProductPostsByTags(
             pageSize, nextId, tags);
         return ResponseEntity.ok(result);
