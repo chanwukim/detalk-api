@@ -2,6 +2,7 @@ package net.detalk.api.controller.v1;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import net.detalk.api.controller.v1.request.UpdateProductPostRequest;
 import net.detalk.api.controller.v1.response.CreateProductPostResponse;
@@ -75,5 +76,15 @@ public class ProductPostController {
         ) {
         recommendService.addRecommendation(postId, user.getId(), createRecommendRequest);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/filter/by-tags")
+    public ResponseEntity<CursorPageData<GetProductPostResponse>> getProductsByTags(
+        @RequestParam(name = "size", defaultValue = "5") @Max(20) int pageSize,
+        @RequestParam(name = "startId", required = false) Long nextId,
+        @RequestParam(name = "tag") List<String> tags) {
+        CursorPageData<GetProductPostResponse> result = productPostService.getProductPostsByTags(
+            pageSize, nextId, tags);
+        return ResponseEntity.ok(result);
     }
 }
