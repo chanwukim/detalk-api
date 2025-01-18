@@ -86,6 +86,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/v1/auth/refresh").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/products/posts/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/products/posts").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/products/posts/filter/by-tags").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/v1/products/posts/{id}/recommend").hasRole("MEMBER")
                 .requestMatchers(HttpMethod.GET, "/api/v1/members/me").hasRole("MEMBER")
                 .requestMatchers(HttpMethod.GET, "/api/v1/members/me/posts").hasRole("MEMBER")

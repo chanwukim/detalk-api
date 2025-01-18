@@ -343,6 +343,17 @@ public class ProductPostService {
         return createCursorPage(result, pageSize);
     }
 
+    public CursorPageData<GetProductPostResponse> getProductPostsByTags(int pageSize, Long nextId,
+        List<String> tags) {
+
+        validatePageSize(pageSize);
+
+        List<GetProductPostResponse> result = productPostRepository.findProductPostsByTags(
+            pageSize, nextId, tags);
+
+        return createCursorPage(result, pageSize);
+    }
+
 
     /**
      * 제품 게시글 존재하는지 검증
