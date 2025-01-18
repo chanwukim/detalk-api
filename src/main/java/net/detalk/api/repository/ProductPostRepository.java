@@ -409,6 +409,96 @@ public class ProductPostRepository {
         return result.map(record -> mapRecordToResponse(record, imagesMap));
     }
 
+    public List<GetProductPostResponse> findProductPostsByTags(int pageSize, Long nextId,
+        List<String> tags) {
+
+        // 1 : 태그 ID 먼저 조회
+        List<Long> tagIds = dsl.select(TAG.ID)
+            .from(TAG)
+            .where(TAG.NAME.in(tags))
+            .fetchInto(Long.class);
+
+        if (tagIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        Condition condition = DSL.trueCondition();
+        if (nextId != null) {
+            condition = PRODUCT_POST.ID.lt(nextId);
+        }
+
+        // 2 : tagIds 가지고 있는 게시글 스냅샷만 먼저 조회
+        var subQuery = dsl.select(PRODUCT_POST_SNAPSHOT_TAG.POST_ID)
+            .from(PRODUCT_POST_SNAPSHOT_TAG)
+            .where(PRODUCT_POST_SNAPSHOT_TAG.TAG_ID.in(tagIds))
+            .groupBy(PRODUCT_POST_SNAPSHOT_TAG.POST_ID)
+            .having(DSL.countDistinct(PRODUCT_POST_SNAPSHOT_TAG.TAG_ID).eq(tagIds.size()));
+
+        // 3: 메인 쿼리 - 위 서브쿼리 결과를 이용하여 커서페이징과 함께 게시글 조회
+        var result = dsl.select(
+                PRODUCT_POST.ID,
+                MEMBER_PROFILE.NICKNAME,
+                MEMBER_PROFILE.USERHANDLE.as("userHandle"),
+                PRODUCT_POST_SNAPSHOT.CREATED_AT.as("createdAt"),
+                DSL.when(PRODUCT_MAKER.ID.isNotNull(), true)
+                    .otherwise(false)
+                    .as("isMaker"),
+                ATTACHMENT_FILE.URL.as("avatarUrl"),
+                PRODUCT_POST_SNAPSHOT.TITLE,
+                PRODUCT_POST_SNAPSHOT.DESCRIPTION,
+                PRICING_PLAN.NAME.as("pricingPlan"),
+                DSL.arrayAggDistinct(TAG.NAME).as("tags"),
+                PRODUCT_POST.RECOMMEND_COUNT.as("recommendCount"),
+                PRODUCT_POST_SNAPSHOT.ID.as("snapshotId"),
+                DSL.arrayAggDistinct(PRODUCT_LINK.URL).as("urls")
+            )
+            .from(PRODUCT_POST)
+            .join(PRODUCT_POST_LAST_SNAPSHOT)
+            .on(PRODUCT_POST.ID.eq(PRODUCT_POST_LAST_SNAPSHOT.POST_ID))
+            .join(PRODUCT_POST_SNAPSHOT)
+            .on(PRODUCT_POST_LAST_SNAPSHOT.SNAPSHOT_ID.eq(PRODUCT_POST_SNAPSHOT.ID))
+            .join(PRICING_PLAN)
+            .on(PRODUCT_POST_SNAPSHOT.PRICING_PLAN_ID.eq(PRICING_PLAN.ID))
+            .leftJoin(PRODUCT_POST_SNAPSHOT_TAG)
+            .on(PRODUCT_POST_SNAPSHOT_TAG.POST_ID.eq(PRODUCT_POST_SNAPSHOT.ID))
+            .leftJoin(TAG)
+            .on(TAG.ID.eq(PRODUCT_POST_SNAPSHOT_TAG.TAG_ID))
+            .leftJoin(MEMBER_PROFILE)
+            .on(MEMBER_PROFILE.MEMBER_ID.eq(PRODUCT_POST.WRITER_ID))
+            .leftJoin(PRODUCT_MAKER)
+            .on(PRODUCT_MAKER.PRODUCT_ID.eq(PRODUCT_POST.PRODUCT_ID))
+            .leftJoin(ATTACHMENT_FILE)
+            .on(ATTACHMENT_FILE.ID.eq(MEMBER_PROFILE.AVATAR_ID))
+            .leftJoin(PRODUCT_POST_LINK)
+            .on(PRODUCT_POST_LINK.POST_ID.eq(PRODUCT_POST.ID))
+            .leftJoin(PRODUCT_LINK)
+            .on(PRODUCT_LINK.ID.eq(PRODUCT_POST_LINK.LINK_ID))
+            .where(condition)
+            // 서브쿼리의 postId와 일치하는 게시글만
+            .and(PRODUCT_POST_SNAPSHOT.ID.in(subQuery))
+            .groupBy(
+                PRODUCT_POST.ID,
+                MEMBER_PROFILE.NICKNAME,
+                MEMBER_PROFILE.USERHANDLE,
+                PRODUCT_POST_SNAPSHOT.CREATED_AT,
+                PRODUCT_MAKER.ID,
+                ATTACHMENT_FILE.URL,
+                PRODUCT_POST_SNAPSHOT.TITLE,
+                PRODUCT_POST_SNAPSHOT.DESCRIPTION,
+                PRICING_PLAN.NAME,
+                PRODUCT_POST.RECOMMEND_COUNT,
+                PRODUCT_POST_SNAPSHOT.ID
+            )
+            .orderBy(PRODUCT_POST.ID.desc(), PRODUCT_POST.CREATED_AT.desc())
+            .limit(pageSize)
+            .fetch();
+
+        List<Long> snapshotIds = result.getValues("snapshotId", Long.class);
+        Map<Long, List<Media>> imagesMap = fetchImagesForSnapshots(snapshotIds);
+
+        return result.map(record -> mapRecordToResponse(record, imagesMap));
+    }
+
 
     public boolean existsById(Long id) {
         Integer count = dsl.selectCount()
