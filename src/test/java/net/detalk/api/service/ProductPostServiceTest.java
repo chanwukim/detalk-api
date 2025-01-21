@@ -22,6 +22,8 @@ import net.detalk.api.domain.ProductLink;
 import net.detalk.api.domain.ProductPost;
 import net.detalk.api.domain.ProductPostSnapshot;
 import net.detalk.api.domain.Tag;
+import net.detalk.api.domain.exception.InvalidPageSizeException;
+import net.detalk.api.domain.exception.InvalidRecommendCountRequest;
 import net.detalk.api.mock.FakeTimeHolder;
 import net.detalk.api.mock.FakeUUIDGenerator;
 import net.detalk.api.repository.ProductLinkRepository;
@@ -43,6 +45,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 
 @ExtendWith(MockitoExtension.class)
 class ProductPostServiceTest {
@@ -775,6 +778,34 @@ class ProductPostServiceTest {
 
         assertThat(exception.getMessage()).isEqualTo("상품-게시글(ID: 1)을 찾을 수 없습니다.");
     }
+
+    @DisplayName("[incrementRecommendCount] 성공적으로 counts 만큼 추천 되어야 한다")
+    @Test
+    void incrementRecommendCount() {
+        var productPostId = 1L;
+        int recommendCounts = 999;
+
+        productPostService.incrementRecommendCount(productPostId, recommendCounts);
+    }
+
+    @DisplayName("[incrementRecommendCount] 성공적으로 counts 만큼 추천 되어야 한다")
+    @Test
+    void incrementRecommendCountValidCounts() {
+        var productPostId = 1L;
+        int recommendCounts = -999;
+
+        InvalidRecommendCountRequest exception = assertThrows(InvalidRecommendCountRequest.class,
+            () -> productPostService.incrementRecommendCount(productPostId, recommendCounts));
+
+        assertThat(exception.getMessage()).isEqualTo("추천 수는 양수여야 합니다. count=-999");
+        assertThat(exception.getErrorCode()).isEqualTo("invalid_recommend_count");
+        assertThat(exception.getHttpStatus()).isEqualTo(HttpStatus.BAD_REQUEST);
+
+
+    }
+
+
+
 
 
 }
