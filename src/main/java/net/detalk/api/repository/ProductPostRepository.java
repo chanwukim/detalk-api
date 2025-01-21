@@ -461,7 +461,7 @@ public class ProductPostRepository {
             .join(PRICING_PLAN)
             .on(PRICING_PLAN.ID.eq(PRODUCT_POST_SNAPSHOT.PRICING_PLAN_ID))
             .join(MEMBER_PROFILE)
-            .on(MEMBER_PROFILE.ID.eq(PRODUCT_POST.WRITER_ID))
+            .on(MEMBER_PROFILE.MEMBER_ID.eq(PRODUCT_POST.WRITER_ID))
             /* 추가 정보: 아바타, maker, tag, link **/
             .leftJoin(ATTACHMENT_FILE)
             .on(ATTACHMENT_FILE.ID.eq(MEMBER_PROFILE.AVATAR_ID))
