@@ -412,7 +412,7 @@ public class ProductPostRepository {
     public List<GetProductPostResponse> findProductPostsByTags(int pageSize, Long nextId,
         List<String> tags) {
 
-        // 1 : 태그 ID 먼저 조회
+        // 태그 ID 먼저 조회
         List<Long> tagIds = dsl.select(TAG.ID)
             .from(TAG)
             .where(TAG.NAME.in(tags))
@@ -427,14 +427,11 @@ public class ProductPostRepository {
             condition = PRODUCT_POST.ID.lt(nextId);
         }
 
-        // 2 : tagIds 가지고 있는 게시글 스냅샷만 먼저 조회
-        var subQuery = dsl.select(PRODUCT_POST_SNAPSHOT_TAG.POST_ID)
-            .from(PRODUCT_POST_SNAPSHOT_TAG)
-            .where(PRODUCT_POST_SNAPSHOT_TAG.TAG_ID.in(tagIds))
-            .groupBy(PRODUCT_POST_SNAPSHOT_TAG.POST_ID)
-            .having(DSL.countDistinct(PRODUCT_POST_SNAPSHOT_TAG.TAG_ID).eq(tagIds.size()));
+        // JOIN을 통해 추가 태그 정보를 조회
+        // ('a','b') 요청 시 ('a','b','c') 태그를 가진 게시글도 함께 조회
+        var PPST_ALIAS = PRODUCT_POST_SNAPSHOT_TAG.as("ppst");
 
-        // 3: 메인 쿼리 - 위 서브쿼리 결과를 이용하여 커서페이징과 함께 게시글 조회
+
         var result = dsl.select(
                 PRODUCT_POST.ID,
                 MEMBER_PROFILE.NICKNAME,
@@ -452,43 +449,44 @@ public class ProductPostRepository {
                 PRODUCT_POST_SNAPSHOT.ID.as("snapshotId"),
                 DSL.arrayAggDistinct(PRODUCT_LINK.URL).as("urls")
             )
-            .from(PRODUCT_POST)
-            .join(PRODUCT_POST_LAST_SNAPSHOT)
-            .on(PRODUCT_POST.ID.eq(PRODUCT_POST_LAST_SNAPSHOT.POST_ID))
+            /* 필수 태그가 모두 포함된 게시글만 선택 **/
+            .from(PRODUCT_POST_SNAPSHOT_TAG)
+            /* 스냅샷, 게시글 관련 **/
             .join(PRODUCT_POST_SNAPSHOT)
+            .on(PRODUCT_POST_SNAPSHOT.ID.eq(PRODUCT_POST_SNAPSHOT_TAG.POST_ID))
+            .join(PRODUCT_POST_LAST_SNAPSHOT)
             .on(PRODUCT_POST_LAST_SNAPSHOT.SNAPSHOT_ID.eq(PRODUCT_POST_SNAPSHOT.ID))
+            .join(PRODUCT_POST)
+            .on(PRODUCT_POST.ID.eq(PRODUCT_POST_LAST_SNAPSHOT.POST_ID))
             .join(PRICING_PLAN)
-            .on(PRODUCT_POST_SNAPSHOT.PRICING_PLAN_ID.eq(PRICING_PLAN.ID))
-            .leftJoin(PRODUCT_POST_SNAPSHOT_TAG)
-            .on(PRODUCT_POST_SNAPSHOT_TAG.POST_ID.eq(PRODUCT_POST_SNAPSHOT.ID))
-            .leftJoin(TAG)
-            .on(TAG.ID.eq(PRODUCT_POST_SNAPSHOT_TAG.TAG_ID))
-            .leftJoin(MEMBER_PROFILE)
-            .on(MEMBER_PROFILE.MEMBER_ID.eq(PRODUCT_POST.WRITER_ID))
-            .leftJoin(PRODUCT_MAKER)
-            .on(PRODUCT_MAKER.PRODUCT_ID.eq(PRODUCT_POST.PRODUCT_ID))
+            .on(PRICING_PLAN.ID.eq(PRODUCT_POST_SNAPSHOT.PRICING_PLAN_ID))
+            .join(MEMBER_PROFILE)
+            .on(MEMBER_PROFILE.ID.eq(PRODUCT_POST.WRITER_ID))
+            /* 추가 정보: 아바타, maker, tag, link **/
             .leftJoin(ATTACHMENT_FILE)
             .on(ATTACHMENT_FILE.ID.eq(MEMBER_PROFILE.AVATAR_ID))
+            .leftJoin(PRODUCT_MAKER)
+            .on(PRODUCT_MAKER.PRODUCT_ID.eq(PRODUCT_POST.PRODUCT_ID))
+            .and(PRODUCT_MAKER.MEMBER_ID.eq(PRODUCT_POST.WRITER_ID))
+            .leftJoin(PPST_ALIAS).on(PPST_ALIAS.POST_ID.eq(PRODUCT_POST_SNAPSHOT.ID))
+            .leftJoin(TAG)
+            .on(TAG.ID.eq(PPST_ALIAS.TAG_ID))
             .leftJoin(PRODUCT_POST_LINK)
             .on(PRODUCT_POST_LINK.POST_ID.eq(PRODUCT_POST.ID))
             .leftJoin(PRODUCT_LINK)
             .on(PRODUCT_LINK.ID.eq(PRODUCT_POST_LINK.LINK_ID))
-            .where(condition)
-            // 서브쿼리의 postId와 일치하는 게시글만
-            .and(PRODUCT_POST_SNAPSHOT.ID.in(subQuery))
+            .where(
+                PRODUCT_POST_SNAPSHOT_TAG.TAG_ID.in(tagIds).and(condition)
+            )
             .groupBy(
                 PRODUCT_POST.ID,
-                MEMBER_PROFILE.NICKNAME,
-                MEMBER_PROFILE.USERHANDLE,
-                PRODUCT_POST_SNAPSHOT.CREATED_AT,
-                PRODUCT_MAKER.ID,
-                ATTACHMENT_FILE.URL,
-                PRODUCT_POST_SNAPSHOT.TITLE,
-                PRODUCT_POST_SNAPSHOT.DESCRIPTION,
-                PRICING_PLAN.NAME,
-                PRODUCT_POST.RECOMMEND_COUNT,
-                PRODUCT_POST_SNAPSHOT.ID
+                PRODUCT_POST_SNAPSHOT.ID,
+                MEMBER_PROFILE.ID,
+                PRICING_PLAN.ID,
+                ATTACHMENT_FILE.ID,
+                PRODUCT_MAKER.ID
             )
+            .having(DSL.countDistinct(PRODUCT_POST_SNAPSHOT_TAG.TAG_ID).eq(tagIds.size()))
             .orderBy(PRODUCT_POST.ID.desc(), PRODUCT_POST.CREATED_AT.desc())
             .limit(pageSize)
             .fetch();
@@ -498,7 +496,6 @@ public class ProductPostRepository {
 
         return result.map(record -> mapRecordToResponse(record, imagesMap));
     }
-
 
     public boolean existsById(Long id) {
         Integer count = dsl.selectCount()
