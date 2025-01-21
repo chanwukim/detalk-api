@@ -21,7 +21,6 @@ import net.detalk.api.repository.MemberRepository;
 import net.detalk.api.support.TimeHolder;
 import net.detalk.api.support.UUIDGenerator;
 import net.detalk.api.support.error.ApiException;
-import net.detalk.api.support.error.InvalidStateException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -49,9 +48,9 @@ class MemberServiceTest {
     /**
      * fake random classes
      */
-    private final TimeHolder timeHolder = new FakeTimeHolder(Instant.parse("2025-01-01T12:00:00Z"));
-    private final UUIDGenerator uuidGenerator = new FakeUUIDGenerator(
-        UUID.fromString("123e4567-e89b-12d3-a456-426614174000"));
+    private TimeHolder timeHolder;
+    private UUIDGenerator uuidGenerator;
+
     /**
      * objects
      */
@@ -66,6 +65,10 @@ class MemberServiceTest {
 
     @BeforeEach
     void init() {
+        timeHolder = new FakeTimeHolder(Instant.parse("2025-01-01T12:00:00Z"));
+        uuidGenerator = new FakeUUIDGenerator(
+            UUID.fromString("123e4567-e89b-12d3-a456-426614174000"));
+
         memberService = new MemberService(
             memberRepository,
             memberProfileRepository,
@@ -157,12 +160,12 @@ class MemberServiceTest {
         Long notExistsId = 9999L;
 
         // when
-        InvalidStateException exception = assertThrows(InvalidStateException.class,
+        MemberProfileNotFoundException exception = assertThrows(MemberProfileNotFoundException.class,
             () -> memberService.me(notExistsId));
 
         // then
         assertThat(exception.getMessage()).isEqualTo(
-            "[me] 회원 " + member.getId() + "의 프로필이 존재하지 않습니다");
+            "회원 프로필을 찾을 수 없습니다.");
     }
 
     @DisplayName("성공[registerProfile]")
@@ -264,7 +267,7 @@ class MemberServiceTest {
 
         // then
         assertThat(exception.getMessage())
-            .isEqualTo("해당 회원의 프로필을 찾을 수 없습니다.");
+            .isEqualTo("회원 프로필을 찾을 수 없습니다.");
     }
 
 }
