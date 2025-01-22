@@ -363,7 +363,7 @@ class MemberServiceTest {
 
     @DisplayName("성공 [findProfileByUserhandle] 회원 프로필 조회")
     @Test
-    void findProfileByUserhandle() {
+    void findProfileByUserhandle_whenValidUserHandle_shouldReturnProfile() {
 
         // given
         MemberProfile memberProfile = MemberProfile.builder()
@@ -433,7 +433,7 @@ class MemberServiceTest {
     }
 
     @Test
-    void checkDuplicateUserHandle() {
+    void checkDuplicateUserHandle_whenHandleExists_shouldThrowException() {
         var userHandle = "userHandle";
 
         when(memberProfileRepository.existsByUserHandle(userHandle)).thenReturn(true);

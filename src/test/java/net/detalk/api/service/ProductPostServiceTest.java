@@ -788,9 +788,9 @@ class ProductPostServiceTest {
         productPostService.incrementRecommendCount(productPostId, recommendCounts);
     }
 
-    @DisplayName("[incrementRecommendCount] 성공적으로 counts 만큼 추천 되어야 한다")
+    @DisplayName("[incrementRecommendCount] 음수 추천 수 입력 시 예외가 발생해야 한다")
     @Test
-    void incrementRecommendCountValidCounts() {
+    void incrementRecommendCount_throwsException_whenCountIsNegative() {
         var productPostId = 1L;
         int recommendCounts = -999;
 
@@ -803,9 +803,4 @@ class ProductPostServiceTest {
 
 
     }
-
-
-
-
-
 }
