@@ -36,7 +36,7 @@ public class MemberProfile {
             .id(id)
             .memberId(memberId)
             .avatarId(newAvatarId)
-            .userhandle(updateProfile.userandle())
+            .userhandle(updateProfile.userhandle())
             .nickname(updateProfile.nickname())
             .description(updateProfile.description())
             .updatedAt(now)

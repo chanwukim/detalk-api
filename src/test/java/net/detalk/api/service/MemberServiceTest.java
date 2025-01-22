@@ -8,12 +8,15 @@ import static org.mockito.Mockito.when;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
+import net.detalk.api.controller.v1.request.UpdateProfileRequest;
 import net.detalk.api.domain.LoginType;
 import net.detalk.api.domain.Member;
 import net.detalk.api.domain.MemberDetail;
 import net.detalk.api.domain.MemberProfile;
 import net.detalk.api.domain.MemberStatus;
+import net.detalk.api.domain.exception.MemberNotFoundException;
 import net.detalk.api.domain.exception.MemberProfileNotFoundException;
+import net.detalk.api.domain.exception.UserHandleDuplicatedException;
 import net.detalk.api.mock.FakeTimeHolder;
 import net.detalk.api.mock.FakeUUIDGenerator;
 import net.detalk.api.repository.MemberProfileRepository;
@@ -21,13 +24,13 @@ import net.detalk.api.repository.MemberRepository;
 import net.detalk.api.support.TimeHolder;
 import net.detalk.api.support.UUIDGenerator;
 import net.detalk.api.support.error.ApiException;
-import net.detalk.api.support.error.InvalidStateException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 
 @ExtendWith(MockitoExtension.class)
 class MemberServiceTest {
@@ -49,9 +52,9 @@ class MemberServiceTest {
     /**
      * fake random classes
      */
-    private final TimeHolder timeHolder = new FakeTimeHolder(Instant.parse("2025-01-01T12:00:00Z"));
-    private final UUIDGenerator uuidGenerator = new FakeUUIDGenerator(
-        UUID.fromString("123e4567-e89b-12d3-a456-426614174000"));
+    private TimeHolder timeHolder;
+    private UUIDGenerator uuidGenerator;
+
     /**
      * objects
      */
@@ -66,6 +69,10 @@ class MemberServiceTest {
 
     @BeforeEach
     void init() {
+        timeHolder = new FakeTimeHolder(Instant.parse("2025-01-01T12:00:00Z"));
+        uuidGenerator = new FakeUUIDGenerator(
+            UUID.fromString("123e4567-e89b-12d3-a456-426614174000"));
+
         memberService = new MemberService(
             memberRepository,
             memberProfileRepository,
@@ -157,12 +164,12 @@ class MemberServiceTest {
         Long notExistsId = 9999L;
 
         // when
-        InvalidStateException exception = assertThrows(InvalidStateException.class,
+        MemberProfileNotFoundException exception = assertThrows(MemberProfileNotFoundException.class,
             () -> memberService.me(notExistsId));
 
         // then
         assertThat(exception.getMessage()).isEqualTo(
-            "[me] 회원 " + member.getId() + "의 프로필이 존재하지 않습니다");
+            "회원 프로필을 찾을 수 없습니다.");
     }
 
     @DisplayName("성공[registerProfile]")
@@ -264,7 +271,181 @@ class MemberServiceTest {
 
         // then
         assertThat(exception.getMessage())
-            .isEqualTo("해당 회원의 프로필을 찾을 수 없습니다.");
+            .isEqualTo("회원 프로필을 찾을 수 없습니다.");
     }
+
+    @DisplayName("성공[updateProfile] 신규 userhandle 및 avatarId 제공 시, 정상 업데이트")
+    @Test
+    void updateProfile_WhenNewUserHandleIsDifferentAndAvatarProvided_ShouldUpdateProfile() {
+
+        var oldUserHandle = "oldUserHandle";
+        var oldNickname = "oldNickname";
+        var oldDescription = "oldDescription";
+
+        // given
+        MemberProfile oldProfile = MemberProfile.builder()
+            .id(1L)
+            .memberId(memberId)
+            .avatarId(uuidGenerator.generateV7())
+            .userhandle(oldUserHandle)
+            .nickname(oldNickname)
+            .description(oldDescription)
+            .updatedAt(timeHolder.now())
+            .build();
+
+        UUIDGenerator newUUIDgenerator = new FakeUUIDGenerator(
+            UUID.fromString("999999-e89b-12d3-a456-426614174000"));
+
+        UUID newAvatarId = newUUIDgenerator.generateV7();
+
+        UpdateProfileRequest updateRequest = UpdateProfileRequest.builder()
+            .userhandle("newUserHandle")
+            .avatarId(String.valueOf(newAvatarId))
+            .nickname("newNickname")
+            .description("newDescription")
+            .build();
+
+        when(memberRepository.findById(memberId)).thenReturn(Optional.of(member));
+        when(memberProfileRepository.findByMemberId(memberId)).thenReturn(Optional.of(oldProfile));
+
+        // when
+        memberService.updateProfile(memberId, updateRequest);
+    }
+
+    @DisplayName("실패[updateProfile] 존재하지 않는 MemberId 요청")
+    @Test
+    void updateProfile_WhenMemberIdNotFound() {
+
+        // given
+        var notExistsMemberId = 9999L;
+        var updateRequest = UpdateProfileRequest.builder()
+            .userhandle("newUserHandle")
+            .avatarId("asdfasdf")
+            .nickname("newNickname")
+            .description("newDescription")
+            .build();
+
+        // when
+        MemberNotFoundException exception = assertThrows(
+            MemberNotFoundException.class,
+            () -> memberService.updateProfile(notExistsMemberId, updateRequest));
+
+        // then
+        assertThat(exception.getMessage()).isEqualTo("해당 회원을 찾을 수 없습니다.");
+        assertThat(exception.getErrorCode()).isEqualTo("member_not_found");
+        assertThat(exception.getHttpStatus()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @DisplayName("실패[updateProfile] MemberId에 해당하는 프로파일이 존재하지 않음")
+    @Test
+    void updateProfile_WhenNotExistsMemberProfileWithMemberId() {
+
+        // given
+        var memberId = 9999L;
+        var updateRequest = UpdateProfileRequest.builder()
+            .userhandle("newUserHandle")
+            .avatarId("asdfasdf")
+            .nickname("newNickname")
+            .description("newDescription")
+            .build();
+
+        when(memberRepository.findById(memberId)).thenReturn(Optional.ofNullable(member));
+
+        // when
+        MemberProfileNotFoundException exception = assertThrows(
+            MemberProfileNotFoundException.class,
+            () -> memberService.updateProfile(memberId, updateRequest));
+
+        assertThat(exception.getMessage()).isEqualTo("회원 프로필을 찾을 수 없습니다.");
+        assertThat(exception.getErrorCode()).isEqualTo("member_profile_not_found");
+        assertThat(exception.getHttpStatus()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @DisplayName("성공 [findProfileByUserhandle] 회원 프로필 조회")
+    @Test
+    void findProfileByUserhandle_whenValidUserHandle_shouldReturnProfile() {
+
+        // given
+        MemberProfile memberProfile = MemberProfile.builder()
+            .id(1L)
+            .memberId(memberId)
+            .avatarId(uuidGenerator.generateV7())
+            .userhandle("userHandle")
+            .nickname("hello")
+            .description("desc")
+            .updatedAt(timeHolder.now())
+            .build();
+
+        var userHandle = "userHandle";
+        when(memberProfileRepository.findByUserHandle(userHandle)).thenReturn(
+            Optional.ofNullable(memberProfile));
+
+        // when
+        MemberProfile result = memberService.findProfileByUserhandle(userHandle);
+
+        // then
+        assertThat(result.getId()).isEqualTo(1L);
+        assertThat(result.getMemberId()).isEqualTo(memberId);
+        assertThat(result.getAvatarId()).isEqualTo(uuidGenerator.generateV7());
+        assertThat(result.getUserhandle()).isEqualTo("userHandle");
+        assertThat(result.getNickname()).isEqualTo("hello");
+        assertThat(result.getDescription()).isEqualTo("desc");
+    }
+
+    @DisplayName("성공 [findProfileByUserhandle] 회원 프로필 조회")
+    @Test
+    void findProfileByUserhandleFailWhenMemberProfileNotExistsWithUserHandle() {
+
+        var userHandle = "notExistsHandle";
+
+        MemberProfileNotFoundException exception = assertThrows(
+            MemberProfileNotFoundException.class,
+            () -> memberService.findProfileByUserhandle(userHandle));
+
+        assertThat(exception.getMessage()).isEqualTo("(userhandle: notExistsHandle)에 해당하는 회원 프로필을 찾을 수 없습니다.");
+        assertThat(exception.getErrorCode()).isEqualTo("member_profile_not_found");
+        assertThat(exception.getHttpStatus()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @DisplayName("성공[findMemberIdByUserHandle]UserHandle로 MemberId 조회")
+    @Test
+    void findMemberIdByUserHandle() {
+        // given
+        MemberProfile memberProfile = MemberProfile.builder()
+            .id(1L)
+            .memberId(memberId)
+            .avatarId(uuidGenerator.generateV7())
+            .userhandle("userHandle")
+            .nickname("hello")
+            .description("desc")
+            .updatedAt(timeHolder.now())
+            .build();
+
+        var userHandle = "userHandle";
+        when(memberProfileRepository.findByUserHandle(userHandle)).thenReturn(
+            Optional.ofNullable(memberProfile));
+
+        // when
+        Long foundMemberId = memberService.findMemberIdByUserHandle(userHandle);
+
+        // then
+        assertThat(foundMemberId).isEqualTo(memberId);
+    }
+
+    @Test
+    void checkDuplicateUserHandle_whenHandleExists_shouldThrowException() {
+        var userHandle = "userHandle";
+
+        when(memberProfileRepository.existsByUserHandle(userHandle)).thenReturn(true);
+
+        UserHandleDuplicatedException exception = assertThrows(
+            UserHandleDuplicatedException.class,
+            () -> memberService.checkDuplicateUserHandle(userHandle));
+
+        assertThat(exception.getMessage()).isEqualTo(String.format("이미 존재하는 userhandle입니다: %s", userHandle));
+        assertThat(exception.getHttpStatus()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(exception.getErrorCode()).isEqualTo("user_handle_conflict");
+    }
+
 
 }

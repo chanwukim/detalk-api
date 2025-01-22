@@ -10,9 +10,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class PricingPlanService {
 
-    private final PricingPlanCache pricingPlanCache;
+    private final DetalkCache<String, PricingPlan> pricingPlanCache;
 
     public PricingPlan findByName(String name) {
-        return pricingPlanCache.getPricingPlan(name);
+        return pricingPlanCache.get(name);
     }
 }

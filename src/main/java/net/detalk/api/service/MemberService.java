@@ -16,7 +16,6 @@ import net.detalk.api.repository.MemberProfileRepository;
 import net.detalk.api.repository.MemberRepository;
 import net.detalk.api.support.TimeHolder;
 import net.detalk.api.support.UUIDGenerator;
-import net.detalk.api.support.error.InvalidStateException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -97,8 +96,8 @@ public class MemberService {
         /**
          * 새로운 userHandle 요청이라면, 이미 존재하는지 검사한다.
          */
-        if (!memberProfile.hasSameUserHandle(updateRequest.userandle())) {
-            checkDuplicateUserHandle(updateRequest.userandle());
+        if (!memberProfile.hasSameUserHandle(updateRequest.userhandle())) {
+            checkDuplicateUserHandle(updateRequest.userhandle());
         }
 
         /**
