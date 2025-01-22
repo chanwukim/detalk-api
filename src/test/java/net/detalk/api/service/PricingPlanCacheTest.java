@@ -34,7 +34,7 @@ class PricingPlanCacheTest {
         var planName = "NonExistentPlan";
 
         // when & then
-        assertThatThrownBy(() -> pricingPlanCache.getPricingPlan(planName))
+        assertThatThrownBy(() -> pricingPlanCache.get(planName))
             .isInstanceOf(PricingPlanNotFoundException.class)
             .hasMessageContaining(String.format("가격 정책(NAME: %s)을 찾을 수 없습니다.", planName));
     }
@@ -56,7 +56,7 @@ class PricingPlanCacheTest {
         pricingPlanCache.loadPricingPlans();
 
         // then 
-        Map<String, PricingPlan> cache = pricingPlanCache.getCache();
+        Map<String, PricingPlan> cache = pricingPlanCache.getAll();
 
         assertThat(cache)
             .isNotEmpty()

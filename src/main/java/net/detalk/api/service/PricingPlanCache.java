@@ -19,9 +19,9 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class PricingPlanCache {
+public class PricingPlanCache implements DetalkCache<String,PricingPlan>{
 
-    private final ConcurrentMap<String, PricingPlan> pricingPlanCache = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, PricingPlan> cache = new ConcurrentHashMap<>();
 
     private final PricingPlanRepository pricingPlanRepository;
 
@@ -32,8 +32,8 @@ public class PricingPlanCache {
     protected void loadPricingPlans() {
         log.info("캐시용 가격 정책 목록 DB에서 조회중...");
         List<PricingPlan> plans = pricingPlanRepository.findAll();
-        plans.forEach(plan -> pricingPlanCache.put(plan.getName(), plan));
-        log.info("총 {}건의 가격 정책이 캐시되었습니다. {}", pricingPlanCache.size(), plans);
+        plans.forEach(plan -> cache.put(plan.getName(), plan));
+        log.info("총 {}건의 가격 정책이 캐시되었습니다. {}", cache.size(), plans);
     }
 
     /**
@@ -42,8 +42,9 @@ public class PricingPlanCache {
      * @return 가격 정책
      * @throws PricingPlanNotFoundException 가격 정책을 찾을 수 없는 경우
      */
-    public PricingPlan getPricingPlan(String name) {
-        PricingPlan plan = pricingPlanCache.get(name);
+    @Override
+    public PricingPlan get(String name) {
+        PricingPlan plan = cache.get(name);
         if (plan == null) {
             log.error("[getPricingPlan] 가격 정책을 찾을 수 없습니다: {}", name);
             throw new PricingPlanNotFoundException(name);
@@ -51,12 +52,18 @@ public class PricingPlanCache {
         return plan;
     }
 
+    @Override
+    public void put(String key, PricingPlan value) {
+        cache.put(key, value);
+    }
+
     /**
      * 캐시된 전체 가격 정책 조회
      * @return 외부에선 변경 불가능한 캐시 가격 정책
      */
-    public Map<String, PricingPlan> getCache() {
-        return Collections.unmodifiableMap(pricingPlanCache);
+    @Override
+    public Map<String, PricingPlan> getAll() {
+        return Collections.unmodifiableMap(cache);
     }
 
 }
