@@ -41,11 +41,11 @@ public class SessionOAuthSuccessHandler implements AuthenticationSuccessHandler 
             SecurityContextHolder.getContext().setAuthentication(securityAuthentication);
         } else {
             log.error("[onAuthenticationSuccess] 시큐리티 컨텍스트 홀더 등록 실패");
-            String url = appProperties.getBaseUrl() + "?oauth=fail";
+            String url = appProperties.getBaseUrl();
             redirectStrategy.sendRedirect(request, response, url);
             return;
         }
-        String url = appProperties.getBaseUrl() + "?oauth=success";
+        String url = appProperties.getBaseUrl();
         redirectStrategy.sendRedirect(request, response, url);
     }
 }
