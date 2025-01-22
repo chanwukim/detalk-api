@@ -299,7 +299,7 @@ class MemberServiceTest {
         UUID newAvatarId = newUUIDgenerator.generateV7();
 
         UpdateProfileRequest updateRequest = UpdateProfileRequest.builder()
-            .userandle("newUserHandle")
+            .userhandle("newUserHandle")
             .avatarId(String.valueOf(newAvatarId))
             .nickname("newNickname")
             .description("newDescription")
@@ -319,7 +319,7 @@ class MemberServiceTest {
         // given
         var notExistsMemberId = 9999L;
         var updateRequest = UpdateProfileRequest.builder()
-            .userandle("newUserHandle")
+            .userhandle("newUserHandle")
             .avatarId("asdfasdf")
             .nickname("newNickname")
             .description("newDescription")
@@ -343,7 +343,7 @@ class MemberServiceTest {
         // given
         var memberId = 9999L;
         var updateRequest = UpdateProfileRequest.builder()
-            .userandle("newUserHandle")
+            .userhandle("newUserHandle")
             .avatarId("asdfasdf")
             .nickname("newNickname")
             .description("newDescription")
