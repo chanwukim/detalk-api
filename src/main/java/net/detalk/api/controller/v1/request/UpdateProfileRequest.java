@@ -2,7 +2,9 @@ package net.detalk.api.controller.v1.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.Builder;
 
+@Builder
 public record UpdateProfileRequest(
     @NotBlank(message = "Userhandle is required")
     @Size(max = 64, message = "Userhandle must be less than or equal to 64 characters")
