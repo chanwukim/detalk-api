@@ -69,7 +69,7 @@ public class MemberController {
         @RequestParam(name = "size", defaultValue = "5") @Max(20) int pageSize,
         @RequestParam(name = "startId", required = false) Long nextId
     ) {
-        Long memberId = memberService.findMemberIdByUserHandle(userhandle);
+        Long memberId = memberService.getMemberIdByUserHandle(userhandle);
 
         CursorPageData<GetProductPostResponse> posts =
             productPostService.getProductPostsByMemberId(memberId, pageSize, nextId);
@@ -83,7 +83,7 @@ public class MemberController {
         @RequestParam(name = "size", defaultValue = "5") @Max(20) int pageSize,
         @RequestParam(name = "startId", required = false) Long nextId
     ) {
-        Long memberId = memberService.findMemberIdByUserHandle(userhandle);
+        Long memberId = memberService.getMemberIdByUserHandle(userhandle);
 
         CursorPageData<GetProductPostResponse> result =
             productPostService.getRecommendedPostsByMemberId(memberId, pageSize, nextId);

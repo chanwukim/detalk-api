@@ -33,7 +33,7 @@ public class MemberService {
      * 자신 프로필 조회
      */
     public MemberDetail me(Long memberId) {
-        Member member = findMemberById(memberId);
+        Member member = getMemberById(memberId);
 
         if (member.isPendingExternalMember()) {
             log.debug("[me] 회원가입이 필요한 외부 회원");
@@ -41,7 +41,7 @@ public class MemberService {
                 member.getStatus());
         }
 
-        return findMemberDetailByMemberId(member.getId());
+        return getMemberDetailByMemberId(member.getId());
     }
 
     /**
@@ -55,7 +55,7 @@ public class MemberService {
             throw new UserHandleDuplicatedException(userhandle);
         });
 
-        Member member = findMemberById(memberId);
+        Member member = getMemberById(memberId);
 
         if (!member.isPendingExternalMember()) {
             throw new InvalidMemberStatusException(memberId, member.getStatus());
@@ -63,7 +63,7 @@ public class MemberService {
 
         member.active(timeHolder);
         memberRepository.update(member);
-        MemberProfile memberProfile = findProfileByMemberId(member.getId());
+        MemberProfile memberProfile = getProfileByMemberId(member.getId());
 
          memberProfile = memberProfileRepository.update(
             MemberProfile.builder()
@@ -90,8 +90,8 @@ public class MemberService {
     @Transactional
     public void updateProfile(Long memberId, UpdateProfileRequest updateRequest) {
 
-        Member member = findMemberById(memberId);
-        MemberProfile memberProfile = findProfileByMemberId(member.getId());
+        Member member = getMemberById(memberId);
+        MemberProfile memberProfile = getProfileByMemberId(member.getId());
 
         /**
          * 새로운 userHandle 요청이라면, 이미 존재하는지 검사한다.
@@ -121,9 +121,9 @@ public class MemberService {
     @Transactional(readOnly = true)
     public GetMemberPublicProfileResponse getMemberDetailByUserhandle(String userhandle) {
 
-        MemberProfile memberProfile = findProfileByUserhandle(userhandle);
+        MemberProfile memberProfile = getProfileByUserhandle(userhandle);
 
-        MemberDetail memberDetail = findMemberDetailByMemberId(memberProfile.getMemberId());
+        MemberDetail memberDetail = getMemberDetailByMemberId(memberProfile.getMemberId());
 
         return GetMemberPublicProfileResponse.builder()
             .userhandle(memberProfile.getUserhandle())
@@ -136,7 +136,7 @@ public class MemberService {
     /**
      * MemberId로 회원 조회
      */
-    public Member findMemberById(Long id) {
+    public Member getMemberById(Long id) {
         return memberRepository.findById(id).orElseThrow(() -> {
             log.error("[findMemberById] 회원 ID {}는 존재하지 않습니다", id);
             return new MemberNotFoundException();
@@ -146,14 +146,14 @@ public class MemberService {
     /**
      * UserHandle로 MemberId 조회
      */
-    public Long findMemberIdByUserHandle(String userHandle) {
-        return findProfileByUserhandle(userHandle).getId();
+    public Long getMemberIdByUserHandle(String userHandle) {
+        return getProfileByUserhandle(userHandle).getId();
     }
 
     /**
      * Userhandle로 회원 프로필 조회
      */
-    public MemberProfile findProfileByUserhandle(String userhandle) {
+    public MemberProfile getProfileByUserhandle(String userhandle) {
         return memberProfileRepository.findByUserHandle(userhandle)
             .orElseThrow(() -> {
                     log.error("[findMemberIdByUserHandle] 회원 userHandle {}은 존재하지 않는 회원입니다", userhandle);
@@ -165,7 +165,7 @@ public class MemberService {
     /**
      * MemberId 로 회원 프로필 조회
      */
-    public MemberProfile findProfileByMemberId(Long memberId) {
+    public MemberProfile getProfileByMemberId(Long memberId) {
         return memberProfileRepository.findByMemberId(memberId)
             .orElseThrow(()->{
                 log.error("[findProfileByMemberId] 존재하지 않는 회원 프로필 입니다. memberId={}", memberId);
@@ -176,7 +176,7 @@ public class MemberService {
     /**
      * MemberId로 회원 프로필 모든 정보 조회 (avatarUrl 포함)
      */
-    private MemberDetail findMemberDetailByMemberId(Long memberId) {
+    private MemberDetail getMemberDetailByMemberId(Long memberId) {
         return memberProfileRepository.findWithAvatarByMemberId(memberId)
             .orElseThrow(() -> {
                 log.error("[GetMemberPublicProfileResponse] 존재하지 않는 회원 프로필 입니다. memberId={}",

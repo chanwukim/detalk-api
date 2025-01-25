@@ -363,7 +363,7 @@ class MemberServiceTest {
 
     @DisplayName("성공 [findProfileByUserhandle] 회원 프로필 조회")
     @Test
-    void findProfileByUserhandle_whenValidUserHandle_shouldReturnProfile() {
+    void getProfileByUserhandle_whenValidUserHandle_shouldReturnProfile() {
 
         // given
         MemberProfile memberProfile = MemberProfile.builder()
@@ -381,7 +381,7 @@ class MemberServiceTest {
             Optional.ofNullable(memberProfile));
 
         // when
-        MemberProfile result = memberService.findProfileByUserhandle(userHandle);
+        MemberProfile result = memberService.getProfileByUserhandle(userHandle);
 
         // then
         assertThat(result.getId()).isEqualTo(1L);
@@ -394,13 +394,13 @@ class MemberServiceTest {
 
     @DisplayName("성공 [findProfileByUserhandle] 회원 프로필 조회")
     @Test
-    void findProfileByUserhandleFailWhenMemberProfileNotExistsWithUserHandle() {
+    void getProfileByUserhandleFailWhenMemberProfileNotExistsWithUserHandle() {
 
         var userHandle = "notExistsHandle";
 
         MemberProfileNotFoundException exception = assertThrows(
             MemberProfileNotFoundException.class,
-            () -> memberService.findProfileByUserhandle(userHandle));
+            () -> memberService.getProfileByUserhandle(userHandle));
 
         assertThat(exception.getMessage()).isEqualTo("(userhandle: notExistsHandle)에 해당하는 회원 프로필을 찾을 수 없습니다.");
         assertThat(exception.getErrorCode()).isEqualTo("member_profile_not_found");
@@ -409,7 +409,7 @@ class MemberServiceTest {
 
     @DisplayName("성공[findMemberIdByUserHandle]UserHandle로 MemberId 조회")
     @Test
-    void findMemberIdByUserHandle() {
+    void getMemberIdByUserHandle() {
         // given
         MemberProfile memberProfile = MemberProfile.builder()
             .id(1L)
@@ -426,7 +426,7 @@ class MemberServiceTest {
             Optional.ofNullable(memberProfile));
 
         // when
-        Long foundMemberId = memberService.findMemberIdByUserHandle(userHandle);
+        Long foundMemberId = memberService.getMemberIdByUserHandle(userHandle);
 
         // then
         assertThat(foundMemberId).isEqualTo(memberId);
