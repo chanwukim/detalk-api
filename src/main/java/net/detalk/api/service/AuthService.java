@@ -4,6 +4,7 @@ import java.util.UUID;
 import net.detalk.api.controller.v1.response.SessionInfoResponse;
 import net.detalk.api.domain.*;
 import net.detalk.api.domain.exception.MemberNotFoundException;
+import net.detalk.api.domain.exception.MemberProfileNotFoundException;
 import net.detalk.api.domain.exception.ProviderUnsupportedException;
 import net.detalk.api.domain.exception.RefreshTokenNotFoundException;
 import net.detalk.api.repository.AttachmentFileRepository;
@@ -38,7 +39,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthService extends DefaultOAuth2UserService {
 
     private final MemberRepository memberRepository;
-    private final MemberService memberService;
     private final MemberProfileRepository memberProfileRepository;
     private final MemberExternalRepository memberExternalRepository;
     private final AuthRefreshTokenRepository authRefreshTokenRepository;
@@ -67,9 +67,12 @@ public class AuthService extends DefaultOAuth2UserService {
             .orElseGet(() -> register(provider, providerId, pictureUrl));
 
         // member 첫 회원가입 상태여부
-        boolean isNewMember = memberRepository.findById(memberExternal.getMemberId())
-            .orElseThrow(MemberNotFoundException::new)
-            .isNewMember();
+        Member member = memberRepository.findById(memberExternal.getMemberId()).orElseThrow(() -> {
+            log.info("[loadUser] 회원 ID {}는 존재하지 않습니다", memberExternal.getMemberId());
+            return new MemberNotFoundException();
+        });
+
+        boolean isNewMember = member.isNewMember();
 
         // TODO: ADMIN 권한 확인
         List<String> authorities = List.of(SecurityRole.MEMBER.getName());
@@ -98,8 +101,18 @@ public class AuthService extends DefaultOAuth2UserService {
     @Transactional(readOnly = true)
     public SessionInfoResponse getSessionInfo(Long memberId) {
 
-        Member member = memberService.getMemberById(memberId);
-        MemberDetail memberDetail = memberService.getMemberDetailByMemberId(memberId);
+        Member member =  memberRepository.findById(memberId).orElseThrow(() -> {
+            log.info("[getSessionInfo] 회원 ID {}는 존재하지 않습니다", memberId);
+            return new MemberNotFoundException();
+        });
+
+        MemberDetail memberDetail = memberProfileRepository.findWithAvatarByMemberId(memberId)
+            .orElseThrow(() -> {
+                log.info("[GetMemberPublicProfileResponse] 존재하지 않는 회원 프로필 입니다. memberId={}",
+                    memberId);
+                return new MemberProfileNotFoundException();
+            });
+
 
         List<String> roles = member.isPendingExternalMember() ? List.of() : List.of("member");
 
