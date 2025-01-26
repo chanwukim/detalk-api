@@ -3,15 +3,20 @@ package net.detalk.api.controller.v1;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import net.detalk.api.controller.v1.response.SessionInfoResponse;
 import net.detalk.api.domain.AuthToken;
 import net.detalk.api.domain.exception.RefreshTokenUnauthorizedException;
 import net.detalk.api.service.AuthService;
 import net.detalk.api.support.EnvironmentHolder;
 import net.detalk.api.support.error.ApiException;
 import net.detalk.api.support.error.ErrorMessage;
+import net.detalk.api.support.security.HasRole;
+import net.detalk.api.support.security.SecurityRole;
+import net.detalk.api.support.security.SecurityUser;
 import net.detalk.api.support.util.CookieUtil;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -86,4 +91,13 @@ public class AuthController {
             .noContent()
             .build();
     }
+
+    @GetMapping("/session")
+    public ResponseEntity<SessionInfoResponse> getSessionInfo(
+        @HasRole(SecurityRole.MEMBER) SecurityUser user
+    ) {
+        SessionInfoResponse sessionInfo = authService.getSessionInfo(user.getId());
+        return ResponseEntity.ok(sessionInfo);
+    }
+
 }

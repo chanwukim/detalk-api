@@ -1,7 +1,7 @@
 package net.detalk.api.service;
 
-import jakarta.transaction.Transactional;
 import java.util.UUID;
+import net.detalk.api.controller.v1.response.SessionInfoResponse;
 import net.detalk.api.domain.*;
 import net.detalk.api.domain.exception.MemberNotFoundException;
 import net.detalk.api.domain.exception.ProviderUnsupportedException;
@@ -30,6 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -37,6 +38,7 @@ import java.util.List;
 public class AuthService extends DefaultOAuth2UserService {
 
     private final MemberRepository memberRepository;
+    private final MemberService memberService;
     private final MemberProfileRepository memberProfileRepository;
     private final MemberExternalRepository memberExternalRepository;
     private final AuthRefreshTokenRepository authRefreshTokenRepository;
@@ -90,6 +92,24 @@ public class AuthService extends DefaultOAuth2UserService {
             .refreshToken(refreshToken.getValue())
             .authorities(AuthorityUtils.createAuthorityList(authorities.toArray(String[]::new)))
             .attributes(user.getAttributes())
+            .build();
+    }
+
+    @Transactional(readOnly = true)
+    public SessionInfoResponse getSessionInfo(Long memberId) {
+
+        Member member = memberService.getMemberById(memberId);
+        MemberDetail memberDetail = memberService.getMemberDetailByMemberId(memberId);
+
+        List<String> roles = member.isPendingExternalMember() ? List.of() : List.of("member");
+
+        return SessionInfoResponse.builder()
+            .id(memberId)
+            .userhandle(memberDetail.getUserhandle())
+            .nickname(memberDetail.getNickname())
+            .description(memberDetail.getDescription())
+            .avatarUrl(memberDetail.getAvatarUrl())
+            .roles(roles)
             .build();
     }
 
