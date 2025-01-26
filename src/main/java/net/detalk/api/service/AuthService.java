@@ -101,30 +101,16 @@ public class AuthService extends DefaultOAuth2UserService {
         Member member = memberService.getMemberById(memberId);
         MemberDetail memberDetail = memberService.getMemberDetailByMemberId(memberId);
 
-        SessionInfoResponse sessionInfoResponse;
-        if (member.isPendingExternalMember()) {
-            sessionInfoResponse = SessionInfoResponse.builder()
-                .id(memberId)
-                .userhandle(memberDetail.getUserhandle())
-                .nickname(memberDetail.getNickname())
-                .description(memberDetail.getDescription())
-                .avatarUrl(memberDetail.getAvatarUrl())
-                .roles(List.of())
-                .build();
-            log.debug("[getSessionInfo] 회원가입이 필요한 외부 회원 세션 조회, memberId={}", memberId);
-        }else{
-            sessionInfoResponse = SessionInfoResponse.builder()
-                .id(memberId)
-                .userhandle(memberDetail.getUserhandle())
-                .nickname(memberDetail.getNickname())
-                .description(memberDetail.getDescription())
-                .avatarUrl(memberDetail.getAvatarUrl())
-                .roles(List.of("member"))
-                .build();
-            log.debug("[getSessionInfo] 기존회원 세션 조회, memberId={}", memberId);
-        }
+        List<String> roles = member.isPendingExternalMember() ? List.of() : List.of("member");
 
-        return sessionInfoResponse;
+        return SessionInfoResponse.builder()
+            .id(memberId)
+            .userhandle(memberDetail.getUserhandle())
+            .nickname(memberDetail.getNickname())
+            .description(memberDetail.getDescription())
+            .avatarUrl(memberDetail.getAvatarUrl())
+            .roles(roles)
+            .build();
     }
 
     private OAuthProvider validateAndGetProvider(String registrationId) {
