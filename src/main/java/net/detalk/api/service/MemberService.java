@@ -176,7 +176,7 @@ public class MemberService {
     /**
      * MemberId로 회원 프로필 모든 정보 조회 (avatarUrl 포함)
      */
-    private MemberDetail getMemberDetailByMemberId(Long memberId) {
+    public MemberDetail getMemberDetailByMemberId(Long memberId) {
         return memberProfileRepository.findWithAvatarByMemberId(memberId)
             .orElseThrow(() -> {
                 log.error("[GetMemberPublicProfileResponse] 존재하지 않는 회원 프로필 입니다. memberId={}",
