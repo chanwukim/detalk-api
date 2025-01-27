@@ -10,6 +10,7 @@ detalk:
   s3-access-key:
   s3-secret-key:
 
+  # 이미지 업로드 URL의 만료 시간 (분)
   upload-url-expiry-minutes: 2
   cloud-flare-account-id:
   cloud-flare-images-api-token:
