@@ -2,9 +2,9 @@ package net.detalk.api.controller.v1;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import net.detalk.api.controller.v1.request.PreSignedUrlRequest;
-import net.detalk.api.domain.PreSignedData;
-import net.detalk.api.service.FileService;
+import net.detalk.api.controller.v1.request.ImageUploadRequest;
+import net.detalk.api.domain.UploadImageData;
+import net.detalk.api.service.ImageService;
 import net.detalk.api.support.security.HasRole;
 import net.detalk.api.support.security.SecurityRole;
 import net.detalk.api.support.security.SecurityUser;
@@ -14,21 +14,26 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * @deprecated
- */
 @RestController
-@RequestMapping("/api/v1/files")
+@RequestMapping("/api/v1/images")
 @RequiredArgsConstructor
-public class FileController {
-    private final FileService fileService;
+public class ImageController {
+    private final ImageService imageService;
 
-    @PostMapping("/signed-url")
-    public ResponseEntity<PreSignedData> createPreSignedUrl(
+    @PostMapping("/upload-url")
+    public ResponseEntity<UploadImageData> createImageUploadUrl (
         @HasRole(SecurityRole.MEMBER) SecurityUser user,
-        @Valid @RequestBody PreSignedUrlRequest body
+        @Valid @RequestBody ImageUploadRequest body
         ) {
-        PreSignedData result = fileService.createPreSignedUrl(user.getId(), body.fileName(), body.fileType(), body.type());
-        return ResponseEntity.ok().body(result);
+
+        UploadImageData uploadImageData = imageService.createImageUploadUrl(
+            user.getId(),
+            body.fileName(),
+            body.purpose()
+        );
+
+        return ResponseEntity
+            .ok()
+            .body(uploadImageData);
     }
 }

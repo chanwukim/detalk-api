@@ -20,4 +20,9 @@ public class AppProperties {
     private String s3Endpoint;
     private String s3AccessKey;
     private String s3SecretKey;
+
+    private int uploadUrlExpiryMinutes;
+    private String cloudFlareImagesApiToken;
+    private String cloudFlareAccountId;
+    private String cloudFlareAccountHash;
 }

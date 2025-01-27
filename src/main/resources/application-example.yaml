@@ -1,12 +1,20 @@
 detalk:
   base-url: http://localhost:3000
+
   token-secret: # https://jwtsecret.com/generate
   access-token-expires-in-seconds: 300
   refresh-token-expires-in-seconds: 1209600
+
   s3-bucket:
   s3-endpoint: https://{account-id}.r2.cloudflarestorage.com
   s3-access-key:
   s3-secret-key:
+
+  # 이미지 업로드 URL의 만료 시간 (분)
+  upload-url-expiry-minutes: 2
+  cloud-flare-account-id:
+  cloud-flare-images-api-token:
+  cloud-flare-account-hash:
 
 server:
   forward-headers-strategy: framework

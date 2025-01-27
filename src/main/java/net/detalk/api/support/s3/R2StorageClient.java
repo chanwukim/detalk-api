@@ -2,6 +2,7 @@ package net.detalk.api.support.s3;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.detalk.api.service.ImageService;
 import net.detalk.api.support.AppProperties;
 import org.springframework.stereotype.Component;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
@@ -10,6 +11,11 @@ import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignReques
 
 import java.time.Duration;
 
+/**
+ * @deprecated
+ * 클라우드 플레어 R2에서 Images로 변경함. {@link ImageService} 참고
+ * @see <a href="https://github.com/chanwukim/detalk-api/issues/90">https://github.com/chanwukim/detalk-api/issues/90</a>
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
