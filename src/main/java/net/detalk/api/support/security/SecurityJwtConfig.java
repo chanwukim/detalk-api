@@ -22,7 +22,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import java.io.PrintWriter;
 
 /**
- * @deprecated 백업 코드
+ * @deprecated 백업w 코드
  */
 @RequiredArgsConstructor
 public class SecurityJwtConfig {
