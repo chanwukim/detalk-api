@@ -23,9 +23,16 @@ public class DetalkInitializer implements ApplicationRunner {
         // 가격 정책 캐싱
         pricingPlanCache.loadPricingPlans();
 
-        // 디스코드 연동 초기화
-        discordService.initialize();
+        // 트랜잭션과 무관한 Discord 연동 초기화
+        initializeDiscord();
+    }
 
+    private void initializeDiscord() {
+        try {
+            discordService.initialize();
+        } catch (Exception e) {
+            log.error("Discord 봇 초기화 실패: {}", e.getMessage(), e);
+        }
     }
 
 }
