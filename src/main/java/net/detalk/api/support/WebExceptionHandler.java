@@ -1,6 +1,8 @@
 package net.detalk.api.support;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import net.detalk.api.service.DiscordService;
 import net.detalk.api.support.error.ApiException;
 import net.detalk.api.support.error.ErrorCode;
 import net.detalk.api.support.error.ErrorMessage;
@@ -21,6 +23,12 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestControllerAdvice
 public class WebExceptionHandler {
+
+    private final DiscordService discordService;
+
+    public WebExceptionHandler(DiscordService discordService) {
+        this.discordService = discordService;
+    }
 
     @ExceptionHandler(ApiException.class)
     public ResponseEntity<ErrorMessage> handleApiException(ApiException e) {
@@ -83,8 +91,24 @@ public class WebExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorMessage> handleException(Exception e) {
-        log.error("Exception. {} ", getAllMessage(e));
+    public ResponseEntity<ErrorMessage> handleException(Exception e, HttpServletRequest request) {
+
+        String errorClass = e.getClass().getSimpleName();
+        String errorMessage = getAllMessage(e);
+        String clientIp = request.getRemoteAddr();
+        String endpoint = request.getRequestURI();
+
+        String discordMsg = String.format(
+            "🛑 [%s]\n• IP: %s\n• Endpoint: %s\n• Message: %s",
+            errorClass,
+            clientIp,
+            endpoint,
+            errorMessage
+        );
+
+        log.error("Exception. {} ", discordMsg);
+        discordService.sendMessage(discordMsg);
+
         return ResponseEntity
             .status(HttpStatus.INTERNAL_SERVER_ERROR)
             .body(new ErrorMessage(ErrorCode.INTERNAL_SERVER_ERROR));
