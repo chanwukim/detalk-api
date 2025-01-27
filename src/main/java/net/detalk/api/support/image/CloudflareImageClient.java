@@ -69,7 +69,6 @@ public class CloudflareImageClient implements ImageClient {
             // client 이미지에 접근하는 url
             String imageDeliveryUrl = String.format(
                 "https://cdn.detalk.net/images/%s/public",
-                appProperties.getCloudFlareAccountId(),
                 result.id);
 
             return UploadImageInfo.builder()
