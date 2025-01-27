@@ -46,7 +46,7 @@ public class DiscordServiceImpl implements DiscordService {
             log.info("Discord JDA initialized successfully in '{}' profile. (Channel ID: {})",
                 activeProfile, config.getChannelId());
 
-            if (activeProfile.equals("prod")) {
+            if ("prod".equals(activeProfile)) {
                 sendMessage("프로덕션 환경으로 Discord봇이 성공적으로 실행되었습니다.");
             }
 
@@ -57,6 +57,10 @@ public class DiscordServiceImpl implements DiscordService {
 
     }
 
+    /**
+     * yaml 설정 파일 discord channelId 에 해당하는곳으로 전송
+     * @param message
+     */
     @Override
     public void sendMessage(String message) {
         if (!isReady()) {
