@@ -81,6 +81,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/v1/members/{userhandle}/recommended-posts").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/members/{userhandle}").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/tags").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/v1/images/upload-url").hasRole("MEMBER")
                 .anyRequest().authenticated())
             /**
              * sign-in: /oauth2/authorization/{registrationId}
