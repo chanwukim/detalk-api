@@ -58,6 +58,10 @@ dependencies {
 
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0'
 
+
+	implementation ('net.dv8tion:JDA:5.2.2'){
+		exclude module: 'opus-java'
+	}
 }
 
 tasks.named('test') {
