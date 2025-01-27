@@ -95,13 +95,11 @@ public class WebExceptionHandler {
 
         String errorClass = e.getClass().getSimpleName();
         String errorMessage = getAllMessage(e);
-        String clientIp = request.getRemoteAddr();
         String endpoint = request.getRequestURI();
 
         String discordMsg = String.format(
-            "🛑 [%s]\n• IP: %s\n• Endpoint: %s\n• Message: %s",
+            "🛑 [%s]\n• Endpoint: %s\n• Message: %s",
             errorClass,
-            clientIp,
             endpoint,
             errorMessage
         );
