@@ -2,45 +2,42 @@
 <configuration>
 
   <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+  <property name="LOG_FILE" value="application-dev.log"/>
+  <property name="LOG_PATH" value="./logs"/>
+  <property name="consolePattern" value="%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr([MDC=%X{correlationId}]){blue} %clr([%thread]){magenta} %clr(%-5level) %clr(%logger{36}){cyan} - %msg%n"/>
+  <property name="filePattern" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [corr=%X{correlationId}] [%thread] %-5level %logger{36} - %msg%n"/>
 
-  <springProperty scope="context" name="consolePattern" source="logging.pattern.console"/>
-  <springProperty scope="context" name="filePattern" source="logging.pattern.file"/>
-  <springProperty scope="context" name="LOG_PATH" source="logging.file.path"/>
-  <springProperty scope="context" name="LOG_FILE" source="logging.file.name"/>
-  <springProperty scope="context" name="LOG_FILE_NAME" source="logging.file.file-name"/>
-  <springProperty scope="context" name="LOGBACK_ROLLINGPOLICY_MAX_HISTORY" source="logging.logback.rollingPolicy.max-history"/>
-  <springProperty scope="context" name="LOGBACK_ROLLINGPOLICY_TOTAL_SIZE_CAP" source="logging.logback.rollingPolicy.total-size-cap"/>
-  <springProperty scope="context" name="LOGBACK_ROLLINGPOLICY_MAX_FILE_SIZE" source="logging.logback.rollingPolicy.max-file-size"/>
-
-
+  <!-- 콘솔출력 -->
   <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
     <encoder>
       <pattern>${consolePattern}</pattern>
     </encoder>
   </appender>
 
-
+  <!-- 파일 저장 -->
   <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-    <file>${LOG_PATH}/${LOG_FILE}.log</file>
-    <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-      <fileNamePattern>${LOG_PATH}/${LOG_FILE_NAME}.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
-      <maxHistory>${LOGBACK_ROLLINGPOLICY_MAX_HISTORY}</maxHistory>
-      <totalSizeCap>${LOGBACK_ROLLINGPOLICY_TOTAL_SIZE_CAP}</totalSizeCap>
-      <maxFileSize>${LOGBACK_ROLLINGPOLICY_MAX_FILE_SIZE}</maxFileSize>
+    <file>${LOG_PATH}/${LOG_FILE}</file>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <!-- 하루단위로 gz로 압축 -->
+      <fileNamePattern>${LOG_PATH}/gz/application.%d{yyyy-MM-dd}.log.gz</fileNamePattern>
+      <!-- 3일간 보관 -->
+      <maxHistory>3</maxHistory>
+      <totalSizeCap>50MB</totalSizeCap>
     </rollingPolicy>
     <encoder>
       <pattern>${filePattern}</pattern>
     </encoder>
+
+    <!-- 파일에 저장할 로그 레벨 INFO -->
+    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+      <level>INFO</level>
+    </filter>
   </appender>
 
-  <!-- 루트 로거 레벨을 YAML에서 정의한 값으로 설정 -->
-  <root level="${logging.level.root}">
+  <!-- 출력 로그 레벨 -->
+  <root level="INFO">
     <appender-ref ref="CONSOLE" />
     <appender-ref ref="FILE" />
   </root>
-
-  <!-- 특정 로거 레벨을 YAML에서 정의한 값으로 설정 -->
-  <logger name="org.jooq.tools.LoggerListener" level="${logging.level.org.jooq.tools.LoggerListener}" />
-  <logger name="net.detalk.api" level="${logging.level.net.detalk.api}" />
 
 </configuration>
