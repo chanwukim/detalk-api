@@ -4,4 +4,5 @@ public interface EnvironmentHolder {
 
     String[] getActiveProfiles();
 
+    String getActiveProfile();
 }
