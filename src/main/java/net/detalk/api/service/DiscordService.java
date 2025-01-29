@@ -12,8 +12,4 @@ public interface DiscordService {
      */
     void sendMessage(String message);
 
-    /**
-     * 디스코드 특정 채널에 message 전송
-     */
-    void sendMessage(String channelId, String message);
 }

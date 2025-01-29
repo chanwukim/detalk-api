@@ -70,24 +70,6 @@ public class DiscordServiceImpl implements DiscordService {
         defaultChannel.sendMessage(message).queue();
     }
 
-    @Override
-    public void sendMessage(String channelId, String message) {
-
-        if (jda == null) {
-            log.warn("JDA not initialized. Cannot send message.");
-            return;
-        }
-
-        TextChannel channel = jda.getTextChannelById(channelId);
-
-        if (channel == null) {
-            log.warn("Channel not found for ID: {}", channelId);
-            return;
-        }
-
-        channel.sendMessage(message).queue();
-    }
-
     private boolean isReady() {
         return (jda != null && defaultChannel != null);
     }
