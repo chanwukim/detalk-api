@@ -75,10 +75,6 @@ public class DiscordServiceImpl implements DiscordService {
         }
         String formattedMessage = message.toDiscordFormat();
 
-        if (formattedMessage.length() > 2000) {
-            formattedMessage = formattedMessage.substring(0, 1900) + "... [TRUNCATED]";
-        }
-
         sendToChannel(formattedMessage);
     }
 
