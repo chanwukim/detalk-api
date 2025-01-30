@@ -1,5 +1,7 @@
 package net.detalk.api.service;
 
+import net.detalk.api.domain.DiscordErrorMessage;
+
 public interface DiscordService {
 
     /**
@@ -8,8 +10,12 @@ public interface DiscordService {
     void initialize();
 
     /**
-     * 기본 채널에 message 전송
+     * message 전송
      */
     void sendMessage(String message);
 
+    /**
+     * Error 전송
+     */
+    void sendError(DiscordErrorMessage discordErrorMessage);
 }

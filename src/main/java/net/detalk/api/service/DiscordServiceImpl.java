@@ -2,6 +2,7 @@ package net.detalk.api.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.detalk.api.domain.DiscordErrorMessage;
 import net.detalk.api.support.DiscordConfig;
 import net.detalk.api.support.EnvironmentHolder;
 import net.dv8tion.jda.api.JDA;
@@ -57,21 +58,40 @@ public class DiscordServiceImpl implements DiscordService {
 
     }
 
-    /**
-     * yaml 설정 파일 discord channelId 에 해당하는곳으로 전송
-     * @param message
-     */
     @Override
     public void sendMessage(String message) {
         if (!isReady()) {
             log.warn("JDA not initialized or channel is null. Cannot send message: {}", message);
             return;
         }
-        defaultChannel.sendMessage(message).queue();
+        sendToChannel(message);
+    }
+
+    @Override
+    public void sendError(DiscordErrorMessage message) {
+        if (!isReady()) {
+            log.warn("JDA not initialized or channel is null. Cannot send message: {}", message.toDiscordFormat());
+            return;
+        }
+        String formattedMessage = message.toDiscordFormat();
+
+        if (formattedMessage.length() > 2000) {
+            formattedMessage = formattedMessage.substring(0, 1900) + "... [TRUNCATED]";
+        }
+
+        sendToChannel(formattedMessage);
     }
 
     private boolean isReady() {
         return (jda != null && defaultChannel != null);
     }
+
+    private void sendToChannel(String message) {
+        defaultChannel.sendMessage(message).queue(
+            success -> log.debug("디스코드 알림 전송 성공"),
+            failure -> log.error("디스코드 알림 전송 실패", failure)
+        );
+    }
+
 
 }
