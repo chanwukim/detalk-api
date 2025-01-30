@@ -1,7 +1,9 @@
 package net.detalk.api.support;
 
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.Arrays;
 import lombok.extern.slf4j.Slf4j;
+import net.detalk.api.domain.DiscordErrorMessage;
 import net.detalk.api.service.DiscordService;
 import net.detalk.api.support.error.ApiException;
 import net.detalk.api.support.error.ErrorCode;
@@ -93,19 +95,14 @@ public class WebExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorMessage> handleException(Exception e, HttpServletRequest request) {
 
-        String errorClass = e.getClass().getSimpleName();
-        String errorMessage = getAllMessage(e);
-        String endpoint = request.getRequestURI();
-
-        String discordMsg = String.format(
-            "🛑 [%s]\n• Endpoint: %s\n• Message: %s",
-            errorClass,
-            endpoint,
-            errorMessage
+        DiscordErrorMessage discordErrorMessage = new DiscordErrorMessage(
+            request.getRequestURI(),
+            e.getClass().getSimpleName(),
+            getAllMessage(e),
+            getStackTrace(e)
         );
 
-        log.error("Exception. {} ", discordMsg);
-        discordService.sendMessage(discordMsg);
+        discordService.sendError(discordErrorMessage);
 
         return ResponseEntity
             .status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -122,5 +119,12 @@ public class WebExceptionHandler {
         }
 
         return strBuilder.toString();
+    }
+
+    private String getStackTrace(Exception e) {
+        return Arrays.stream(e.getStackTrace())
+            .limit(5)
+            .map(StackTraceElement::toString)
+            .collect(Collectors.joining("\n"));
     }
 }
