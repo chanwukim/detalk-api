@@ -12,7 +12,6 @@ public record ImageUploadRequest(
      */
     @NotBlank
     @Size(max = 255)
-    @Pattern(regexp = "^.+\\.(jpg|jpeg|png|gif|webp)$", message = "지원되는 이미지 형식이 아닙니다")
     String fileName,
 
     /**
