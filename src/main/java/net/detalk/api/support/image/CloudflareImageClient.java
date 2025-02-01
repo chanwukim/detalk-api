@@ -34,12 +34,9 @@ public class CloudflareImageClient implements ImageClient {
      * "https://developers.cloudflare.com/images/upload-images/direct-creator-upload/">https://developers.cloudflare.com/images/upload-images/direct-creator-upload/</a>
      */
     @Override
-    public UploadImageInfo createUploadUrl(String uploaderId, String path, Map<String, String> metadata) {
+    public UploadImageInfo createUploadUrl(Map<String, String> metadata) {
         // metadata
         Map<String, Object> requestMetadata = new HashMap<>();
-
-        requestMetadata.put("uploaderId", uploaderId);
-        requestMetadata.put("path", path);
 
         if (metadata != null) {
             requestMetadata.putAll(metadata);

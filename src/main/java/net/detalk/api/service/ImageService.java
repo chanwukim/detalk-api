@@ -12,6 +12,8 @@ import net.detalk.api.support.image.ImageClient;
 import net.detalk.api.support.image.UploadImageInfo;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -54,10 +56,18 @@ public class ImageService {
             throw new InvalidImageFormatException("지원하지 않는 이미지 형식입니다");
         }
 
-        UploadImageInfo uploadImageInfo = imageClient.createUploadUrl(memberId.toString(), purpose, null);
+        UUID fileId = uuidGenerator.generateV7();
+
+        Map<String, String> metadata = new HashMap<>();
+        metadata.put("memberId", memberId.toString());
+        metadata.put("fileId", fileId.toString());
+        metadata.put("fileName", fileName);
+        metadata.put("purpose", purpose);
+
+        UploadImageInfo uploadImageInfo = imageClient.createUploadUrl(metadata);
         log.debug("[createImageUploadUrl] uploadImageInfo = {}", uploadImageInfo);
 
-        UUID fileId = uuidGenerator.generateV7();
+
         AttachmentFile file = AttachmentFile.builder()
             .id(fileId)
             .uploaderId(memberId)
