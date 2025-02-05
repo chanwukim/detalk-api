@@ -218,7 +218,7 @@ public class ProductPostService {
     @Transactional(readOnly = true)
     public GetProductPostResponse getProductPostDetailsById(Long id) {
         return productPostRepository.findDetailsById(id).orElseThrow(() -> {
-            log.error("[getProductPostDetailsById] 제품 게시글 없음 ID: {}", id);
+            log.info("[getProductPostDetailsById] 제품 게시글 없음 ID: {}", id);
             return new ProductPostNotFoundException(id);
         });
     }
@@ -361,7 +361,7 @@ public class ProductPostService {
      */
     public void validatePostExists(Long id) {
         if (!productPostRepository.existsById(id)) {
-            log.error("[validatePostExists] 게시글이 존재하지 않습니다 : {}" , id);
+            log.info("[validatePostExists] 게시글이 존재하지 않습니다 : {}" , id);
             throw new ProductPostNotFoundException(id);
         }
     }
@@ -373,9 +373,8 @@ public class ProductPostService {
      * @param count 추천 수
      */
     public void incrementRecommendCount(Long id, int count) {
-        // validatePostExists(id); TODO : 게시글 추천에서 이미 검증하는데, 만약 다른곳 호출된다면, 고민
         if (count <= 0) {
-            log.error("추천 수는 양수여야 합니다. count={}", count);
+            log.info("추천 수는 양수여야 합니다. count={}", count);
             throw new InvalidRecommendCountRequest(count);
         }
         productPostRepository.incrementRecommendCount(id, count);
@@ -387,7 +386,7 @@ public class ProductPostService {
      */
     private void validatePageSize(int pageSize) {
         if (pageSize < 1) {
-            log.warn("잘못된 페이지 사이즈 요청입니다={}", pageSize);
+            log.info("잘못된 페이지 사이즈 요청입니다={}", pageSize);
             throw new InvalidPageSizeException(pageSize);
         }
     }
