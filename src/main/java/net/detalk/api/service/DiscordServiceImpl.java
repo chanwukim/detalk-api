@@ -1,5 +1,6 @@
 package net.detalk.api.service;
 
+import java.util.EnumSet;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.detalk.api.domain.DiscordErrorMessage;
@@ -10,6 +11,8 @@ import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.requests.GatewayIntent;
+import net.dv8tion.jda.api.utils.MemberCachePolicy;
+import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -29,6 +32,15 @@ public class DiscordServiceImpl implements DiscordService {
         try {
             jda = JDABuilder.createDefault(config.getToken())
                 .setActivity(Activity.playing("알람봇"))
+                .disableCache(
+                    EnumSet.of(
+                        CacheFlag.ACTIVITY,
+                        CacheFlag.EMOJI,
+                        CacheFlag.CLIENT_STATUS,
+                        CacheFlag.MEMBER_OVERRIDES,
+                        CacheFlag.STICKER
+                    ))
+                .setMemberCachePolicy(MemberCachePolicy.NONE)
                 .enableIntents(GatewayIntent.MESSAGE_CONTENT)
                 .build();
 
