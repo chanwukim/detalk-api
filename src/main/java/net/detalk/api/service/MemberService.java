@@ -190,7 +190,7 @@ public class MemberService {
      */
     public void checkDuplicateUserHandle(String userHandle) {
         if (memberProfileRepository.existsByUserHandle(userHandle)) {
-            log.error("[duplicateUserHandleValidation] 이미 존재하는 userhandle입니다. userhandle={}",
+            log.info("[duplicateUserHandleValidation] 이미 존재하는 userhandle입니다. userhandle={}",
                 userHandle);
             throw new UserHandleDuplicatedException(userHandle);
         }
