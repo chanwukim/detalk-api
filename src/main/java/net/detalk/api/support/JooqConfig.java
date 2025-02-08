@@ -16,7 +16,12 @@ public class JooqConfig {
     @Bean
     public DefaultConfigurationCustomizer jooqDefaultConfigurationCustomizer() {
         return conf -> {
-            conf.set(new PerformanceListener(discordService));  // 슬로우 쿼리 탐지를 위한 내 커스텀 리스너 추가
+            conf.set(performanceListener());  // 슬로우 쿼리 탐지를 위한 내 커스텀 리스너 추가
         };
+    }
+
+    @Bean
+    public PerformanceListener performanceListener() {
+        return new PerformanceListener(discordService);
     }
 }
