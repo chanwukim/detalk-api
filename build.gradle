@@ -77,7 +77,8 @@ jooq {
 				name = 'org.jooq.meta.extensions.ddl.DDLDatabase'
 				inputSchema = 'PUBLIC'
 				includes = '.*'  // 모든 테이블 포함
-				excludes = 'flyway_schema_history'
+				// excludes = 'flyway_schema_history'
+				excludes = 'flyway_schema_history|V0\\.0\\.5__Insert_Init_Pricing_Plans\\.sql'
 				properties {
 					property {
 						key = 'scripts'
@@ -86,6 +87,11 @@ jooq {
 					property {
 						key = 'sort'
 						value = 'flyway'
+					}
+
+					property {
+						key = "defaultNameCase"
+						value = "lower"
 					}
 				}
 				forcedTypes {
