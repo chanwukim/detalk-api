@@ -60,12 +60,15 @@ public class RecommendProductRepository {
                 RECOMMEND_PRODUCT.RECOMMEND_ID,
                 RECOMMEND_PRODUCT.PRODUCT_POST_ID,
                 RECOMMEND_PRODUCT.MEMBER_ID,
-                RECOMMEND_PRODUCT.CREATED_AT)
+                RECOMMEND_PRODUCT.CREATED_AT,
+                RECOMMEND_PRODUCT.CONTENT
+            )
             .values(
                 (Long) null,
                 (Long) null,
                 (Long)null,
-                (Instant) null
+                (Instant) null,
+                (String) null
             );
 
         var batch = dsl.batch(baseQuery);
@@ -75,7 +78,8 @@ public class RecommendProductRepository {
                 rp.getRecommendId(),
                 rp.getProductPostId(),
                 rp.getMemberId(),
-                rp.getCreatedAt()
+                rp.getCreatedAt(),
+                rp.getContent()
             );
         }
 
