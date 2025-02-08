@@ -78,6 +78,7 @@ jooq {
 				inputSchema = 'PUBLIC'
 				includes = '.*'  // 모든 테이블 포함
 				// excludes = 'flyway_schema_history'
+				// 초기 데이터 마이그레이션 파일 제외
 				excludes = 'flyway_schema_history|V0\\.0\\.5__Insert_Init_Pricing_Plans\\.sql'
 				properties {
 					property {
@@ -89,6 +90,7 @@ jooq {
 						value = 'flyway'
 					}
 
+					// 생성된 코드의 이름을 소문자로 통일
 					property {
 						key = "defaultNameCase"
 						value = "lower"
