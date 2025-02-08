@@ -33,6 +33,9 @@ public class RecommendService {
         productPostService.validatePostExists(postId);
 
         Instant now = timeHolder.now();
+        // 사용자가 입력한 “추천 내용” (예: 비용이 싸고 디자인이 깔끔해요)
+        String content = createRecommendRequest.content();
+        // 기본 추천 내용 목록 (예: 디자인이 이뻐요, 가격이 저렴해요)
         List<String> reasons = createRecommendRequest.reasons();
 
         List<RecommendProduct> recommendProducts = new ArrayList<>();
@@ -55,6 +58,7 @@ public class RecommendService {
                 .recommendId(recommendId)
                 .productPostId(postId)
                 .memberId(memberId)
+                .content(content)
                 .createdAt(now)
                 .build();
 

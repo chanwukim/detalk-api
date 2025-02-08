@@ -63,16 +63,26 @@ class RecommendServiceTest {
         var postId = 1L;
         var memberId = 1L;
         var recommendId = 100L;
-        var reason = "좋음";
-        var createRequest = new CreateRecommendRequest(List.of(reason));
+        var reason1 = "좋음";
+        var reason2 = "저렴함";
+        var content = "디자인이 이쁘고 저렴해요.";
+        var createRequest = new CreateRecommendRequest(List.of(reason1, reason2), content);
 
-        var existsRecommend = Recommend.builder()
+        var existsRecommend1 = Recommend.builder()
             .id(recommendId)
-            .value(reason)
+            .value(reason1)
             .build();
 
-        when(recommendRepository.findByReason(reason))
-            .thenReturn(Optional.of(existsRecommend));
+        var existsRecommend2 = Recommend.builder()
+            .id(recommendId)
+            .value(reason2)
+            .build();
+
+        when(recommendRepository.findByReason(reason1))
+            .thenReturn(Optional.of(existsRecommend1));
+
+        when(recommendRepository.findByReason(reason2))
+            .thenReturn(Optional.of(existsRecommend2));
 
         when(recommendProductRepository.isAlreadyRecommended(memberId, recommendId, postId))
             .thenReturn(false);
@@ -82,14 +92,15 @@ class RecommendServiceTest {
 
         // then 연관 관계 호출되었는지
         verify(recommendProductRepository).saveAll(argThat(
-            list -> list.size() == 1
-            && list.getFirst().getRecommendId().equals(recommendId)
-            && list.getFirst().getMemberId().equals(memberId)
-            && list.getFirst().getProductPostId().equals(postId)
+            list -> list.size() == 2
+                && list.get(0).getRecommendId().equals(recommendId)
+                && list.get(0).getMemberId().equals(memberId)
+                && list.get(0).getProductPostId().equals(postId)
+                && list.get(0).getContent().equals(content)
         ));
 
         // 추천수가 1증가 했는지
-        verify(productPostService).incrementRecommendCount(postId, 1);
+        verify(productPostService).incrementRecommendCount(postId, 2);
     }
 
     @DisplayName("[addRecommendation] 게시글 추천 시, 연관관계 저장 전, 중복 추천이면 예외 발생")
@@ -101,7 +112,8 @@ class RecommendServiceTest {
         var memberId = 1L;
         var recommendId = 100L;
         var reason = "중복추천";
-        var createRequest = new CreateRecommendRequest(List.of(reason));
+        var content = "중복 추천 테스트";
+        var createRequest = new CreateRecommendRequest(List.of(reason),content);
 
         // 이미 해당 추천 이유가 존재한다고 가정
         var existsRecommend = Recommend.builder()
@@ -134,7 +146,8 @@ class RecommendServiceTest {
         var postId = 999L; // 없는 게시글 ID
         var memberId = 1L;
         var reason = "좋음";
-        var createRequest = new CreateRecommendRequest(List.of(reason));
+        var content = "존재하지 않는 게시글 테스트";
+        var createRequest = new CreateRecommendRequest(List.of(reason),content);
 
         // 게시글 존재 여부 검증에서 예외를 발생하도록 설정
         doThrow(new ProductPostNotFoundException(postId))
