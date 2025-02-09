@@ -80,6 +80,8 @@ class ProductPostServiceTest {
     private TagService tagService;
     @Mock
     private PricingPlanService planService;
+    @Mock
+    private ProductPostIdempotentService postIdempotentService;
 
     /**
      * fake random classes
@@ -130,7 +132,8 @@ class ProductPostServiceTest {
             postSnapshotRepository,
             productPostLinkRepository,
             timeHolder,
-            uuidGenerator
+            uuidGenerator,
+            postIdempotentService
         );
 
         product = Product.builder()
@@ -190,6 +193,8 @@ class ProductPostServiceTest {
     @Test
     void create_success_newProduct() {
 
+        UUID idempotentKey = uuidGenerator.generateV7();
+
         // given
         CreateProductPostRequest request = CreateProductPostRequest.builder()
             .name("newProduct")
@@ -199,6 +204,7 @@ class ProductPostServiceTest {
             .isMaker(false)
             .tags(List.of("newTag"))
             .pricingPlan(plan)
+            .idempotentKey(String.valueOf(idempotentKey))
             .build();
 
         Product newProduct = Product.builder()
@@ -217,6 +223,8 @@ class ProductPostServiceTest {
         when(postLastSnapshotRepository.save(anyLong(), anyLong())).thenReturn(null);
         when(linkRepository.findByUrl(request.url())).thenReturn(Optional.ofNullable(productLink));
         when(tagService.getOrCreateTag("newTag")).thenReturn(tag);
+        when(postIdempotentService.insertIdempotentKey(idempotentKey, timeHolder.now())).thenReturn(
+            true);
 
         // when
         Long result = productPostService.create(request, memberId);
@@ -229,7 +237,7 @@ class ProductPostServiceTest {
     @DisplayName("성공[create] - 기존 제품 이용하여 게시글 생성")
     @Test
     void create_success() {
-
+        UUID idempotentKey = uuidGenerator.generateV7();
         // given
         CreateProductPostRequest request = CreateProductPostRequest.builder()
             .name("chatGpt")
@@ -239,6 +247,7 @@ class ProductPostServiceTest {
             .isMaker(false)
             .tags(List.of("ai"))
             .pricingPlan(plan)
+            .idempotentKey(String.valueOf(idempotentKey))
             .build();
 
         when(productRepository.findByName(productName)).thenReturn(Optional.ofNullable(product));
@@ -250,6 +259,8 @@ class ProductPostServiceTest {
             null);
         when(linkRepository.findByUrl(request.url())).thenReturn(Optional.ofNullable(productLink));
         when(tagService.getOrCreateTag(tagName)).thenReturn(tag);
+        when(postIdempotentService.insertIdempotentKey(idempotentKey, timeHolder.now())).thenReturn(
+            true);
 
         Long result = productPostService.create(request, memberId);
         assertThat(result).isEqualTo(1L);
@@ -258,6 +269,8 @@ class ProductPostServiceTest {
     @DisplayName("성공[create] - 새 링크 저장 후, 게시글 생성")
     @Test
     void create_success_newLink() {
+
+        UUID idempotentKey = uuidGenerator.generateV7();
 
         // given
         CreateProductPostRequest request = CreateProductPostRequest.builder()
@@ -268,6 +281,7 @@ class ProductPostServiceTest {
             .isMaker(false)
             .tags(List.of("ai"))
             .pricingPlan(plan)
+            .idempotentKey(String.valueOf(idempotentKey))
             .build();
 
         when(productRepository.findByName(productName)).thenReturn(Optional.of(product));
@@ -282,6 +296,9 @@ class ProductPostServiceTest {
             productLink);
         when(tagService.getOrCreateTag(tagName)).thenReturn(tag);
 
+        when(postIdempotentService.insertIdempotentKey(idempotentKey, timeHolder.now())).thenReturn(
+            true);
+
         // when
         Long result = productPostService.create(request, memberId);
 
@@ -293,6 +310,9 @@ class ProductPostServiceTest {
     @DisplayName("성공[create] - 새로운 태그가 생성됨")
     @Test
     void create_success_newTag() {
+
+        UUID idempotentKey = uuidGenerator.generateV7();
+
         // given
         CreateProductPostRequest request = CreateProductPostRequest.builder()
             .name(productName)
@@ -302,6 +322,7 @@ class ProductPostServiceTest {
             .isMaker(false)
             .tags(List.of("newTag"))
             .pricingPlan(plan)
+            .idempotentKey(String.valueOf(idempotentKey))
             .build();
 
         Tag newTag = Tag.builder()
@@ -318,6 +339,9 @@ class ProductPostServiceTest {
             null);
         when(linkRepository.findByUrl(productUrl)).thenReturn(Optional.of(productLink));
         when(tagService.getOrCreateTag("newTag")).thenReturn(newTag);
+
+        when(postIdempotentService.insertIdempotentKey(idempotentKey, timeHolder.now())).thenReturn(
+            true);
 
         // when
         Long result = productPostService.create(request, memberId);
