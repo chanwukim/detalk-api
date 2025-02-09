@@ -17,30 +17,39 @@ public class PerformanceListener implements ExecuteListener {
 
     private final DiscordService discordService;
     private static final Logger log = LoggerFactory.getLogger(PerformanceListener.class);
-    private final ThreadLocal<StopWatch> watch = ThreadLocal.withInitial(StopWatch::new);
-
+    private final ThreadLocal<StopWatch> watch = ThreadLocal.withInitial(() -> null);
     private static final Duration SLOW_QUERY_LIMIT= Duration.ofSeconds(5);
     private static final int MAX_MESSAGE_LENGTH = 500;
+
     @Override
     public void executeStart(ExecuteContext ctx) {
-        StopWatch sw = watch.get();
-        sw.start("SQLQuery");
+        StopWatch newWatch = new StopWatch();
+        newWatch.start("SQLQuery");
+        watch.set(newWatch);
     }
 
     @Override
     public void executeEnd(ExecuteContext ctx) {
-        StopWatch sw = null;
+        // ThreadLocal에서 꺼냄
+        StopWatch sw = watch.get();
         try {
-            sw = watch.get();
-            if (sw == null || !sw.isRunning()) {
-                log.warn("StopWatch가 정상적으로 시작되지 않았습니다.");
+            if (sw == null) {
+                // StopWatch가 생성되지 않았으면 로그만 남기고 종료
+                log.warn("StopWatch가 null입니다. 정상적으로 시작되지 않았을 수 있습니다.");
                 return;
             }
 
-            sw.stop();
+            // 실행 중이면 stop()
+            if (sw.isRunning()) {
+                sw.stop();
+            }
+
+            // 소요 시간 계산
             final long queryTimeNano = sw.getTotalTimeNanos();
             Duration executeTime = Duration.ofNanos(queryTimeNano);
             Query query = ctx.query();
+
+            // 슬로우 쿼리 검사
             if (queryTimeNano > SLOW_QUERY_LIMIT.toNanos()) {
 
                 String slowQueryMessage = String.format(
@@ -57,6 +66,7 @@ public class PerformanceListener implements ExecuteListener {
 
                 final String trimIndicator = " ......";
 
+                // 메시지 길이 제한
                 if (slowQueryMessage.length() > MAX_MESSAGE_LENGTH) {
                     slowQueryMessage =
                         slowQueryMessage.substring(0, MAX_MESSAGE_LENGTH - trimIndicator.length())
@@ -69,6 +79,7 @@ public class PerformanceListener implements ExecuteListener {
         } catch (Exception e) {
             log.error("쿼리 실행 시간 측정 중 오류 발생");
         }finally {
+            // 한 번 사용 후, ThreadLocal에서 제거
             watch.remove();
         }
 }
