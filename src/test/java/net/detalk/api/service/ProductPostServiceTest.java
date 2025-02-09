@@ -22,7 +22,7 @@ import net.detalk.api.domain.ProductLink;
 import net.detalk.api.domain.ProductPost;
 import net.detalk.api.domain.ProductPostSnapshot;
 import net.detalk.api.domain.Tag;
-import net.detalk.api.domain.exception.InvalidPageSizeException;
+import net.detalk.api.domain.exception.DuplicateCreatePostException;
 import net.detalk.api.domain.exception.InvalidRecommendCountRequest;
 import net.detalk.api.mock.FakeTimeHolder;
 import net.detalk.api.mock.FakeUUIDGenerator;
@@ -350,6 +350,35 @@ class ProductPostServiceTest {
         assertThat(result).isEqualTo(1L);
     }
 
+    @DisplayName("실패[create] - 동시에 게시글 여러번 생성 시, 멱등성으로 인해 실패한다.")
+    @Test
+    void create_fail_idempotent() {
+
+        UUID idempotentKey = uuidGenerator.generateV7();
+        // given
+        CreateProductPostRequest request = CreateProductPostRequest.builder()
+            .name("chatGpt")
+            .url(productUrl)
+            .description("ai skills")
+            .imageIds(List.of(imageId))
+            .isMaker(false)
+            .tags(List.of("ai"))
+            .pricingPlan(plan)
+            .idempotentKey(String.valueOf(idempotentKey))
+            .build();
+
+        when(postIdempotentService.insertIdempotentKey(idempotentKey, timeHolder.now())).thenReturn(
+            false);
+
+        DuplicateCreatePostException exception = assertThrows(
+            DuplicateCreatePostException.class,
+            () -> productPostService.create(request, memberId));
+
+        assertThat(exception.getMessage()).isEqualTo("이 요청은 이미 처리되었습니다.");
+        assertThat(exception.getHttpStatus()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(exception.getErrorCode()).isEqualTo("duplicate_create_post");
+
+    }
 
     @DisplayName("성공[getProductPosts] - 다음 데이터가 없으면 hasNext,nextId null 을 반환한다")
     @Test
