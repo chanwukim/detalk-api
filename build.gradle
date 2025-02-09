@@ -77,13 +77,12 @@ jooq {
 				name = 'org.jooq.meta.extensions.ddl.DDLDatabase'
 				inputSchema = 'PUBLIC'
 				includes = '.*'  // 모든 테이블 포함
-				// excludes = 'flyway_schema_history'
+				excludes = 'flyway_schema_history'
 				// 초기 데이터 마이그레이션 파일 제외
-				excludes = 'flyway_schema_history|V0\\.0\\.5__Insert_Init_Pricing_Plans\\.sql'
 				properties {
 					property {
 						key = 'scripts'
-						value = 'src/main/resources/db/migration/*.sql'
+						value = 'src/main/resources/db/migration/ddl/*.sql'
 					}
 					property {
 						key = 'sort'
