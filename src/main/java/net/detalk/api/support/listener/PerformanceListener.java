@@ -80,6 +80,7 @@ public class PerformanceListener implements ExecuteListener {
             log.error("쿼리 실행 시간 측정 중 오류 발생");
         }finally {
             // 한 번 사용 후, ThreadLocal에서 제거
+            log.debug("ThreadLocal StopWatch 정리 완료");
             watch.remove();
         }
 }

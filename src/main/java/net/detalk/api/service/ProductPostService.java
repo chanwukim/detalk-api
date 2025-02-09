@@ -68,6 +68,7 @@ public class ProductPostService {
         boolean isFirstTime = idempotentService.insertIdempotentKey(idempotentKey, now);
 
         if (!isFirstTime) {
+            log.info("같은 게시글 여러번 요청 uuid={}", idempotentKey);
             throw new DuplicateCreatePostException();
         }
 
