@@ -35,7 +35,10 @@ public record CreateProductPostRequest(
 
     @NotBlank(message = "Pricing Plan is required")
     @Size(max = 255, message = "Pricing Plan must be less than or equal to 255 characters")
-    String pricingPlan
+    String pricingPlan,
+
+    @NotBlank(message = "idempotentKey is required")
+    String idempotentKey
 
 ) {}
 

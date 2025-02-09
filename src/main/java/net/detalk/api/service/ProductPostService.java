@@ -5,11 +5,13 @@ import java.time.Instant;
 import java.util.List;
 
 import java.util.Optional;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.detalk.api.controller.v1.request.UpdateProductPostRequest;
 import net.detalk.api.controller.v1.response.GetProductPostResponse;
 import net.detalk.api.domain.ProductLink;
+import net.detalk.api.domain.exception.DuplicateCreatePostException;
 import net.detalk.api.domain.exception.InvalidPageSizeException;
 import net.detalk.api.domain.exception.InvalidRecommendCountRequest;
 import net.detalk.api.domain.exception.ProductPostForbiddenException;
@@ -56,30 +58,19 @@ public class ProductPostService {
     private final ProductPostLinkRepository productPostLinkRepository;
     private final TimeHolder timeHolder;
     private final UUIDGenerator uuidGenerator;
+    private final ProductPostIdempotentService idempotentService;
 
-    /**
-     * Creates a new product post with comprehensive details.
-     *
-     * This method handles the complete workflow of creating a product post, including:
-     * - Product retrieval or creation
-     * - Product post creation
-     * - Pricing plan association
-     * - Snapshot generation
-     * - Optional product link saving
-     * - Image attachment handling
-     * - Maker status tracking
-     * - Tag processing
-     *
-     * @param createProductPostRequest The request containing all details for creating a product post
-     * @param memberId The unique identifier of the member creating the post
-     * @return The unique identifier of the newly created product post
-     *
-     * @throws ProductPostSnapshotUpdateException If there are issues creating the post snapshot
-     */
     @Transactional
     public Long create(CreateProductPostRequest createProductPostRequest, Long memberId) {
 
         Instant now = timeHolder.now();
+        UUID idempotentKey = uuidGenerator.fromString(createProductPostRequest.idempotentKey());
+        boolean isFirstTime = idempotentService.insertIdempotentKey(idempotentKey, now);
+
+        if (!isFirstTime) {
+            throw new DuplicateCreatePostException();
+        }
+
         String productUrl = createProductPostRequest.url();
         String productName = createProductPostRequest.name();
 
