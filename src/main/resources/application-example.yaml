@@ -43,14 +43,14 @@ spring:
             scope:
               - email
               - profile
-            client-id:
-            client-secret:
+            client-id: your_google_oauth_id
+            client-secret:  your_google_oauth_pw
   # https://docs.spring.io/spring-boot/reference/io/email.html
   mail:
     host: smtp.domain.com
     port: 587
-    username:
-    password:
+    username: username
+    password: password
     properties:
       mail:
         smtp:
@@ -60,3 +60,8 @@ spring:
           auth: true
           starttls:
             enable: true
+
+discord:
+  bot:
+    token: your_discord_api_token
+    channel-id: your_discord_channel_id
