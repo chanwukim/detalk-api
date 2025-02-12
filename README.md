@@ -9,6 +9,7 @@
     - [Infra](#infra)
 - [아키텍처](#아키텍처)
 - [ERD](#erd)
+- [트러블슈팅](#트러블슈팅)
 
 ## 규칙
 - **선 구현 후 추상화 & 리팩토링** : 기능을 먼저 구현하고, 이후 추상화하여 리팩토링하는 방식으로 개발합니다.
@@ -73,7 +74,12 @@ curl -i http://localhost:8080/api/health
 
 
 ## ERD
-- Product-Post
+#### 1. Product-Post
   ![product_post_dia.png](img/product_post_dia.png)
-- Member
+#### 2. Member
   ![member_dia.png](img/member_dia.png)
+
+## 트러블슈팅
+- 태그로 게시글 조회 시 풀스캔하는 쿼리 튜닝 [[PR #83](https://github.com/chanwukim/detalk-api/pull/83)]
+- 에러 발생 또는 느린 쿼리문 디스코드 실시간 알람 봇 구현 [[PR #94](https://github.com/chanwukim/detalk-api/pull/94)]
+- 멱등성으로 인한 중복 게시글 생성 문제 [[PR #106](https://github.com/chanwukim/detalk-api/pull/106)]
