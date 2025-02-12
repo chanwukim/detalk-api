@@ -1,90 +1,79 @@
-# detalk-api
+# [Detalk](https://detalk.net)
 
 ## 목차
-1. [프로젝트 구성](#프로젝트-구성)
-   - [패키지 구조](#패키지-구조)
-   - [주요 라이브러리 및 버전](#주요-라이브러리-및-버전)
-2. [명명 규칙](#명명-규칙)
-   - [커밋 메시지](#커밋-메세지)
-3. [환경 세팅](#환경-세팅)
-   - [개발 환경](#개발-환경)
-   - [운영 환경](#운영-환경)
-4. [실행 방법](#실행-방법)
-   - [개발 실행](#개발-실행)
-   - [운영 실행](#운영-실행)
-5. [배포 프로세스](#배포-프로세스)
+- [규칙](#규칙)
+- [시작하기](#시작하기)
+- [기술](#기술)
+    - [BackEnd](#backend)
+    - [DataBase](#database)
+    - [Infra](#infra)
+- [아키텍처](#아키텍처)
+- [ERD](#erd)
 
+## 규칙
+- **선 구현 후 추상화 & 리팩토링** : 기능을 먼저 구현하고, 이후 추상화하여 리팩토링하는 방식으로 개발합니다.
+
+## 시작하기
+0. 요구 사항
+
+- **Java 21** 이상이 설치되어 있어야 합니다.
+- PostgreSQL 데이터베이스 연결 정보가 필요합니다. (Docker나 로컬 설치 등 원하는 방식으로 PostgreSQL을 준비하고, application-*.yaml에 관련 설정을 기입하세요.)
+1. git clone
+
+```bash
+git clone https://github.com/chanwukim/detalk-api.git
+```
+
+2. add `application-*.yaml`
+
+`application-example.yaml`을 참고하여 `application-*.yaml`을 작성하세요.
+
+3. execute `jooqCodegen`
+
+`jooqCodegen`을 실행하여 JOOQ 코드를 생성하세요.
+
+```bash
+ ./gradlew jooqCodegen
+```
+
+4. deployment `jar`
+
+```bash
+// build jar
+./gradlew clean build -x test
+
+// jar deployment
+java -jar build/libs/api-0.0.1-SNAPSHOT.jar
+
+// health check
+curl -i http://localhost:8080/api/health
+```
 ---
+## 기술
 
-## 프로젝트 구성
+### BackEnd
+![Java 21](https://img.shields.io/badge/Java-21-007396?logo=OpenJDK&logoColor=white)
+![Spring Boot 3.4](https://img.shields.io/badge/Spring%20Boot-3.4-6DB33F?logo=Spring%20Boot&logoColor=white)
+![Spring Security 6.4](https://img.shields.io/badge/Spring%20Security-6.4-6DB33F?logo=Spring%20Security&logoColor=white)
+![JOOQ 3.4](https://img.shields.io/badge/JOOQ-3.4-DB4437?logo=Gradle&logoColor=white)
 
-TODO
+### DataBase
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14-336791?logo=PostgreSQL&logoColor=white)
 
-### 패키지 구조
+### Infra
+![AWS LightSail](https://img.shields.io/badge/AWS%20LightSail-FF9900?logo=Amazon%20AWS&logoColor=white)
+![AWS S3](https://img.shields.io/badge/AWS%20S3-569A31?logo=Amazon%20S3&logoColor=white)
+![AWS RDS](https://img.shields.io/badge/AWS%20RDS-527FFF?logo=Amazon%20RDS&logoColor=white)
+![Nginx](https://img.shields.io/badge/Nginx-009639?logo=nginx&logoColor=white)
+![Cloudflare](https://img.shields.io/badge/Cloudflare-F38020?logo=Cloudflare&logoColor=white)
 
-TODO
+## 아키텍처
+![ar.png](img/ar.png)
 
-### 주요 라이브러리 및 버전
 
-- Java: 21
-- Spring Boot: 3.x
-- PostgreSQL: TODO
 
-## 명명 규칙
-
-### 커밋 메세지
-
-```
-type: message #issue
-
-body
-
-footer
-```
-  - `feat`: 새로운 기능 추가
-  - `fix`: 버그 수정
-  - `docs`: 문서 추가 및 수정
-  - `style`: 코드 스타일 수정 (포매팅, 세미콜론 등)
-  - `refactor`: 코드 리팩토링
-  - `test`: 테스트 코드 추가 및 수정
-  - `chore`: 기타 변경 사항 (빌드, 의존성 등)
-
-## 환경 세팅
-
-### 개발 환경
-
-TODO
-
-### 운영 환경
-
-TODO
-
-## 실행 방법
-
-### 개발 실행
-
-TODO
-
-### 운영 실행
-
-TODO
-
-## 배포 프로세스
-
-(임시)
-
-1. 코드 병합
-
-- PR을 통해 `main` 브랜치로 병합
-
-2. 프로덕션 빌드
-
-```bash
-./gradlew clean build
-```
-
-3. 배포
-
-```bash
-java -jar build/libs/<프로젝트명>.jar
-```
+## ERD
+- Product-Post
+  ![product_post_dia.png](img/product_post_dia.png)
+- Member
+  ![member_dia.png](img/member_dia.png)

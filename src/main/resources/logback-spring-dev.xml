@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+  <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+  <property name="LOG_FILE" value="application-dev.log"/>
+  <property name="LOG_PATH" value="./logs"/>
+  <property name="consolePattern" value="%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr([MDC=%X{correlationId}]){blue} %clr([%thread]){magenta} %clr(%-5level) %clr(%logger{36}){cyan} - %msg%n"/>
+  <property name="filePattern" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [corr=%X{correlationId}] [%thread] %-5level %logger{36} - %msg%n"/>
+
+  <!-- 콘솔출력 -->
+  <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>${consolePattern}</pattern>
+    </encoder>
+  </appender>
+
+  <!-- 파일 저장 -->
+  <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${LOG_PATH}/${LOG_FILE}</file>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <!-- 하루단위로 gz로 압축 -->
+      <fileNamePattern>${LOG_PATH}/gz/application.%d{yyyy-MM-dd}.log.gz</fileNamePattern>
+      <!-- 3일간 보관 -->
+      <maxHistory>3</maxHistory>
+      <totalSizeCap>50MB</totalSizeCap>
+    </rollingPolicy>
+    <encoder>
+      <pattern>${filePattern}</pattern>
+    </encoder>
+
+    <!-- 파일에 저장할 로그 레벨 INFO -->
+    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+      <level>INFO</level>
+    </filter>
+  </appender>
+
+  <!-- 출력 로그 레벨 -->
+  <root level="INFO">
+    <appender-ref ref="CONSOLE" />
+    <appender-ref ref="FILE" />
+  </root>
+
+</configuration>

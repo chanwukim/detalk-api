@@ -1,0 +1,143 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.4.0'
+	id 'io.spring.dependency-management' version '1.1.6'
+	id 'org.jooq.jooq-codegen-gradle' version '3.19.15'
+}
+
+group = 'net.detalk'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(21)
+	}
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-jooq'
+	
+	implementation 'org.flywaydb:flyway-core'
+	implementation 'org.flywaydb:flyway-database-postgresql'
+	runtimeOnly 'org.postgresql:postgresql'
+	runtimeOnly 'com.h2database:h2'
+	jooqCodegen 'org.jooq:jooq-meta-extensions:3.19.15'
+
+	implementation(platform('software.amazon.awssdk:bom:2.27.21'))
+	implementation 'software.amazon.awssdk:s3'
+
+	implementation 'io.jsonwebtoken:jjwt-api:0.12.5'
+	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.5'
+	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.5'
+
+	implementation 'com.fasterxml.uuid:java-uuid-generator:5.1.0'
+
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.security:spring-security-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0'
+
+
+	implementation ('net.dv8tion:JDA:5.2.2'){
+		exclude module: 'opus-java'
+	}
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
+
+// https://www.jooq.org/doc/latest/manual/code-generation/codegen-configuration
+jooq {
+	configuration {
+		generator {
+			database {
+				// https://www.jooq.org/doc/latest/manual/code-generation/codegen-ddl
+				name = 'org.jooq.meta.extensions.ddl.DDLDatabase'
+				inputSchema = 'PUBLIC'
+				includes = '.*'  // 모든 테이블 포함
+				excludes = 'flyway_schema_history'
+				// 초기 데이터 마이그레이션 파일 제외
+				properties {
+					property {
+						key = 'scripts'
+						value = 'src/main/resources/db/migration/ddl/*.sql'
+					}
+					property {
+						key = 'sort'
+						value = 'flyway'
+					}
+
+					// 생성된 코드의 이름을 소문자로 통일
+					property {
+						key = "defaultNameCase"
+						value = "lower"
+					}
+				}
+				forcedTypes {
+					forcedType {
+						userType = 'java.time.Instant'
+						converter = 'net.detalk.api.support.InstantConverter'
+						includeExpression = '.*(_AT)$'
+						includeTypes = 'BIGINT'
+					}
+					forcedType {
+						userType = 'net.detalk.api.domain.LoginType'
+						enumConverter = true
+						name = 'varchar'
+						includeExpression = 'member\\.login_type'
+					}
+					forcedType {
+						userType = 'net.detalk.api.domain.MemberStatus'
+						enumConverter = true
+						name = 'varchar'
+						includeExpression = 'member\\.status'
+					}
+					forcedType {
+						userType = 'net.detalk.api.support.security.OAuthProvider'
+						enumConverter = true
+						name = 'varchar'
+						includeExpression = 'member_external\\.type'
+					}
+				}
+			}
+			target {
+				packageName = 'net.detalk.jooq'
+				directory = 'src/main/java'
+			}
+			strategy {
+				matchers {
+					tables {
+						table {
+							tableClass {
+								transform = "PASCAL"
+								expression = 'J_$0'
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}

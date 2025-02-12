@@ -1,0 +1,67 @@
+detalk:
+  base-url: http://localhost:3000
+
+  token-secret: # https://jwtsecret.com/generate
+  access-token-expires-in-seconds: 300
+  refresh-token-expires-in-seconds: 1209600
+
+  s3-bucket:
+  s3-endpoint: https://{account-id}.r2.cloudflarestorage.com
+  s3-access-key:
+  s3-secret-key:
+
+  # 이미지 업로드 URL의 만료 시간 (분)
+  upload-url-expiry-minutes: 2
+  cloud-flare-account-id:
+  cloud-flare-images-api-token:
+  cloud-flare-account-hash:
+
+server:
+  forward-headers-strategy: framework
+
+logging:
+  level:
+    org.jooq.tools.LoggerListener: DEBUG
+    net.detalk.api: DEBUG
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/postgres?serverTimezone=UTC
+    username: postgres
+    password: postgres
+  jpa:
+    properties:
+      hibernate:
+        ddl-auto: validate
+  flyway:
+    enabled: true
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            scope:
+              - email
+              - profile
+            client-id: your_google_oauth_id
+            client-secret:  your_google_oauth_pw
+  # https://docs.spring.io/spring-boot/reference/io/email.html
+  mail:
+    host: smtp.domain.com
+    port: 587
+    username: username
+    password: password
+    properties:
+      mail:
+        smtp:
+          connectiontimeout: 5000
+          timeout: 3000
+          writetimeout: 5000
+          auth: true
+          starttls:
+            enable: true
+
+discord:
+  bot:
+    token: your_discord_api_token
+    channel-id: your_discord_channel_id
