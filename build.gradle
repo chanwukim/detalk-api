@@ -115,7 +115,7 @@ jooq {
 						includeExpression = 'member\\.status'
 					}
 					forcedType {
-						userType = 'net.detalk.api.support.security.OAuthProvider'
+						userType = 'net.detalk.api.support.security.oauth.OAuthProvider'
 						enumConverter = true
 						name = 'varchar'
 						includeExpression = 'member_external\\.type'
