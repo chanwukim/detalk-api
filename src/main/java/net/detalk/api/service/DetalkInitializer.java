@@ -4,6 +4,8 @@ package net.detalk.api.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.detalk.api.domain.Role;
+import net.detalk.api.repository.RoleRepository;
 import net.detalk.api.support.EnvironmentHolder;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -18,6 +20,8 @@ public class DetalkInitializer implements ApplicationRunner {
 
     private final DiscordService discordService;
 
+    private final RoleRepository roleRepository;
+
     private final EnvironmentHolder env;
 
     @Transactional
@@ -28,6 +32,7 @@ public class DetalkInitializer implements ApplicationRunner {
 
         // 트랜잭션과 무관한 Discord 연동 초기화
         initializeDiscord();
+        initMemberRoles();
 
         if ("prod".equals(env.getActiveProfile())) {
             log.info("운영 서버 톰캣 실행 완료");
@@ -41,6 +46,20 @@ public class DetalkInitializer implements ApplicationRunner {
         } catch (Exception e) {
             log.error("Discord 봇 초기화 실패: {}", e.getMessage(), e);
         }
+    }
+
+    private void initMemberRoles() {
+
+        if(roleRepository.findByCode("MEMBER").isEmpty()){
+            roleRepository.save(new Role("MEMBER", "일반 회원"));
+            log.info("MEMBER 역할 생성");
+        }
+
+        if(roleRepository.findByCode("ADMIN").isEmpty()){
+            roleRepository.save(new Role("ADMIN", "관리자"));
+            log.info("ADMIN 역할 생성");
+        }
+
     }
 
 }
