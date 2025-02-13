@@ -11,7 +11,6 @@ import net.detalk.api.domain.MemberExternal;
 import net.detalk.api.domain.MemberProfile;
 import net.detalk.api.domain.MemberStatus;
 import net.detalk.api.domain.Role;
-import net.detalk.api.domain.exception.RoleNotFoundException;
 import net.detalk.api.repository.MemberExternalRepository;
 import net.detalk.api.repository.MemberProfileRepository;
 import net.detalk.api.repository.MemberRepository;
@@ -104,10 +103,7 @@ public class SessionAuthService extends DefaultOAuth2UserService {
                 .updatedAt(now)
                 .build());
 
-        Role memberRole = roleRepository.findByCode("MEMBER")
-            .orElseThrow(() -> new RoleNotFoundException("기본 MEMBER 역할이 DB에 없습니다."));
-
-        roleRepository.saveMemberRole(member.getId(), memberRole.getCode());
+        roleRepository.saveMemberRole(member.getId(), "MEMBER");
 
         return memberExternalRepository.save(
             MemberExternal.builder()
