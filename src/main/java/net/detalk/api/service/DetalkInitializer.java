@@ -52,10 +52,12 @@ public class DetalkInitializer implements ApplicationRunner {
 
         if(roleRepository.findByCode("MEMBER").isEmpty()){
             roleRepository.save(new Role("MEMBER", "일반 회원"));
+            log.info("MEMBER 역할 생성");
         }
 
         if(roleRepository.findByCode("ADMIN").isEmpty()){
             roleRepository.save(new Role("ADMIN", "관리자"));
+            log.info("ADMIN 역할 생성");
         }
 
     }
