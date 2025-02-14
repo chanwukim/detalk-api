@@ -2,11 +2,16 @@ package net.detalk.api.service;
 
 
 import jakarta.transaction.Transactional;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.detalk.api.domain.Role;
 import net.detalk.api.repository.RoleRepository;
 import net.detalk.api.support.EnvironmentHolder;
+import net.detalk.api.support.security.SecurityRole;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
@@ -32,6 +37,8 @@ public class DetalkInitializer implements ApplicationRunner {
 
         // 트랜잭션과 무관한 Discord 연동 초기화
         initializeDiscord();
+
+        // 초기 권한
         initMemberRoles();
 
         if ("prod".equals(env.getActiveProfile())) {
@@ -50,14 +57,26 @@ public class DetalkInitializer implements ApplicationRunner {
 
     private void initMemberRoles() {
 
-        if(roleRepository.findByCode("MEMBER").isEmpty()){
-            roleRepository.save(new Role("MEMBER", "일반 회원"));
-            log.info("MEMBER 역할 생성");
-        }
+        // SecurityRole 클래스에 정의되어있는 모든 권한 목록을 조회한다
+        List<String> roleCodes = Arrays.stream(SecurityRole.values())
+            .map(SecurityRole::getName)
+            .toList();
 
-        if(roleRepository.findByCode("ADMIN").isEmpty()){
-            roleRepository.save(new Role("ADMIN", "관리자"));
-            log.info("ADMIN 역할 생성");
+        // DB에 존재하는 모든 권한을 조회한다
+        List<Role> existingRoles = roleRepository.findByCodes(roleCodes);
+
+        // DB에 존재하는 권한 목록의 Code 추출
+        Set<String> existingCodes = existingRoles.stream()
+            .map(Role::getCode)
+            .collect(Collectors.toSet());
+
+        // DB에 존재하지 않을 경우, 새 권한을 저장한다.
+        for (SecurityRole securityRole : SecurityRole.values()) {
+            if (!existingCodes.contains(securityRole.getName())) {
+                roleRepository.save(
+                    new Role(securityRole.getName(), securityRole.getDescription()));
+                log.info("새 권한 생성 : {}", securityRole.getName());
+            }
         }
 
     }
