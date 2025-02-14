@@ -3,6 +3,7 @@ package net.detalk.api.repository;
 import static net.detalk.jooq.tables.JMemberRole.MEMBER_ROLE;
 import static net.detalk.jooq.tables.JRole.ROLE;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,12 @@ public class RoleRepository {
         return dsl.selectFrom(ROLE)
             .where(ROLE.CODE.eq(code))
             .fetchOptionalInto(Role.class);
+    }
+
+    public List<Role> findByCodes(Collection<String> codes) {
+        return dsl.selectFrom(ROLE)
+            .where(ROLE.CODE.in(codes))
+            .fetchInto(Role.class);
     }
 
     public List<Role> findRolesByMemberId(Long memberId) {
