@@ -94,7 +94,7 @@ public class AuthController {
 
     @GetMapping("/session")
     public ResponseEntity<SessionInfoResponse> getSessionInfo(
-        @HasRole(SecurityRole.MEMBER) SecurityUser user
+        @HasRole({SecurityRole.MEMBER, SecurityRole.ADMIN}) SecurityUser user
     ) {
         SessionInfoResponse sessionInfo = authService.getSessionInfo(user.getId());
         return ResponseEntity.ok(sessionInfo);
