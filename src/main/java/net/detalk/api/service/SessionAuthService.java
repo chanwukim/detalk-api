@@ -1,8 +1,8 @@
 package net.detalk.api.service;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.detalk.api.domain.LoginType;
@@ -11,6 +11,7 @@ import net.detalk.api.domain.MemberExternal;
 import net.detalk.api.domain.MemberProfile;
 import net.detalk.api.domain.MemberStatus;
 import net.detalk.api.domain.Role;
+import net.detalk.api.domain.exception.MemberProfileNotFoundException;
 import net.detalk.api.repository.MemberExternalRepository;
 import net.detalk.api.repository.MemberProfileRepository;
 import net.detalk.api.repository.MemberRepository;
@@ -20,7 +21,8 @@ import net.detalk.api.support.security.oauth.OAuthProvider;
 import net.detalk.api.support.security.oauth.OAuthUser;
 import net.detalk.api.support.security.SecurityRole;
 import net.detalk.api.support.util.StringUtil;
-import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -48,30 +50,26 @@ public class SessionAuthService extends DefaultOAuth2UserService {
         String providerId = extractProviderId(provider, oAuth2User);
         log.debug("[loadUser] provider: {}, providerId: {}", provider, providerId);
 
+
         MemberExternal memberExternal = memberExternalRepository
             .findByTypeAndUid(provider, providerId)
-            .orElseGet(() -> register(provider, providerId));
+            .orElseGet(() -> register(provider, providerId, timeHolder.now()));
 
-        // D회원 권한 목록 조회
+        // 회원 권한 목록 조회
         List<Role> dbRoles = roleRepository.findRolesByMemberId(memberExternal.getMemberId());
 
-        // DB 역할 SecurityRole 매핑 후, Spring Security 권한 문자열 생성
-        List<String> authorities = new ArrayList<>(dbRoles.stream()
-            .map(role -> {
-                SecurityRole securityRole = SecurityRole.valueOf(role.getCode());
-                return securityRole.getName();
-            })
-            .toList());
+        List<GrantedAuthority> securityRoles = dbRoles.stream()
+            .map(role -> new SimpleGrantedAuthority(role.getCode()))
+            .collect(Collectors.toList());
 
-        // 만약 조회된 권한 없다면 기본 MEMBER 권한 추가
-        if (authorities.isEmpty()) {
-            authorities.add(SecurityRole.MEMBER.getName());
-        }
+        MemberProfile memberProfile = memberProfileRepository.findByMemberId(
+                memberExternal.getMemberId())
+            .orElseThrow(MemberProfileNotFoundException::new);
 
         return OAuthUser.builder()
             .id(memberExternal.getMemberId())
-            .username("username")
-            .authorities(AuthorityUtils.createAuthorityList(authorities.toArray(String[]::new)))
+            .username(memberProfile.getUserhandle())
+            .authorities(securityRoles)
             .attributes(oAuth2User.getAttributes())
             .build();
     }
@@ -82,10 +80,8 @@ public class SessionAuthService extends DefaultOAuth2UserService {
         };
     }
 
-    private MemberExternal register(OAuthProvider provider, String providerId) {
+    private MemberExternal register(OAuthProvider provider, String providerId, Instant now) {
         log.info("[register] 새 소셜회원가입 provider {}", provider);
-
-        Instant now = Instant.now();
 
         // 소셜 로그인후 LoginType.EXTERNAL, 상태는 PENDING이라면, 가입 form으로 이동
         Member member = memberRepository.save(
@@ -103,14 +99,14 @@ public class SessionAuthService extends DefaultOAuth2UserService {
                 .updatedAt(now)
                 .build());
 
-        roleRepository.saveMemberRole(member.getId(), "MEMBER");
+        roleRepository.saveMemberRole(member.getId(), SecurityRole.MEMBER.getName());
 
         return memberExternalRepository.save(
             MemberExternal.builder()
                 .memberId(member.getId())
                 .oauthProvider(provider)
                 .uid(providerId)
-                .createdAt(timeHolder.now())
+                .createdAt(now)
                 .build());
     }
 }

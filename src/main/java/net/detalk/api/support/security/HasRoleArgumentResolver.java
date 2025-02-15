@@ -1,5 +1,6 @@
 package net.detalk.api.support.security;
 
+import java.util.Arrays;
 import lombok.NonNull;
 import org.springframework.core.MethodParameter;
 import org.springframework.security.core.Authentication;
@@ -52,10 +53,14 @@ public class HasRoleArgumentResolver implements HandlerMethodArgumentResolver {
         // @HasRole 어노테이션이 요구하는 ROLE 가져오기
         HasRole hasRoleAnnotation = parameter.getParameterAnnotation(HasRole.class);
         assert hasRoleAnnotation != null;
-        String requiredRole = hasRoleAnnotation.value().getName();
+        SecurityRole[] requiredRoles = hasRoleAnnotation.value();
+
+        boolean hasAnyRole = Arrays.stream(requiredRoles)
+            .map(SecurityRole::getName)
+            .anyMatch(role -> hasRole(securityUser, role));
 
         // 사용자가 필요한 역할을 가지고 있는지 확인
-        if (hasRole(securityUser, requiredRole)) {
+        if (hasAnyRole) {
             return securityUser;
         }
 
