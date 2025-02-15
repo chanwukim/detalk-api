@@ -20,8 +20,8 @@ public class SessionTrackingService {
      */
     public List<ActiveSessionResponse> getActiveSessions() {
         return sessionRegistry.getAllPrincipals().stream()
-            .filter(principal -> principal instanceof OAuthUser)
-            .map(principal -> (OAuthUser) principal)
+            .filter(OAuthUser.class::isInstance)
+            .map(OAuthUser.class::cast)
             .flatMap(user -> sessionRegistry.getAllSessions(user, false).stream()
                 .map(sessionInfo -> new ActiveSessionResponse(
                     user.getId(),
