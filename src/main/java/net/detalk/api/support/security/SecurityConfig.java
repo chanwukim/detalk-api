@@ -102,6 +102,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/v1/members/{userhandle}/recommended-posts").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/members/{userhandle}").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/tags").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/auth/session").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/v1/images/upload-url").hasRole("MEMBER")
                 .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated())
