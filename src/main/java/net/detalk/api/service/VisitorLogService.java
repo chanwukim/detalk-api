@@ -1,7 +1,9 @@
 package net.detalk.api.service;
 
 import com.maxmind.geoip2.DatabaseReader;
+import com.maxmind.geoip2.exception.GeoIp2Exception;
 import com.maxmind.geoip2.model.CityResponse;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +15,7 @@ import net.detalk.api.support.EnvironmentHolder;
 import net.detalk.api.support.TimeHolder;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -34,6 +37,7 @@ public class VisitorLogService {
      * @param userAgent 브라우저 정보
      * @param referer   이전 페이지 정보
      */
+    @Transactional
     @Async
     public void saveVisitorLocation(String clientIp, String sessionId, String userAgent,
         String referer) {
@@ -71,9 +75,11 @@ public class VisitorLogService {
 
             visitorLogRepository.save(visitorLog);
 
-        } catch (Exception e) {
-            log.warn("사용자 위치 정보 저장 중 오류 발생 (clientIp: {})", clientIp);
-            throw new VisitorLocationSaveException("방문자 위치 정보 저장에 실패했습니다.");
+
+        } catch (GeoIp2Exception | IOException e) {
+            log.warn("사용자 위치 정보 저장 중 에러 발생 (clientIp: {})", clientIp);
+            log.debug("사용자 위치 정보 에러={}",e.getMessage());
+            throw new VisitorLocationSaveException("사용자 위치 정보 저장 중 에러 발생");
         }
     }
 }
