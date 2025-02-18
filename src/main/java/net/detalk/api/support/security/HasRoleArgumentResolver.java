@@ -66,7 +66,8 @@ public class HasRoleArgumentResolver implements HandlerMethodArgumentResolver {
             return securityUser;
         }
 
-        // 시큐리티 컨텍스트 홀더엔 있지만 권한이 없을 경우
+        // 사용자는 인증되었지만 요청된 권한이 없거나 부족한 경우 접근 거부
+        // 예: ADMIN 역할이 필요한 엔드포인트에 USER 역할로 접근 시도
         throw new AccessDeniedException();
     }
 
