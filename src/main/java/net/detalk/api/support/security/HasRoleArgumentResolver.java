@@ -2,6 +2,8 @@ package net.detalk.api.support.security;
 
 import java.util.Arrays;
 import lombok.NonNull;
+import net.detalk.api.domain.exception.AccessDeniedException;
+import net.detalk.api.domain.exception.SessionUserNotFoundException;
 import org.springframework.core.MethodParameter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -45,9 +47,9 @@ public class HasRoleArgumentResolver implements HandlerMethodArgumentResolver {
          */
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        // authentication 없거나 Principal이 SecurityUser 아닐경우 null 리턴
+        // authentication 없거나 Principal이 SecurityUser 아닐경우
         if (authentication == null || !(authentication.getPrincipal() instanceof SecurityUser securityUser)) {
-            return null;
+            throw new SessionUserNotFoundException();
         }
 
         // @HasRole 어노테이션이 요구하는 ROLE 가져오기
@@ -64,8 +66,9 @@ public class HasRoleArgumentResolver implements HandlerMethodArgumentResolver {
             return securityUser;
         }
 
-        // 권한이 없으면 null 반환
-        return null;
+        // 사용자는 인증되었지만 요청된 권한이 없거나 부족한 경우 접근 거부
+        // 예: ADMIN 역할이 필요한 엔드포인트에 USER 역할로 접근 시도
+        throw new AccessDeniedException();
     }
 
     private boolean hasRole(SecurityUser securityUser, String requiredRole) {
