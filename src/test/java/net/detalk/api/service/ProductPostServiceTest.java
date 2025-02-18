@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -86,7 +87,10 @@ class ProductPostServiceTest {
     /**
      * fake random classes
      */
-    private TimeHolder timeHolder = new FakeTimeHolder(Instant.parse("2025-01-01T12:00:00Z"));
+    private final LocalDateTime fixedLocalDateTime = LocalDateTime.of(2025, 1, 1, 12, 0, 0);
+    private final Instant fixedInstant = Instant.parse("2025-01-01T12:00:00Z");
+
+    private TimeHolder timeHolder = new FakeTimeHolder(fixedInstant, fixedLocalDateTime);
     private UUIDGenerator uuidGenerator = new FakeUUIDGenerator(
         UUID.fromString("123e4567-e89b-12d3-a456-426614174000"));
 

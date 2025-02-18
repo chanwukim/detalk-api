@@ -13,6 +13,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import net.detalk.api.controller.v1.request.CreateRecommendRequest;
@@ -44,9 +45,12 @@ class RecommendServiceTest {
 
     private RecommendService recommendService;
 
+    private final LocalDateTime fixedLocalDateTime = LocalDateTime.of(2025, 1, 1, 12, 0, 0);
+    private final Instant fixedInstant = Instant.parse("2025-01-01T12:00:00Z");
+
     @BeforeEach
     void setUp() {
-        timeHolder = new FakeTimeHolder(Instant.parse("2025-01-01T12:00:00Z"));
+        timeHolder = new FakeTimeHolder(fixedInstant, fixedLocalDateTime);
         recommendService = new RecommendService(
             recommendRepository,
             recommendProductRepository,
