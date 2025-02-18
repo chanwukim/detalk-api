@@ -95,6 +95,8 @@ public class GeoLoggingFilter extends OncePerRequestFilter {
             cookie.setPath("/");
             cookie.setHttpOnly(true);
             cookie.setMaxAge(24 * 60 * 60);
+            cookie.setSecure(true);
+            cookie.setAttribute("SameSite", "Strict");
             response.addCookie(cookie);
         }
     }
