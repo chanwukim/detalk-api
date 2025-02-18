@@ -15,7 +15,6 @@ import net.detalk.api.support.EnvironmentHolder;
 import net.detalk.api.support.TimeHolder;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -37,8 +36,7 @@ public class VisitorLogService {
      * @param userAgent 브라우저 정보
      * @param referer   이전 페이지 정보
      */
-    @Transactional
-    @Async
+    @Async("visitorLogTaskExecutor")
     public void saveVisitorLocation(String clientIp, String sessionId, String userAgent,
         String referer) {
 
