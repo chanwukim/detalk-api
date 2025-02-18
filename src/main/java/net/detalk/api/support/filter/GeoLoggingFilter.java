@@ -15,6 +15,12 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+/**
+ * 방문자의 위치 정보를 로깅하는 필터
+ * - 요청당 한 번만 실행
+ * - 수집된 정보를 비동기적으로 데이터베이스에 저장
+ * - 세션 또는 쿠키를 통한 중복 로깅 방지
+ */
 @Component
 @Slf4j
 @RequiredArgsConstructor
@@ -23,23 +29,34 @@ public class GeoLoggingFilter extends OncePerRequestFilter {
     private final VisitorLogService visitorLogService;
 
     private static final String GEO_LOGGED_KEY = "geoLogged";
+    private static final String NEXT_JS_SSR_AGENT = "node";
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
+    protected void doFilterInternal(
+        @NotNull HttpServletRequest request,
         @NotNull HttpServletResponse response,
         @NotNull FilterChain filterChain) throws ServletException, IOException {
-        HttpSession session = request.getSession(true);
 
-        // 로그가 저장되지 않을 경우 새로 저장한다
+        // 이미 로깅되었는지 확인
         if (!isGeoLogged(request)) {
+
+            HttpSession session = request.getSession(false);
+
+            // 세션 없고, 쿠키도 없으면 세션 생성. 첫 방문 경우에만 세션 생성
+            if (session == null && !CookieUtil.getCookie(GEO_LOGGED_KEY, request).isPresent()) {
+                session = request.getSession(true);
+            }
 
             String userAgent = request.getHeader("User-Agent");
 
-            if (userAgent != null && userAgent.toLowerCase().contains("node")) {
-                log.debug("Next.js SSR 요청 (NODE) => 위치정보 저장 안함");
+            // Next.js SSR 요청이면 위치정보 저장 안 함
+            if (userAgent != null && userAgent.toLowerCase().contains(NEXT_JS_SSR_AGENT)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Next.js SSR 요청 (NODE) => 위치정보 저장 안함");
+                }
             }else{
                 String clientIp = getClientIp(request);
-                String sessionId = session.getId();
+                String sessionId = (session != null) ? session.getId() : null;
                 String referer = request.getHeader("Referer");
                 log.debug("사용자 위치 정보 => IP: {}, Session: {}, UserAgent: {}, Referer: {}",
                     clientIp,
@@ -48,7 +65,7 @@ public class GeoLoggingFilter extends OncePerRequestFilter {
                     referer
                 );
 
-                // 위치 정보 DB 저장
+                // 위치 정보 DB 저장 (비동기로 처리)
                 visitorLogService.saveVisitorLocation(
                     clientIp,
                     sessionId,
@@ -57,22 +74,34 @@ public class GeoLoggingFilter extends OncePerRequestFilter {
                 );
             }
 
-            // 세션에 로그 저장했다고 설정
+            // 세션이나 쿠키에 로그 기록 표시
             markGeoLogged(request, response);
 
         }
         filterChain.doFilter(request, response);
     }
 
+    /**
+     * 방문자의 위치 정보가 이미 로깅되었는지 확인
+     *
+     * @param request HTTP 요청
+     * @return 이미 로깅되었으면 true, 아니면 false
+     */
     private boolean isGeoLogged(HttpServletRequest request) {
-        var session = request.getSession(false);
-        if (session != null) {
-            // 세션 존재하고, GEO_LOGGED_KEY == true 면 이미 기록한 위치정보
-            return session.getAttribute(GEO_LOGGED_KEY) != null;
-        }     // 세션 없는데 GEO_LOGGED_KEY 쿠키가 존재하면 이미 기록한 위치 정보
-        else {
-            return CookieUtil.getCookie(GEO_LOGGED_KEY, request).isPresent();
+
+        if (request == null) {
+            return false;
         }
+
+        HttpSession session = request.getSession(false);
+
+        if (session != null) {
+            return session.getAttribute(GEO_LOGGED_KEY) != null;
+        }
+
+        // 세션이 없는데 쿠키가 있으면 이미 기록된 것으로 간주
+        return CookieUtil.getCookie(GEO_LOGGED_KEY, request).isPresent();
+
     }
 
     private String getClientIp(HttpServletRequest request) {
