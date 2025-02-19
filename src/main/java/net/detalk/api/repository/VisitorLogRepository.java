@@ -2,6 +2,7 @@ package net.detalk.api.repository;
 
 import static net.detalk.jooq.tables.JVisitorLog.VISITOR_LOG;
 
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import net.detalk.api.domain.VisitorLog;
@@ -31,5 +32,10 @@ public class VisitorLogRepository {
         return dsl.selectFrom(VISITOR_LOG)
             .where(VISITOR_LOG.ID.eq(id))
             .fetchOptionalInto(VisitorLog.class);
+    }
+
+    public List<VisitorLog> findAll() {
+        return dsl.selectFrom(VISITOR_LOG)
+            .fetchInto(VisitorLog.class);
     }
 }
