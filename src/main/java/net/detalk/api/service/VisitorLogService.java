@@ -43,7 +43,7 @@ public class VisitorLogService {
     public void saveVisitorLocation(String clientIp, String sessionId, String userAgent,
         String referer) {
 
-        try{
+        try {
 
             String continentCode;
             String countryIso;
@@ -77,10 +77,14 @@ public class VisitorLogService {
             visitorLogRepository.save(visitorLog);
 
 
-        } catch (GeoIp2Exception | IOException e) {
-            log.warn("사용자 위치 정보 저장 중 에러 발생 (clientIp: {})", clientIp);
-            log.debug("사용자 위치 정보 에러={}",e.getMessage());
-            throw new VisitorLocationSaveException("사용자 위치 정보 저장 중 에러 발생");
+        } catch (GeoIp2Exception e) {
+            log.warn("GeoIP2 데이터베이스 조회 중 에러 발생 (sessionId: {})", sessionId);
+            log.debug("GeoIP2 에러={}", e.getMessage());
+            throw new VisitorLocationSaveException("사용자 위치 정보 저장 중 GeoLite2 DB 에러 발생");
+        } catch (IOException e) {
+            log.warn("사용자 위치 정보 저장 중 에러 발생 (sessionId: {})", sessionId);
+            log.debug("사용자 위치 정보 에러={}", e.getMessage());
+            throw new VisitorLocationSaveException("사용자 위치 정보 저장 중 IOE 에러 발생");
         }
     }
 
