@@ -6,14 +6,17 @@ import com.maxmind.geoip2.model.CityResponse;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.time.LocalDateTime;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.detalk.api.controller.v1.response.VisitorLogResponse;
 import net.detalk.api.domain.VisitorLog;
 import net.detalk.api.domain.exception.VisitorLocationSaveException;
 import net.detalk.api.repository.VisitorLogRepository;
 import net.detalk.api.support.EnvironmentHolder;
 import net.detalk.api.support.TimeHolder;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -80,4 +83,19 @@ public class VisitorLogService {
             throw new VisitorLocationSaveException("사용자 위치 정보 저장 중 에러 발생");
         }
     }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<VisitorLogResponse> findAll() {
+        return visitorLogRepository.findAll().stream()
+            .map(v -> new VisitorLogResponse(
+                v.getSessionId(),
+                v.getContinentCode(),
+                v.getCountryIso(),
+                v.getCountryName(),
+                v.getVisitedAt(),
+                v.getUserAgent(),
+                v.getReferer()
+            )).toList();
+    }
+
 }
