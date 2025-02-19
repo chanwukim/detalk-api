@@ -28,6 +28,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import java.io.PrintWriter;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 
+import static org.springframework.security.config.Customizer.withDefaults;
+
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity // 메서드 별 권한 설정 활성화
@@ -79,6 +81,9 @@ public class SecurityConfig {
     @Bean
     protected SecurityFilterChain securityFilterChain(HttpSecurity http, TokenProvider tokenProvider) throws Exception {
         http
+            // https://docs.spring.io/spring-security/reference/servlet/integrations/cors.html
+            // WebConfig CORS 설정을 사용
+            .cors(withDefaults())
             .csrf(AbstractHttpConfigurer::disable)
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
