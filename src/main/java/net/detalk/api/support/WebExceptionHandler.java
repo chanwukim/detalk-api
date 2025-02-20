@@ -16,6 +16,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.server.MethodNotAllowedException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
@@ -49,6 +50,15 @@ public class WebExceptionHandler {
         return ResponseEntity
             .status(HttpStatus.INTERNAL_SERVER_ERROR)
             .body(new ErrorMessage(ErrorCode.INTERNAL_SERVER_ERROR));
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorMessage> handleMethodArgumentTypeMismatchException(
+        MethodArgumentTypeMismatchException e) {
+        log.info("MethodArgumentTypeMismatchException. {}", e.getMessage());
+        return ResponseEntity
+            .status(HttpStatus.BAD_REQUEST)
+            .body(new ErrorMessage(ErrorCode.BAD_REQUEST));
     }
 
     // Validation
