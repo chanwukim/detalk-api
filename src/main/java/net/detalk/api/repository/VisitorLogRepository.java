@@ -7,6 +7,9 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import net.detalk.api.domain.VisitorLog;
 import org.jooq.DSLContext;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 @RequiredArgsConstructor
@@ -37,5 +40,17 @@ public class VisitorLogRepository {
     public List<VisitorLog> findAll() {
         return dsl.selectFrom(VISITOR_LOG)
             .fetchInto(VisitorLog.class);
+    }
+
+    public Page<VisitorLog> findAll(Pageable pageable) {
+
+        List<VisitorLog> visitorLogs = dsl.selectFrom(VISITOR_LOG)
+            .offset(pageable.getOffset())
+            .limit(pageable.getPageSize())
+            .fetchInto(VisitorLog.class);
+
+        int count = dsl.fetchCount(dsl.selectFrom(VISITOR_LOG));
+
+        return new PageImpl<>(visitorLogs, pageable, count);
     }
 }
