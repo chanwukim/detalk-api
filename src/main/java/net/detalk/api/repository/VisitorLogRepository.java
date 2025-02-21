@@ -49,7 +49,9 @@ public class VisitorLogRepository {
             .limit(pageable.getPageSize())
             .fetchInto(VisitorLog.class);
 
-        int count = dsl.fetchCount(dsl.selectFrom(VISITOR_LOG));
+        Long count = dsl.selectCount()
+            .from(VISITOR_LOG)
+            .fetchOne(0, Long.class);
 
         return new PageImpl<>(visitorLogs, pageable, count);
     }
