@@ -1,6 +1,7 @@
 package net.detalk.api.controller.v1;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -36,9 +37,11 @@ public class AdminController {
         return ResponseEntity.ok(activeSessions);
     }
 
-    @Operation(summary = "방문자 정보 목록 조회", description = "사이트에 방문한 회원의 위치 정보를 조회합니다")
+    @Operation(summary = "방문자 정보 목록 조회", description = "사이트에 방문한 회원의 위치 정보를 페이징하여 조회합니다")
     @ApiResponse(responseCode = "200", description = "조회 성공")
     @ApiResponse(responseCode = "403", description = "권한 없음")
+    @Parameter(name = "page", description = "페이지 번호 (0부터 시작)", example = "0")
+    @Parameter(name = "size", description = "페이지당 항목 수", example = "10")
     @GetMapping("/visitor-logs")
     public ResponseEntity<PagingData<VisitorLogResponse>> getVisitorLogs(
         @RequestParam(name = "page", defaultValue = "0") int page,
