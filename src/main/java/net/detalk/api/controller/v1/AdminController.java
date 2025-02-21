@@ -8,10 +8,14 @@ import net.detalk.api.controller.v1.response.ActiveSessionResponse;
 import net.detalk.api.controller.v1.response.VisitorLogResponse;
 import net.detalk.api.service.SessionTrackingService;
 import net.detalk.api.service.VisitorLogService;
+import net.detalk.api.support.PagingData;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @PreAuthorize("hasRole('ADMIN')")
@@ -36,9 +40,13 @@ public class AdminController {
     @ApiResponse(responseCode = "200", description = "조회 성공")
     @ApiResponse(responseCode = "403", description = "권한 없음")
     @GetMapping("/visitor-logs")
-    public ResponseEntity<List<VisitorLogResponse>> getVisitorLogs() {
-        List<VisitorLogResponse> logs = visitorLogService.findAll();
-        return ResponseEntity.ok(logs);
+    public ResponseEntity<PagingData<VisitorLogResponse>> getVisitorLogs(
+        @RequestParam(name = "page", defaultValue = "0") int page,
+        @RequestParam(name = "size", defaultValue = "10") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        PagingData<VisitorLogResponse> result = visitorLogService.findAll(pageable);
+        return ResponseEntity.ok(result);
     }
 
 }

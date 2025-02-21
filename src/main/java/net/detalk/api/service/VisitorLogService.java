@@ -14,7 +14,10 @@ import net.detalk.api.domain.VisitorLog;
 import net.detalk.api.domain.exception.VisitorLocationSaveException;
 import net.detalk.api.repository.VisitorLogRepository;
 import net.detalk.api.support.EnvironmentHolder;
+import net.detalk.api.support.PagingData;
 import net.detalk.api.support.TimeHolder;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -89,17 +92,28 @@ public class VisitorLogService {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    public List<VisitorLogResponse> findAll() {
-        return visitorLogRepository.findAll().stream()
-            .map(v -> new VisitorLogResponse(
-                v.getSessionId(),
-                v.getContinentCode(),
-                v.getCountryIso(),
-                v.getCountryName(),
-                v.getVisitedAt(),
-                v.getUserAgent(),
-                v.getReferer()
+    public PagingData<VisitorLogResponse> findAll(Pageable pageable) {
+
+        Page<VisitorLog> page = visitorLogRepository.findAll(pageable);
+
+        var content = page.getContent().stream()
+            .map(result -> new VisitorLogResponse(
+                result.getSessionId(),
+                result.getContinentCode(),
+                result.getCountryIso(),
+                result.getCountryName(),
+                result.getVisitedAt(),
+                result.getUserAgent(),
+                result.getReferer()
             )).toList();
+
+        return new PagingData<>(
+            content,
+            page.getNumber(),
+            page.getSize(),
+            page.getTotalElements(),
+            page.getTotalPages()
+        );
     }
 
 }
