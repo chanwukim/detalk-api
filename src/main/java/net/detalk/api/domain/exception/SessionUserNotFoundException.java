@@ -21,6 +21,6 @@ public class SessionUserNotFoundException extends ApiException {
 
     @Override
     public boolean isNecessaryToLog() {
-        return true;
+        return false;
     }
 }
