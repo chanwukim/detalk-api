@@ -1,7 +1,7 @@
-package net.detalk.api.domain.exception;
+package net.detalk.api.member.domain.exception;
 
-import net.detalk.api.domain.LoginType;
-import net.detalk.api.domain.MemberStatus;
+import net.detalk.api.member.domain.LoginType;
+import net.detalk.api.member.domain.MemberStatus;
 import net.detalk.api.support.error.ApiException;
 import org.springframework.http.HttpStatus;
 
@@ -26,6 +26,6 @@ public class MemberNeedSignUpException extends ApiException {
 
     @Override
     public boolean isNecessaryToLog() {
-        return true;
+        return false;
     }
 }

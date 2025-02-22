@@ -1,4 +1,4 @@
-package net.detalk.api.domain;
+package net.detalk.api.member.domain;
 
 import java.util.Objects;
 import lombok.Builder;
@@ -6,7 +6,7 @@ import lombok.Getter;
 
 import java.time.Instant;
 import java.util.UUID;
-import net.detalk.api.controller.v1.request.UpdateProfileRequest;
+import net.detalk.api.member.controller.v1.request.UpdateMemberProfileRequest;
 
 @Getter
 public class MemberProfile {
@@ -30,7 +30,7 @@ public class MemberProfile {
         this.updatedAt = updatedAt;
     }
 
-    public MemberProfile update(UpdateProfileRequest updateProfile, UUID newAvatarId,
+    public MemberProfile update(UpdateMemberProfileRequest updateProfile, UUID newAvatarId,
         Instant now) {
         return MemberProfile.builder()
             .id(id)

@@ -1,4 +1,4 @@
-package net.detalk.api.domain;
+package net.detalk.api.member.domain;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -8,6 +8,7 @@ import java.time.Instant;
 
 @Getter
 public class Member {
+
     private Long id;
     private LoginType loginType;
     private MemberStatus status;

@@ -1,9 +1,10 @@
-package net.detalk.api.repository;
+package net.detalk.api.member.repository.impl;
 
-import net.detalk.api.domain.MemberDetail;
+import net.detalk.api.member.controller.v1.response.GetMemberProfileResponse;
+import net.detalk.api.member.repository.MemberProfileRepository;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Repository;
-import net.detalk.api.domain.MemberProfile;
+import net.detalk.api.member.domain.MemberProfile;
 
 import static net.detalk.jooq.Tables.MEMBER_PROFILE;
 import static net.detalk.jooq.tables.JAttachmentFile.ATTACHMENT_FILE;
@@ -38,7 +39,7 @@ public class MemberProfileRepositoryImpl implements MemberProfileRepository {
     }
 
     @Override
-    public Optional<MemberDetail> findWithAvatarByMemberId(Long memberId) {
+    public Optional<GetMemberProfileResponse> findWithAvatarByMemberId(Long memberId) {
         return dsl.select(
                 MEMBER_PROFILE.MEMBER_ID.as("id"),
                 MEMBER_PROFILE.USERHANDLE.as("userhandle"),
@@ -50,7 +51,7 @@ public class MemberProfileRepositoryImpl implements MemberProfileRepository {
             .leftJoin(ATTACHMENT_FILE)
             .on(MEMBER_PROFILE.AVATAR_ID.eq(ATTACHMENT_FILE.ID))
             .where(MEMBER_PROFILE.MEMBER_ID.eq(memberId))
-            .fetchOptionalInto(MemberDetail.class);
+            .fetchOptionalInto(GetMemberProfileResponse.class);
     }
 
     @Override

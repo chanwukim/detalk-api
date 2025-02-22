@@ -1,6 +1,6 @@
-package net.detalk.api.repository;
+package net.detalk.api.member.repository;
 
-import net.detalk.api.domain.Member;
+import net.detalk.api.member.domain.Member;
 
 import java.util.Optional;
 
