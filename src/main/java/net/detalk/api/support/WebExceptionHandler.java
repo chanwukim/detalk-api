@@ -13,6 +13,7 @@ import net.detalk.api.support.util.StringUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -55,12 +56,20 @@ public class WebExceptionHandler {
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ErrorMessage> handleMethodArgumentTypeMismatchException(
         MethodArgumentTypeMismatchException e) {
-        log.info("MethodArgumentTypeMismatchException. {}", e.getMessage());
+        log.info("METHOD_NOT_ALLOWED. {}", e.getMessage());
+        return ResponseEntity
+            .status(HttpStatus.METHOD_NOT_ALLOWED)
+            .body(new ErrorMessage(ErrorCode.METHOD_NOT_ALLOWED));
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ErrorMessage> handleHttpRequestMethodNotSupportedException(
+        HttpRequestMethodNotSupportedException e) {
+        log.info("HttpRequestMethodNotSupportedException. {}", e.getMessage());
         return ResponseEntity
             .status(HttpStatus.BAD_REQUEST)
             .body(new ErrorMessage(ErrorCode.BAD_REQUEST));
     }
-
     // Validation
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorMessage> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
