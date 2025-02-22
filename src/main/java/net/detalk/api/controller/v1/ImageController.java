@@ -22,7 +22,7 @@ public class ImageController {
 
     @PostMapping("/upload-url")
     public ResponseEntity<UploadImageData> createImageUploadUrl (
-        @HasRole(SecurityRole.MEMBER) SecurityUser user,
+        @HasRole({SecurityRole.MEMBER, SecurityRole.ADMIN}) SecurityUser user,
         @Valid @RequestBody ImageUploadRequest body
         ) {
 
