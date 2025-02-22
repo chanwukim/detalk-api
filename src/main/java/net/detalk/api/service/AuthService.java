@@ -3,15 +3,21 @@ package net.detalk.api.service;
 import java.util.UUID;
 import net.detalk.api.controller.v1.response.SessionInfoResponse;
 import net.detalk.api.domain.*;
-import net.detalk.api.domain.exception.MemberNotFoundException;
-import net.detalk.api.domain.exception.MemberProfileNotFoundException;
+import net.detalk.api.member.domain.LoginType;
+import net.detalk.api.member.domain.MemberStatus;
+import net.detalk.api.member.domain.exception.MemberNotFoundException;
+import net.detalk.api.member.domain.exception.MemberProfileNotFoundException;
 import net.detalk.api.domain.exception.ProviderUnsupportedException;
 import net.detalk.api.domain.exception.RefreshTokenNotFoundException;
+import net.detalk.api.member.controller.v1.response.GetMemberProfileResponse;
+import net.detalk.api.member.domain.Member;
+import net.detalk.api.member.domain.MemberExternal;
+import net.detalk.api.member.domain.MemberProfile;
 import net.detalk.api.repository.AttachmentFileRepository;
 import net.detalk.api.repository.AuthRefreshTokenRepository;
-import net.detalk.api.repository.MemberExternalRepository;
-import net.detalk.api.repository.MemberProfileRepository;
-import net.detalk.api.repository.MemberRepository;
+import net.detalk.api.member.repository.MemberExternalRepository;
+import net.detalk.api.member.repository.MemberProfileRepository;
+import net.detalk.api.member.repository.MemberRepository;
 import net.detalk.api.support.TimeHolder;
 import net.detalk.api.support.UUIDGenerator;
 import net.detalk.api.support.security.*;
@@ -106,7 +112,7 @@ public class AuthService extends DefaultOAuth2UserService {
             return new MemberNotFoundException();
         });
 
-        MemberDetail memberDetail = memberProfileRepository.findWithAvatarByMemberId(memberId)
+        GetMemberProfileResponse memberProfileDto = memberProfileRepository.findWithAvatarByMemberId(memberId)
             .orElseThrow(() -> {
                 log.info("[GetMemberPublicProfileResponse] 존재하지 않는 회원 프로필 입니다. memberId={}",
                     memberId);
@@ -118,10 +124,10 @@ public class AuthService extends DefaultOAuth2UserService {
 
         return SessionInfoResponse.builder()
             .id(memberId)
-            .userhandle(memberDetail.getUserhandle())
-            .nickname(memberDetail.getNickname())
-            .description(memberDetail.getDescription())
-            .avatarUrl(memberDetail.getAvatarUrl())
+            .userhandle(memberProfileDto.userhandle())
+            .nickname(memberProfileDto.nickname())
+            .description(memberProfileDto.description())
+            .avatarUrl(memberProfileDto.avatarUrl())
             .roles(roles)
             .build();
     }

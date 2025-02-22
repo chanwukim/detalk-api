@@ -110,7 +110,7 @@ jooq {
 						includeExpression = 'member\\.login_type'
 					}
 					forcedType {
-						userType = 'net.detalk.api.domain.MemberStatus'
+						userType = 'net.detalk.api.member.domain.MemberStatus'
 						enumConverter = true
 						name = 'varchar'
 						includeExpression = 'member\\.status'

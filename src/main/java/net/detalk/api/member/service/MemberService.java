@@ -1,19 +1,18 @@
-package net.detalk.api.service;
+package net.detalk.api.member.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.detalk.api.controller.v1.request.UpdateProfileRequest;
-import net.detalk.api.controller.v1.response.GetMemberPublicProfileResponse;
-import net.detalk.api.domain.Member;
-import net.detalk.api.domain.MemberDetail;
-import net.detalk.api.domain.MemberProfile;
-import net.detalk.api.domain.exception.InvalidMemberStatusException;
-import net.detalk.api.domain.exception.MemberNeedSignUpException;
-import net.detalk.api.domain.exception.MemberNotFoundException;
-import net.detalk.api.domain.exception.MemberProfileNotFoundException;
+import net.detalk.api.member.controller.v1.request.UpdateMemberProfileRequest;
+import net.detalk.api.member.controller.v1.response.GetMemberProfileResponse;
+import net.detalk.api.member.domain.Member;
+import net.detalk.api.member.domain.MemberProfile;
+import net.detalk.api.member.domain.exception.MemberInvalidStatusException;
+import net.detalk.api.member.domain.exception.MemberNeedSignUpException;
+import net.detalk.api.member.domain.exception.MemberNotFoundException;
+import net.detalk.api.member.domain.exception.MemberProfileNotFoundException;
 import net.detalk.api.domain.exception.UserHandleDuplicatedException;
-import net.detalk.api.repository.MemberProfileRepository;
-import net.detalk.api.repository.MemberRepository;
+import net.detalk.api.member.repository.MemberProfileRepository;
+import net.detalk.api.member.repository.MemberRepository;
 import net.detalk.api.support.TimeHolder;
 import net.detalk.api.support.UUIDGenerator;
 import org.springframework.stereotype.Service;
@@ -32,7 +31,7 @@ public class MemberService {
     /**
      * 자신 프로필 조회
      */
-    public MemberDetail me(Long memberId) {
+    public GetMemberProfileResponse me(Long memberId) {
         Member member = getMemberById(memberId);
 
         if (member.isPendingExternalMember()) {
@@ -48,7 +47,7 @@ public class MemberService {
      * 프로필 생성
      */
     @Transactional
-    public MemberDetail registerProfile(Long memberId, String userhandle, String nickname) {
+    public GetMemberProfileResponse registerProfile(Long memberId, String userhandle, String nickname) {
         log.debug("[registerProfile] userhandle 중복검사 {}", userhandle);
         memberProfileRepository.findByUserHandle(userhandle).ifPresent(m -> {
             log.error("[registerProfile] 이미 존재하는 userhandle({}) 입니다.", userhandle);
@@ -58,7 +57,7 @@ public class MemberService {
         Member member = getMemberById(memberId);
 
         if (!member.isPendingExternalMember()) {
-            throw new InvalidMemberStatusException(memberId, member.getStatus());
+            throw new MemberInvalidStatusException(memberId, member.getStatus());
         }
 
         member.active(timeHolder);
@@ -76,7 +75,7 @@ public class MemberService {
                 .build()
         );
 
-        return MemberDetail.builder()
+        return GetMemberProfileResponse.builder()
             .id(member.getId())
             .userhandle(memberProfile.getUserhandle())
             .nickname(memberProfile.getNickname())
@@ -88,7 +87,7 @@ public class MemberService {
      * 프로필 업데이트
      */
     @Transactional
-    public void updateProfile(Long memberId, UpdateProfileRequest updateRequest) {
+    public void updateProfile(Long memberId, UpdateMemberProfileRequest updateRequest) {
 
         Member member = getMemberById(memberId);
         MemberProfile memberProfile = getProfileByMemberId(member.getId());
@@ -119,18 +118,9 @@ public class MemberService {
      * userhandle로 회원 프로필 조회
      */
     @Transactional(readOnly = true)
-    public GetMemberPublicProfileResponse getMemberDetailByUserhandle(String userhandle) {
-
+    public GetMemberProfileResponse getMemberDetailByUserhandle(String userhandle) {
         MemberProfile memberProfile = getProfileByUserhandle(userhandle);
-
-        MemberDetail memberDetail = getMemberDetailByMemberId(memberProfile.getMemberId());
-
-        return GetMemberPublicProfileResponse.builder()
-            .userhandle(memberProfile.getUserhandle())
-            .nickname(memberProfile.getNickname())
-            .description(memberProfile.getDescription())
-            .avatarUrl(memberDetail.getAvatarUrl())
-            .build();
+        return getMemberDetailByMemberId(memberProfile.getMemberId());
     }
 
     /**
@@ -176,7 +166,7 @@ public class MemberService {
     /**
      * MemberId로 회원 프로필 모든 정보 조회 (avatarUrl 포함)
      */
-    public MemberDetail getMemberDetailByMemberId(Long memberId) {
+    public GetMemberProfileResponse getMemberDetailByMemberId(Long memberId) {
         return memberProfileRepository.findWithAvatarByMemberId(memberId)
             .orElseThrow(() -> {
                 log.error("[GetMemberPublicProfileResponse] 존재하지 않는 회원 프로필 입니다. memberId={}",

@@ -1,14 +1,13 @@
-package net.detalk.api.controller.v1;
+package net.detalk.api.member.controller.v1;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import lombok.RequiredArgsConstructor;
-import net.detalk.api.controller.v1.request.CreateProfileRequest;
-import net.detalk.api.controller.v1.request.UpdateProfileRequest;
-import net.detalk.api.controller.v1.response.GetMemberPublicProfileResponse;
+import net.detalk.api.member.controller.v1.request.CreateMemberProfileRequest;
+import net.detalk.api.member.controller.v1.request.UpdateMemberProfileRequest;
+import net.detalk.api.member.controller.v1.response.GetMemberProfileResponse;
 import net.detalk.api.controller.v1.response.GetProductPostResponse;
-import net.detalk.api.domain.MemberDetail;
-import net.detalk.api.service.MemberService;
+import net.detalk.api.member.service.MemberService;
 import net.detalk.api.service.ProductPostService;
 import net.detalk.api.support.CursorPageData;
 import net.detalk.api.support.security.HasRole;
@@ -26,27 +25,27 @@ public class MemberController {
     private final ProductPostService productPostService;
 
     @GetMapping("/me")
-    public ResponseEntity<MemberDetail> me(
+    public ResponseEntity<GetMemberProfileResponse> me(
         @HasRole(SecurityRole.MEMBER) SecurityUser user
     ) {
-        MemberDetail memberDetail = memberService.me(user.getId());
-        return ResponseEntity.ok().body(memberDetail);
+        GetMemberProfileResponse memberProfileResponse = memberService.me(user.getId());
+        return ResponseEntity.ok().body(memberProfileResponse);
     }
 
     @PostMapping("/profile")
-    public ResponseEntity<MemberDetail> registerProfile(
+    public ResponseEntity<GetMemberProfileResponse> registerProfile(
         @HasRole(SecurityRole.MEMBER) SecurityUser user,
-        @Valid @RequestBody CreateProfileRequest registerProfile
+        @Valid @RequestBody CreateMemberProfileRequest registerProfile
     ) {
-        MemberDetail memberDetail = memberService.registerProfile(user.getId(),
+        GetMemberProfileResponse memberProfileResponse = memberService.registerProfile(user.getId(),
             registerProfile.userhandle(), registerProfile.nickname());
-        return ResponseEntity.ok().body(memberDetail);
+        return ResponseEntity.ok().body(memberProfileResponse);
     }
 
     @PutMapping("/profile")
     public ResponseEntity<Void> updateProfile(
         @HasRole(SecurityRole.MEMBER) SecurityUser user,
-        @Valid @RequestBody UpdateProfileRequest updateProfileRequest
+        @Valid @RequestBody UpdateMemberProfileRequest updateProfileRequest
     ) {
         memberService.updateProfile(user.getId(), updateProfileRequest);
         return ResponseEntity.noContent().build();
@@ -58,9 +57,9 @@ public class MemberController {
         @RequestParam(name = "startId", required = false) Long nextId,
         @HasRole(SecurityRole.MEMBER) SecurityUser user
     ) {
-        CursorPageData<GetProductPostResponse> result = productPostService.getProductPostsByMemberId(
+        CursorPageData<GetProductPostResponse> myPostResponses = productPostService.getProductPostsByMemberId(
             user.getId(), pageSize, nextId);
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(myPostResponses);
     }
 
     @GetMapping("/{userhandle}/posts")
@@ -71,10 +70,10 @@ public class MemberController {
     ) {
         Long memberId = memberService.getMemberIdByUserHandle(userhandle);
 
-        CursorPageData<GetProductPostResponse> posts =
+        CursorPageData<GetProductPostResponse> memberProductResponses =
             productPostService.getProductPostsByMemberId(memberId, pageSize, nextId);
 
-        return ResponseEntity.ok(posts);
+        return ResponseEntity.ok(memberProductResponses);
     }
 
     @GetMapping("/{userhandle}/recommended-posts")
@@ -85,17 +84,17 @@ public class MemberController {
     ) {
         Long memberId = memberService.getMemberIdByUserHandle(userhandle);
 
-        CursorPageData<GetProductPostResponse> result =
+        CursorPageData<GetProductPostResponse> recommendedPostResponses =
             productPostService.getRecommendedPostsByMemberId(memberId, pageSize, nextId);
 
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(recommendedPostResponses);
     }
 
     @GetMapping("/{userhandle}")
-    public ResponseEntity<GetMemberPublicProfileResponse> getMemberProfile(
+    public ResponseEntity<GetMemberProfileResponse> getMemberProfile(
         @PathVariable("userhandle") String userhandle
     ) {
-        GetMemberPublicProfileResponse memberDetail = memberService.getMemberDetailByUserhandle(userhandle);
-        return ResponseEntity.ok(memberDetail);
+        GetMemberProfileResponse memberProfileResponse = memberService.getMemberDetailByUserhandle(userhandle);
+        return ResponseEntity.ok(memberProfileResponse);
     }
 }

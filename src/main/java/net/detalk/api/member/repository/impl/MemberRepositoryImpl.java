@@ -1,8 +1,9 @@
-package net.detalk.api.repository;
+package net.detalk.api.member.repository.impl;
 
 import lombok.RequiredArgsConstructor;
-import net.detalk.api.domain.Member;
+import net.detalk.api.member.domain.Member;
 
+import net.detalk.api.member.repository.MemberRepository;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Repository;
 

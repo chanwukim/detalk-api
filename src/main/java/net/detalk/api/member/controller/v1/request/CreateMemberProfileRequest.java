@@ -1,9 +1,15 @@
-package net.detalk.api.controller.v1.request;
+package net.detalk.api.member.controller.v1.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-public record CreateProfileRequest(
+/**
+ * 사용자 프로필 등록 요청 DTO
+ *
+ * @param userhandle 계정 고유 식별자 (64자 이내)
+ * @param nickname   사용자 표시 이름 (2~20자)
+ */
+public record CreateMemberProfileRequest(
     @NotBlank(message = "Userhandle is required")
     @Size(max = 64, message = "Userhandle must be less than or equal to 64 characters")
     String userhandle,

@@ -1,6 +1,6 @@
-package net.detalk.api.repository;
+package net.detalk.api.member.repository;
 
-import net.detalk.api.domain.MemberExternal;
+import net.detalk.api.member.domain.MemberExternal;
 import net.detalk.api.support.security.oauth.OAuthProvider;
 
 import java.util.Optional;
