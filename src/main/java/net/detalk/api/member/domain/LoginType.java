@@ -1,4 +1,4 @@
-package net.detalk.api.domain;
+package net.detalk.api.member.domain;
 
 public enum LoginType {
     EMAIL,
