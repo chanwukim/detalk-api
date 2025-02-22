@@ -67,8 +67,8 @@ public class WebExceptionHandler {
         HttpRequestMethodNotSupportedException e) {
         log.info("HttpRequestMethodNotSupportedException. {}", e.getMessage());
         return ResponseEntity
-            .status(HttpStatus.BAD_REQUEST)
-            .body(new ErrorMessage(ErrorCode.BAD_REQUEST));
+            .status(HttpStatus.METHOD_NOT_ALLOWED)
+            .body(new ErrorMessage(ErrorCode.METHOD_NOT_ALLOWED));
     }
     // Validation
     @ExceptionHandler(MethodArgumentNotValidException.class)
