@@ -104,7 +104,7 @@ jooq {
 						includeTypes = 'BIGINT'
 					}
 					forcedType {
-						userType = 'net.detalk.api.domain.LoginType'
+						userType = 'net.detalk.api.member.domain.LoginType'
 						enumConverter = true
 						name = 'varchar'
 						includeExpression = 'member\\.login_type'

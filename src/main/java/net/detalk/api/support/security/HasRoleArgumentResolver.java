@@ -1,7 +1,9 @@
 package net.detalk.api.support.security;
 
 import java.util.Arrays;
+import java.util.Objects;
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import net.detalk.api.domain.exception.AccessDeniedException;
 import net.detalk.api.domain.exception.SessionUserNotFoundException;
 import org.springframework.core.MethodParameter;
@@ -23,6 +25,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  * 필요한 경우 해당 {@link SecurityUser}를 반환한다.
  * </p>
  */
+@Slf4j
 @Component
 public class HasRoleArgumentResolver implements HandlerMethodArgumentResolver {
 
@@ -49,10 +52,12 @@ public class HasRoleArgumentResolver implements HandlerMethodArgumentResolver {
 
         // authentication 없거나 Principal이 SecurityUser 아닐경우
         if (authentication == null || !(authentication.getPrincipal() instanceof SecurityUser securityUser)) {
+            log.debug("Authentication failed for method: {}. authentication: {}", Objects.requireNonNull(
+                parameter.getMethod()).getName(), authentication);
             throw new SessionUserNotFoundException();
         }
 
-        // @HasRole 어노테이션이 요구하는 ROLE 가져오기
+        // 컨트롤러 @HasRole 어노테이션이 요구하는 ROLE 가져오기
         HasRole hasRoleAnnotation = parameter.getParameterAnnotation(HasRole.class);
         assert hasRoleAnnotation != null;
         SecurityRole[] requiredRoles = hasRoleAnnotation.value();
