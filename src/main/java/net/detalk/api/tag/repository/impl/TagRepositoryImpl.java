@@ -1,18 +1,18 @@
-package net.detalk.api.repository;
+package net.detalk.api.tag.repository.impl;
 
 import static net.detalk.jooq.tables.JTag.TAG;
 
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import net.detalk.api.controller.v1.response.GetTagResponse;
-import net.detalk.api.domain.Tag;
+import net.detalk.api.tag.domain.Tag;
+import net.detalk.api.tag.repository.TagRepository;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Repository;
 
 @RequiredArgsConstructor
 @Repository
-public class TagRepository {
+public class TagRepositoryImpl implements TagRepository {
 
     private final DSLContext dsl;
 

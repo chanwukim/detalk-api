@@ -1,4 +1,4 @@
-package net.detalk.api.domain;
+package net.detalk.api.tag.domain;
 
 import lombok.Builder;
 import lombok.Getter;
