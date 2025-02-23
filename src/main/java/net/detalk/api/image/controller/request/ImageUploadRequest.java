@@ -1,10 +1,7 @@
-package net.detalk.api.controller.v1.request;
+package net.detalk.api.image.controller.request;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-
-import java.util.Map;
 
 public record ImageUploadRequest(
     /**

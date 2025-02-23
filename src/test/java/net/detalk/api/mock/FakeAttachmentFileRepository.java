@@ -1,7 +1,7 @@
 package net.detalk.api.mock;
 
-import net.detalk.api.domain.AttachmentFile;
-import net.detalk.api.repository.AttachmentFileRepository;
+import net.detalk.api.image.domain.AttachmentFile;
+import net.detalk.api.image.repository.AttachmentFileRepository;
 
 public class FakeAttachmentFileRepository implements AttachmentFileRepository {
 

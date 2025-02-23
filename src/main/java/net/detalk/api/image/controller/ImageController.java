@@ -1,10 +1,10 @@
-package net.detalk.api.controller.v1;
+package net.detalk.api.image.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import net.detalk.api.controller.v1.request.ImageUploadRequest;
-import net.detalk.api.domain.UploadImageData;
-import net.detalk.api.service.ImageService;
+import net.detalk.api.image.controller.request.ImageUploadRequest;
+import net.detalk.api.image.controller.response.UploadImageData;
+import net.detalk.api.image.service.ImageService;
 import net.detalk.api.support.security.HasRole;
 import net.detalk.api.support.security.SecurityRole;
 import net.detalk.api.support.security.SecurityUser;

@@ -1,4 +1,4 @@
-package net.detalk.api.domain;
+package net.detalk.api.image.controller.response;
 
 import lombok.Builder;
 
