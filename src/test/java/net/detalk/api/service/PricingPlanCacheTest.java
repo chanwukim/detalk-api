@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Map;
 import net.detalk.api.plan.domain.PricingPlan;
 import net.detalk.api.plan.domain.exception.PricingPlanNotFoundException;
+import net.detalk.api.plan.repository.PricingPlanRepository;
 import net.detalk.api.plan.service.PricingPlanCache;
-import net.detalk.api.plan.repository.impl.PricingPlanRepositoryImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,7 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class PricingPlanCacheTest {
 
     @Mock
-    private PricingPlanRepositoryImpl pricingPlanRepository;
+    private PricingPlanRepository pricingPlanRepository;
     private PricingPlanCache pricingPlanCache;
 
     @BeforeEach

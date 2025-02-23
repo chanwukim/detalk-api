@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.detalk.api.plan.domain.PricingPlan;
 import net.detalk.api.plan.domain.exception.PricingPlanNotFoundException;
-import net.detalk.api.plan.repository.impl.PricingPlanRepositoryImpl;
+import net.detalk.api.plan.repository.PricingPlanRepository;
 import net.detalk.api.service.DetalkCache;
 import org.springframework.stereotype.Component;
 
@@ -24,7 +24,7 @@ public class PricingPlanCache implements DetalkCache<String,PricingPlan> {
 
     private final ConcurrentMap<String, PricingPlan> cache = new ConcurrentHashMap<>();
 
-    private final PricingPlanRepositoryImpl pricingPlanRepository;
+    private final PricingPlanRepository pricingPlanRepository;
 
     /**
      * 톰캣 실행 시, 실행된다.
