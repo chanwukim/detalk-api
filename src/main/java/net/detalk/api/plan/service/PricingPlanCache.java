@@ -1,4 +1,4 @@
-package net.detalk.api.service;
+package net.detalk.api.plan.service;
 
 import java.util.Collections;
 import java.util.List;
@@ -7,9 +7,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.detalk.api.domain.PricingPlan;
-import net.detalk.api.domain.exception.PricingPlanNotFoundException;
-import net.detalk.api.repository.PricingPlanRepository;
+import net.detalk.api.plan.domain.PricingPlan;
+import net.detalk.api.plan.domain.exception.PricingPlanNotFoundException;
+import net.detalk.api.plan.repository.PricingPlanRepository;
+import net.detalk.api.service.DetalkCache;
 import org.springframework.stereotype.Component;
 
 /**
@@ -19,7 +20,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class PricingPlanCache implements DetalkCache<String,PricingPlan>{
+public class PricingPlanCache implements DetalkCache<String,PricingPlan> {
 
     private final ConcurrentMap<String, PricingPlan> cache = new ConcurrentHashMap<>();
 
@@ -29,7 +30,7 @@ public class PricingPlanCache implements DetalkCache<String,PricingPlan>{
      * 톰캣 실행 시, 실행된다.
      * 초기 가격 정책 캐시 설정
      */
-    protected void loadPricingPlans() {
+    public void loadPricingPlans() {
         log.info("캐시용 가격 정책 목록 DB에서 조회중...");
         List<PricingPlan> plans = pricingPlanRepository.findAll();
         plans.forEach(plan -> cache.put(plan.getName(), plan));

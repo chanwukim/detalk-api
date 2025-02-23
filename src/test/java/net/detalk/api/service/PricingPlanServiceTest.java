@@ -3,9 +3,10 @@ package net.detalk.api.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
-import net.detalk.api.domain.PricingPlan;
-import net.detalk.api.domain.exception.PricingPlanNotFoundException;
+import net.detalk.api.plan.domain.PricingPlan;
+import net.detalk.api.plan.domain.exception.PricingPlanNotFoundException;
 import net.detalk.api.mock.FakePricingPlanCache;
+import net.detalk.api.plan.service.PricingPlanService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
