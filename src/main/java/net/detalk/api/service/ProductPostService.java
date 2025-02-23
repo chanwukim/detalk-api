@@ -10,31 +10,31 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.detalk.api.controller.v1.request.UpdateProductPostRequest;
 import net.detalk.api.controller.v1.response.GetProductPostResponse;
-import net.detalk.api.domain.ProductLink;
+import net.detalk.api.product.domain.ProductLink;
 import net.detalk.api.domain.exception.DuplicateCreatePostException;
 import net.detalk.api.domain.exception.InvalidPageSizeException;
 import net.detalk.api.domain.exception.InvalidRecommendCountRequest;
 import net.detalk.api.domain.exception.ProductPostForbiddenException;
 import net.detalk.api.domain.exception.ProductPostNotFoundException;
 import net.detalk.api.domain.exception.ProductPostSnapshotUpdateException;
+import net.detalk.api.product.repository.ProductLinkRepository;
+import net.detalk.api.product.repository.ProductMakerRepository;
+import net.detalk.api.product.repository.ProductRepository;
 import net.detalk.api.repository.ProductPostLinkRepository;
 import net.detalk.api.support.CursorPageData;
-import net.detalk.api.domain.ProductMaker;
+import net.detalk.api.product.domain.ProductMaker;
 import net.detalk.api.domain.ProductPostSnapshotAttachmentFile;
 import net.detalk.api.domain.PricingPlan;
-import net.detalk.api.domain.Product;
+import net.detalk.api.product.domain.Product;
 import net.detalk.api.controller.v1.request.CreateProductPostRequest;
 import net.detalk.api.domain.ProductPost;
 import net.detalk.api.domain.ProductPostSnapshot;
 import net.detalk.api.domain.ProductPostSnapshotTag;
-import net.detalk.api.repository.ProductLinkRepository;
-import net.detalk.api.repository.ProductMakerRepository;
 import net.detalk.api.repository.ProductPostLastSnapshotRepository;
 import net.detalk.api.repository.ProductPostRepository;
 import net.detalk.api.repository.ProductPostSnapshotAttachmentFileRepository;
 import net.detalk.api.repository.ProductPostSnapshotRepository;
 import net.detalk.api.repository.ProductPostSnapshotTagRepository;
-import net.detalk.api.repository.ProductRepository;
 import net.detalk.api.support.TimeHolder;
 import net.detalk.api.support.UUIDGenerator;
 import org.springframework.stereotype.Service;
@@ -45,20 +45,39 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ProductPostService {
 
+    /**
+     * Product
+     */
     private final ProductRepository productRepository;
-    private final ProductPostRepository productPostRepository;
-    private final PricingPlanService pricingPlanService;
-    private final ProductPostLastSnapshotRepository productPostLastSnapshotRepository;
     private final ProductLinkRepository productLinkRepository;
-    private final ProductPostSnapshotAttachmentFileRepository productPostSnapshotAttachmentFileRepository;
     private final ProductMakerRepository productMakerRepository;
-    private final TagService tagService;
+
+    /**
+     * Product-Post
+     */
+    private final ProductPostRepository productPostRepository;
+    private final ProductPostLastSnapshotRepository productPostLastSnapshotRepository;
+    private final ProductPostSnapshotAttachmentFileRepository productPostSnapshotAttachmentFileRepository;
     private final ProductPostSnapshotTagRepository productPostSnapshotTagRepository;
     private final ProductPostSnapshotRepository productPostSnapshotRepository;
+    private final ProductPostIdempotentService idempotentService;
     private final ProductPostLinkRepository productPostLinkRepository;
+
+    /**
+     * PricingPlan
+     */
+    private final PricingPlanService pricingPlanService;
+
+    /**
+     * Tag
+     */
+    private final TagService tagService;
+
+    /**
+     * ETC
+     */
     private final TimeHolder timeHolder;
     private final UUIDGenerator uuidGenerator;
-    private final ProductPostIdempotentService idempotentService;
 
     @Transactional
     public Long create(CreateProductPostRequest createProductPostRequest, Long memberId) {

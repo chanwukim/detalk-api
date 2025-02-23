@@ -1,19 +1,21 @@
-package net.detalk.api.repository;
+package net.detalk.api.product.repository.impl;
 
 import static net.detalk.jooq.tables.JProductMaker.*;
 
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import net.detalk.api.domain.ProductMaker;
+import net.detalk.api.product.domain.ProductMaker;
+import net.detalk.api.product.repository.ProductMakerRepository;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Repository;
 
 @RequiredArgsConstructor
 @Repository
-public class ProductMakerRepository {
+public class ProductMakerRepositoryImpl implements ProductMakerRepository {
 
     private final DSLContext dsl;
 
+    @Override
     public ProductMaker save(ProductMaker maker) {
         return dsl.insertInto(PRODUCT_MAKER)
             .set(PRODUCT_MAKER.PRODUCT_ID, maker.getProductId())
@@ -23,6 +25,8 @@ public class ProductMakerRepository {
             .fetchOneInto(ProductMaker.class);
     }
 
+
+    @Override
     public Optional<ProductMaker> findByProductIdAndMemberId(Long productId, Long memberId) {
         return dsl.selectFrom(PRODUCT_MAKER)
             .where(PRODUCT_MAKER.PRODUCT_ID.eq(productId))
