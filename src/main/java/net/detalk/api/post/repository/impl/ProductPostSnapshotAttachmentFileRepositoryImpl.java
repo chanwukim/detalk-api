@@ -1,18 +1,21 @@
-package net.detalk.api.repository;
+package net.detalk.api.post.repository.impl;
 
 import static net.detalk.jooq.tables.JProductPostSnapshotAttachmentFile.PRODUCT_POST_SNAPSHOT_ATTACHMENT_FILE;
 
 import lombok.RequiredArgsConstructor;
-import net.detalk.api.domain.ProductPostSnapshotAttachmentFile;
+import net.detalk.api.post.domain.ProductPostSnapshotAttachmentFile;
+import net.detalk.api.post.repository.ProductPostSnapshotAttachmentFileRepository;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Repository;
 
 @RequiredArgsConstructor
 @Repository
-public class ProductPostSnapshotAttachmentFileRepository {
+public class ProductPostSnapshotAttachmentFileRepositoryImpl implements
+    ProductPostSnapshotAttachmentFileRepository {
 
     private final DSLContext dsl;
 
+    @Override
     public ProductPostSnapshotAttachmentFile save(ProductPostSnapshotAttachmentFile attachmentFile) {
         return dsl.insertInto(PRODUCT_POST_SNAPSHOT_ATTACHMENT_FILE)
             .set(PRODUCT_POST_SNAPSHOT_ATTACHMENT_FILE.SNAPSHOT_ID, attachmentFile.getSnapshotId())

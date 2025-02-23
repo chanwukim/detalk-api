@@ -1,4 +1,4 @@
-package net.detalk.api.service;
+package net.detalk.api.post.service;
 
 
 import java.time.Instant;
@@ -8,34 +8,35 @@ import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.detalk.api.controller.v1.request.UpdateProductPostRequest;
-import net.detalk.api.controller.v1.response.GetProductPostResponse;
+import net.detalk.api.post.controller.request.UpdateProductPostRequest;
+import net.detalk.api.post.controller.response.GetProductPostResponse;
 import net.detalk.api.plan.service.PricingPlanService;
+import net.detalk.api.post.repository.ProductPostLastSnapshotRepository;
+import net.detalk.api.post.repository.ProductPostLinkRepository;
+import net.detalk.api.post.repository.ProductPostRepository;
+import net.detalk.api.post.repository.ProductPostSnapshotAttachmentFileRepository;
+import net.detalk.api.post.repository.ProductPostSnapshotRepository;
+import net.detalk.api.post.repository.ProductPostSnapshotTagRepository;
 import net.detalk.api.product.domain.ProductLink;
 import net.detalk.api.domain.exception.DuplicateCreatePostException;
 import net.detalk.api.domain.exception.InvalidPageSizeException;
 import net.detalk.api.domain.exception.InvalidRecommendCountRequest;
-import net.detalk.api.domain.exception.ProductPostForbiddenException;
-import net.detalk.api.domain.exception.ProductPostNotFoundException;
-import net.detalk.api.domain.exception.ProductPostSnapshotUpdateException;
+import net.detalk.api.post.domain.exception.ProductPostForbiddenException;
+import net.detalk.api.post.domain.exception.ProductPostNotFoundException;
+import net.detalk.api.post.domain.exception.ProductPostSnapshotUpdateException;
 import net.detalk.api.product.repository.ProductLinkRepository;
 import net.detalk.api.product.repository.ProductMakerRepository;
 import net.detalk.api.product.repository.ProductRepository;
-import net.detalk.api.repository.ProductPostLinkRepository;
+import net.detalk.api.service.TagService;
 import net.detalk.api.support.CursorPageData;
 import net.detalk.api.product.domain.ProductMaker;
-import net.detalk.api.domain.ProductPostSnapshotAttachmentFile;
+import net.detalk.api.post.domain.ProductPostSnapshotAttachmentFile;
 import net.detalk.api.plan.domain.PricingPlan;
 import net.detalk.api.product.domain.Product;
-import net.detalk.api.controller.v1.request.CreateProductPostRequest;
-import net.detalk.api.domain.ProductPost;
-import net.detalk.api.domain.ProductPostSnapshot;
-import net.detalk.api.domain.ProductPostSnapshotTag;
-import net.detalk.api.repository.ProductPostLastSnapshotRepository;
-import net.detalk.api.repository.ProductPostRepository;
-import net.detalk.api.repository.ProductPostSnapshotAttachmentFileRepository;
-import net.detalk.api.repository.ProductPostSnapshotRepository;
-import net.detalk.api.repository.ProductPostSnapshotTagRepository;
+import net.detalk.api.post.controller.request.CreateProductPostRequest;
+import net.detalk.api.post.domain.ProductPost;
+import net.detalk.api.post.domain.ProductPostSnapshot;
+import net.detalk.api.post.domain.ProductPostSnapshotTag;
 import net.detalk.api.support.TimeHolder;
 import net.detalk.api.support.UUIDGenerator;
 import org.springframework.stereotype.Service;
@@ -61,8 +62,8 @@ public class ProductPostService {
     private final ProductPostSnapshotAttachmentFileRepository productPostSnapshotAttachmentFileRepository;
     private final ProductPostSnapshotTagRepository productPostSnapshotTagRepository;
     private final ProductPostSnapshotRepository productPostSnapshotRepository;
-    private final ProductPostIdempotentService idempotentService;
     private final ProductPostLinkRepository productPostLinkRepository;
+    private final ProductPostIdempotentService idempotentService;
 
     /**
      * PricingPlan

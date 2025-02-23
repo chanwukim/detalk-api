@@ -1,4 +1,4 @@
-package net.detalk.api.controller.v1.request;
+package net.detalk.api.post.controller.request;
 
 import java.util.List;
 
@@ -8,6 +8,18 @@ import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.Pattern;
 import lombok.Builder;
 
+/**
+ * 상품 게시글 생성 요청 DTO
+ *
+ * @param name          상품 이름 (필수, 255자 이내)
+ * @param url           상품 URL (필수, 유효한 URL 형식)
+ * @param description   상품 설명 (필수, 1000자 이내)
+ * @param imageIds      이미지 ID 목록 (필수, null 불가)
+ * @param isMaker       메이커 여부
+ * @param tags          태그 목록 (최대 10개, 각 태그 32자 이내)
+ * @param pricingPlan   가격 정책 (필수, 255자 이내)
+ * @param idempotentKey 멱등키 (필수)
+ */
 @Builder
 public record CreateProductPostRequest(
 

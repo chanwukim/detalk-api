@@ -1,20 +1,21 @@
-package net.detalk.api.repository;
+package net.detalk.api.post.repository.impl;
 
 import static net.detalk.jooq.tables.JProductPostSnapshot.PRODUCT_POST_SNAPSHOT;
 
-import java.time.Instant;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import net.detalk.api.domain.ProductPostSnapshot;
+import net.detalk.api.post.domain.ProductPostSnapshot;
+import net.detalk.api.post.repository.ProductPostSnapshotRepository;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Repository;
 
 @RequiredArgsConstructor
 @Repository
-public class ProductPostSnapshotRepository {
+public class ProductPostSnapshotRepositoryImpl implements ProductPostSnapshotRepository {
 
     private final DSLContext dsl;
 
+    @Override
     public ProductPostSnapshot save(ProductPostSnapshot snapshot) {
         return dsl.insertInto(PRODUCT_POST_SNAPSHOT)
             .set(PRODUCT_POST_SNAPSHOT.POST_ID, snapshot.getPostId())
@@ -26,6 +27,7 @@ public class ProductPostSnapshotRepository {
             .fetchOneInto(ProductPostSnapshot.class);
     }
 
+    @Override
     public Optional<ProductPostSnapshot> findById(Long id) {
         return dsl.selectFrom(PRODUCT_POST_SNAPSHOT)
             .where(PRODUCT_POST_SNAPSHOT.ID.eq(id))
