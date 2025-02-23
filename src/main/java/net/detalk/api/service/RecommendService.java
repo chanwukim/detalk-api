@@ -10,6 +10,7 @@ import net.detalk.api.controller.v1.request.CreateRecommendRequest;
 import net.detalk.api.domain.Recommend;
 import net.detalk.api.domain.RecommendProduct;
 import net.detalk.api.domain.exception.DuplicateRecommendationException;
+import net.detalk.api.post.service.ProductPostService;
 import net.detalk.api.repository.RecommendProductRepository;
 import net.detalk.api.repository.RecommendRepository;
 import net.detalk.api.support.TimeHolder;

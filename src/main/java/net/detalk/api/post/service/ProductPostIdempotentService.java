@@ -1,4 +1,4 @@
-package net.detalk.api.service;
+package net.detalk.api.post.service;
 
 import java.time.Instant;
 import java.util.UUID;

@@ -13,16 +13,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import net.detalk.api.controller.v1.request.CreateProductPostRequest;
-import net.detalk.api.controller.v1.request.UpdateProductPostRequest;
-import net.detalk.api.controller.v1.response.GetProductPostResponse;
-import net.detalk.api.controller.v1.response.GetProductPostResponse.Media;
+import net.detalk.api.post.controller.request.CreateProductPostRequest;
+import net.detalk.api.post.controller.request.UpdateProductPostRequest;
+import net.detalk.api.post.controller.response.GetProductPostResponse;
+import net.detalk.api.post.controller.response.GetProductPostResponse.Media;
 import net.detalk.api.plan.domain.PricingPlan;
 import net.detalk.api.plan.service.PricingPlanService;
+import net.detalk.api.post.repository.ProductPostLastSnapshotRepository;
+import net.detalk.api.post.repository.ProductPostLinkRepository;
+import net.detalk.api.post.repository.ProductPostRepository;
+import net.detalk.api.post.repository.ProductPostSnapshotAttachmentFileRepository;
+import net.detalk.api.post.repository.ProductPostSnapshotRepository;
+import net.detalk.api.post.repository.ProductPostSnapshotTagRepository;
 import net.detalk.api.product.domain.Product;
 import net.detalk.api.product.domain.ProductLink;
-import net.detalk.api.domain.ProductPost;
-import net.detalk.api.domain.ProductPostSnapshot;
+import net.detalk.api.post.domain.ProductPost;
+import net.detalk.api.post.domain.ProductPostSnapshot;
 import net.detalk.api.domain.Tag;
 import net.detalk.api.domain.exception.DuplicateCreatePostException;
 import net.detalk.api.domain.exception.InvalidRecommendCountRequest;
@@ -31,12 +37,8 @@ import net.detalk.api.mock.FakeUUIDGenerator;
 import net.detalk.api.product.repository.ProductLinkRepository;
 import net.detalk.api.product.repository.ProductMakerRepository;
 import net.detalk.api.product.repository.ProductRepository;
-import net.detalk.api.repository.ProductPostLastSnapshotRepository;
-import net.detalk.api.repository.ProductPostLinkRepository;
-import net.detalk.api.repository.ProductPostRepository;
-import net.detalk.api.repository.ProductPostSnapshotAttachmentFileRepository;
-import net.detalk.api.repository.ProductPostSnapshotRepository;
-import net.detalk.api.repository.ProductPostSnapshotTagRepository;
+import net.detalk.api.post.service.ProductPostIdempotentService;
+import net.detalk.api.post.service.ProductPostService;
 import net.detalk.api.support.CursorPageData;
 import net.detalk.api.support.TimeHolder;
 import net.detalk.api.support.UUIDGenerator;
@@ -133,8 +135,8 @@ class ProductPostServiceTest {
             snapshotAttachmentFileRepository,
             postSnapshotTagRepository,
             postSnapshotRepository,
-            postIdempotentService,
             productPostLinkRepository,
+            postIdempotentService,
             planService,
             tagService,
             timeHolder,

@@ -1,4 +1,4 @@
-package net.detalk.api.repository;
+package net.detalk.api.post.repository.impl;
 
 import static net.detalk.jooq.tables.JAttachmentFile.ATTACHMENT_FILE;
 import static net.detalk.jooq.tables.JMemberProfile.MEMBER_PROFILE;
@@ -24,9 +24,10 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import net.detalk.api.controller.v1.response.GetProductPostResponse;
-import net.detalk.api.controller.v1.response.GetProductPostResponse.Media;
-import net.detalk.api.domain.ProductPost;
+import net.detalk.api.post.controller.response.GetProductPostResponse;
+import net.detalk.api.post.controller.response.GetProductPostResponse.Media;
+import net.detalk.api.post.domain.ProductPost;
+import net.detalk.api.post.repository.ProductPostRepository;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record;
@@ -35,10 +36,11 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 @RequiredArgsConstructor
-public class ProductPostRepository {
+public class ProductPostRepositoryImpl implements ProductPostRepository {
 
     private final DSLContext dsl;
 
+    @Override
     public ProductPost save(Long writerId, Long productId, Instant now) {
         return dsl.insertInto(PRODUCT_POST)
             .set(PRODUCT_POST.WRITER_ID, writerId)
@@ -49,18 +51,21 @@ public class ProductPostRepository {
             .fetchOneInto(ProductPost.class);
     }
 
+    @Override
     public Optional<ProductPost> findById(Long id) {
         return dsl.selectFrom(PRODUCT_POST)
             .where(PRODUCT_POST.ID.eq(id))
             .fetchOptionalInto(ProductPost.class);
     }
 
+    @Override
     public Optional<ProductPost> findByProductId(Long productId) {
         return dsl.selectFrom(PRODUCT_POST)
             .where(PRODUCT_POST.PRODUCT_ID.eq(productId))
             .fetchOptionalInto(ProductPost.class);
     }
 
+    @Override
     public Optional<GetProductPostResponse> findDetailsById(Long id) {
 
         var result = dsl.select(
@@ -191,6 +196,7 @@ public class ProductPostRepository {
     }
 
 
+    @Override
     public List<GetProductPostResponse> findProductPosts(int pageSize, Long nextId) {
 
         // nextId null인 경우, 가장 최신 데이터를 조회
@@ -264,6 +270,7 @@ public class ProductPostRepository {
         return result.map(record -> mapRecordToResponse(record, imagesMap));
     }
 
+    @Override
     public List<GetProductPostResponse> findProductPostsByMemberId(Long memberId, int pageSize, Long nextId) {
 
         // 로그인 회원 ID에 해당하는 게시글 조건문
@@ -333,7 +340,7 @@ public class ProductPostRepository {
         return result.map(record -> mapRecordToResponse(record, imagesMap));
     }
 
-
+    @Override
     public List<GetProductPostResponse> findRecommendedPostsByMemberId(Long memberId, int pageSize,
         Long nextId) {
 
@@ -409,6 +416,7 @@ public class ProductPostRepository {
         return result.map(record -> mapRecordToResponse(record, imagesMap));
     }
 
+    @Override
     public List<GetProductPostResponse> findProductPostsByTags(int pageSize, Long nextId,
         List<String> tags) {
 
@@ -497,6 +505,7 @@ public class ProductPostRepository {
         return result.map(record -> mapRecordToResponse(record, imagesMap));
     }
 
+    @Override
     public boolean existsById(Long id) {
         Integer count = dsl.selectCount()
             .from(PRODUCT_POST)
@@ -505,6 +514,7 @@ public class ProductPostRepository {
         return count != null && count > 0;
     }
 
+    @Override
     public void incrementRecommendCount(Long postId,int count) {
         dsl.update(PRODUCT_POST)
             .set(PRODUCT_POST.RECOMMEND_COUNT, PRODUCT_POST.RECOMMEND_COUNT.plus(count))
