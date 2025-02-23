@@ -6,9 +6,10 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
-import net.detalk.api.domain.PricingPlan;
-import net.detalk.api.domain.exception.PricingPlanNotFoundException;
-import net.detalk.api.repository.PricingPlanRepository;
+import net.detalk.api.plan.domain.PricingPlan;
+import net.detalk.api.plan.domain.exception.PricingPlanNotFoundException;
+import net.detalk.api.plan.service.PricingPlanCache;
+import net.detalk.api.plan.repository.impl.PricingPlanRepositoryImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,7 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class PricingPlanCacheTest {
 
     @Mock
-    private PricingPlanRepository pricingPlanRepository;
+    private PricingPlanRepositoryImpl pricingPlanRepository;
     private PricingPlanCache pricingPlanCache;
 
     @BeforeEach
