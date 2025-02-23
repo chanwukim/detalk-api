@@ -18,8 +18,8 @@ import net.detalk.api.controller.v1.request.UpdateProductPostRequest;
 import net.detalk.api.controller.v1.response.GetProductPostResponse;
 import net.detalk.api.controller.v1.response.GetProductPostResponse.Media;
 import net.detalk.api.domain.PricingPlan;
-import net.detalk.api.domain.Product;
-import net.detalk.api.domain.ProductLink;
+import net.detalk.api.product.domain.Product;
+import net.detalk.api.product.domain.ProductLink;
 import net.detalk.api.domain.ProductPost;
 import net.detalk.api.domain.ProductPostSnapshot;
 import net.detalk.api.domain.Tag;
@@ -27,15 +27,15 @@ import net.detalk.api.domain.exception.DuplicateCreatePostException;
 import net.detalk.api.domain.exception.InvalidRecommendCountRequest;
 import net.detalk.api.mock.FakeTimeHolder;
 import net.detalk.api.mock.FakeUUIDGenerator;
-import net.detalk.api.repository.ProductLinkRepository;
-import net.detalk.api.repository.ProductMakerRepository;
+import net.detalk.api.product.repository.ProductLinkRepository;
+import net.detalk.api.product.repository.ProductMakerRepository;
+import net.detalk.api.product.repository.ProductRepository;
 import net.detalk.api.repository.ProductPostLastSnapshotRepository;
 import net.detalk.api.repository.ProductPostLinkRepository;
 import net.detalk.api.repository.ProductPostRepository;
 import net.detalk.api.repository.ProductPostSnapshotAttachmentFileRepository;
 import net.detalk.api.repository.ProductPostSnapshotRepository;
 import net.detalk.api.repository.ProductPostSnapshotTagRepository;
-import net.detalk.api.repository.ProductRepository;
 import net.detalk.api.support.CursorPageData;
 import net.detalk.api.support.TimeHolder;
 import net.detalk.api.support.UUIDGenerator;
@@ -125,19 +125,19 @@ class ProductPostServiceTest {
 
         productPostService = new ProductPostService(
             productRepository,
-            postRepository,
-            planService,
-            postLastSnapshotRepository,
             linkRepository,
-            snapshotAttachmentFileRepository,
             makerRepository,
-            tagService,
+            postRepository,
+            postLastSnapshotRepository,
+            snapshotAttachmentFileRepository,
             postSnapshotTagRepository,
             postSnapshotRepository,
+            postIdempotentService,
             productPostLinkRepository,
+            planService,
+            tagService,
             timeHolder,
-            uuidGenerator,
-            postIdempotentService
+            uuidGenerator
         );
 
         product = Product.builder()

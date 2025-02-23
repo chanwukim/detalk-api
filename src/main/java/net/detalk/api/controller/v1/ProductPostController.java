@@ -38,7 +38,7 @@ public class ProductPostController {
     @PostMapping
     public ResponseEntity<CreateProductPostResponse> create(
         @Valid @RequestBody CreateProductPostRequest createProductPostRequest,
-        @HasRole(SecurityRole.MEMBER) SecurityUser user
+        @HasRole({SecurityRole.MEMBER, SecurityRole.ADMIN}) SecurityUser user
         ) {
         Long productPostId = productPostService.create(createProductPostRequest, user.getId());
         return ResponseEntity.ok(new CreateProductPostResponse(productPostId));
