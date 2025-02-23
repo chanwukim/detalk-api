@@ -27,15 +27,15 @@ import net.detalk.api.domain.exception.DuplicateCreatePostException;
 import net.detalk.api.domain.exception.InvalidRecommendCountRequest;
 import net.detalk.api.mock.FakeTimeHolder;
 import net.detalk.api.mock.FakeUUIDGenerator;
-import net.detalk.api.product.repository.impl.ProductLinkRepositoryImpl;
-import net.detalk.api.product.repository.impl.ProductMakerRepositoryImpl;
+import net.detalk.api.product.repository.ProductLinkRepository;
+import net.detalk.api.product.repository.ProductMakerRepository;
+import net.detalk.api.product.repository.ProductRepository;
 import net.detalk.api.repository.ProductPostLastSnapshotRepository;
 import net.detalk.api.repository.ProductPostLinkRepository;
 import net.detalk.api.repository.ProductPostRepository;
 import net.detalk.api.repository.ProductPostSnapshotAttachmentFileRepository;
 import net.detalk.api.repository.ProductPostSnapshotRepository;
 import net.detalk.api.repository.ProductPostSnapshotTagRepository;
-import net.detalk.api.product.repository.impl.ProductRepositoryImpl;
 import net.detalk.api.support.CursorPageData;
 import net.detalk.api.support.TimeHolder;
 import net.detalk.api.support.UUIDGenerator;
@@ -60,17 +60,17 @@ class ProductPostServiceTest {
      * mock repository, service
      */
     @Mock
-    private ProductRepositoryImpl productRepository;
+    private ProductRepository productRepository;
     @Mock
     private ProductPostRepository postRepository;
     @Mock
     private ProductPostLastSnapshotRepository postLastSnapshotRepository;
     @Mock
-    private ProductLinkRepositoryImpl linkRepository;
+    private ProductLinkRepository linkRepository;
     @Mock
     private ProductPostSnapshotAttachmentFileRepository snapshotAttachmentFileRepository;
     @Mock
-    private ProductMakerRepositoryImpl makerRepository;
+    private ProductMakerRepository makerRepository;
     @Mock
     private ProductPostSnapshotTagRepository postSnapshotTagRepository;
     @Mock

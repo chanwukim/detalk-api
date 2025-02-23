@@ -34,6 +34,7 @@ public class ProductMakerRepositoryImpl implements ProductMakerRepository {
             .fetchOptionalInto(ProductMaker.class);
     }
 
+    @Override
     public void deleteByProductIdAndMemberId(Long productId, Long memberId) {
         dsl.deleteFrom(PRODUCT_MAKER)
             .where(PRODUCT_MAKER.PRODUCT_ID.eq(productId))
