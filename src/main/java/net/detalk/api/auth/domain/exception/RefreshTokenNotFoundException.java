@@ -1,12 +1,12 @@
-package net.detalk.api.domain.exception;
+package net.detalk.api.auth.domain.exception;
 
 import net.detalk.api.support.error.ApiException;
 import org.springframework.http.HttpStatus;
 
-public class SessionUserNotFoundException extends ApiException {
+public class RefreshTokenNotFoundException extends ApiException {
 
-    public SessionUserNotFoundException() {
-        super("User session not found. Please log in");
+    public RefreshTokenNotFoundException() {
+        super("존재하지 않는 리프레시 토큰입니다.");
     }
 
     @Override
@@ -16,11 +16,11 @@ public class SessionUserNotFoundException extends ApiException {
 
     @Override
     public String getErrorCode() {
-        return "session_user_not_found";
+        return "refresh_token_not_found";
     }
 
     @Override
     public boolean isNecessaryToLog() {
-        return false;
+        return true;
     }
 }

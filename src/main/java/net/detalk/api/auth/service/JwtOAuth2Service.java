@@ -1,21 +1,22 @@
-package net.detalk.api.service;
+package net.detalk.api.auth.service;
 
 import java.util.UUID;
-import net.detalk.api.controller.v1.response.SessionInfoResponse;
-import net.detalk.api.domain.*;
+import net.detalk.api.auth.domain.AuthRefreshToken;
+import net.detalk.api.auth.domain.AuthToken;
+import net.detalk.api.auth.controller.response.SessionInfoResponse;
 import net.detalk.api.image.domain.AttachmentFile;
 import net.detalk.api.member.domain.LoginType;
 import net.detalk.api.member.domain.MemberStatus;
 import net.detalk.api.member.domain.exception.MemberNotFoundException;
 import net.detalk.api.member.domain.exception.MemberProfileNotFoundException;
-import net.detalk.api.domain.exception.ProviderUnsupportedException;
-import net.detalk.api.domain.exception.RefreshTokenNotFoundException;
+import net.detalk.api.auth.domain.exception.ProviderUnsupportedException;
+import net.detalk.api.auth.domain.exception.RefreshTokenNotFoundException;
 import net.detalk.api.member.controller.v1.response.GetMemberProfileResponse;
 import net.detalk.api.member.domain.Member;
 import net.detalk.api.member.domain.MemberExternal;
 import net.detalk.api.member.domain.MemberProfile;
 import net.detalk.api.image.repository.AttachmentFileRepository;
-import net.detalk.api.repository.AuthRefreshTokenRepository;
+import net.detalk.api.auth.repository.AuthRefreshTokenRepository;
 import net.detalk.api.member.repository.MemberExternalRepository;
 import net.detalk.api.member.repository.MemberProfileRepository;
 import net.detalk.api.member.repository.MemberRepository;
@@ -43,7 +44,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class AuthService extends DefaultOAuth2UserService {
+public class JwtOAuth2Service extends DefaultOAuth2UserService {
 
     private final MemberRepository memberRepository;
     private final MemberProfileRepository memberProfileRepository;

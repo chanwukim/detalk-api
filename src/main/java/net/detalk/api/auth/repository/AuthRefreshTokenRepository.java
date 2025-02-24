@@ -1,6 +1,6 @@
-package net.detalk.api.repository;
+package net.detalk.api.auth.repository;
 
-import net.detalk.api.domain.AuthRefreshToken;
+import net.detalk.api.auth.domain.AuthRefreshToken;
 
 import java.util.Optional;
 

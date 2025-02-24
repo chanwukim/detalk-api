@@ -1,22 +1,22 @@
-package net.detalk.api.domain.exception;
+package net.detalk.api.auth.domain.exception;
 
 import net.detalk.api.support.error.ApiException;
 import org.springframework.http.HttpStatus;
 
-public class RefreshTokenUnauthorizedException extends ApiException {
+public class AccessDeniedException extends ApiException {
 
-    public RefreshTokenUnauthorizedException() {
-        super();
+    public AccessDeniedException() {
+        super("User does not have the required role(s).");
     }
 
     @Override
     public HttpStatus getHttpStatus() {
-        return HttpStatus.UNAUTHORIZED;
+        return HttpStatus.FORBIDDEN;
     }
 
     @Override
     public String getErrorCode() {
-        return "unauthorized";
+        return "access_denied";
     }
 
     @Override

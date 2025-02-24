@@ -3,7 +3,7 @@ package net.detalk.api.support.security;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import net.detalk.api.service.SessionAuthService;
+import net.detalk.api.auth.service.SessionOAuth2Service;
 import net.detalk.api.support.error.ErrorCode;
 import net.detalk.api.support.error.ErrorMessage;
 import net.detalk.api.support.filter.MDCFilter;
@@ -38,7 +38,7 @@ public class SecurityConfig {
 
     private final OAuthFailHandler oAuthFailHandler;
     private final MDCFilter mdcFilter;
-    private final SessionAuthService authService;
+    private final SessionOAuth2Service authService;
     private final SessionOAuthSuccessHandler oAuthSuccessHandler;
     private final SessionLogoutSuccessHandler logoutSuccessHandler;
 
