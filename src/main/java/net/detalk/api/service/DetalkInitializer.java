@@ -33,11 +33,11 @@ public class DetalkInitializer implements ApplicationRunner {
 
     @Transactional
     @Override
-    public void run(ApplicationArguments args) throws Exception {
+    public void run(ApplicationArguments args){
         // 가격 정책 캐싱
         pricingPlanCache.loadPricingPlans();
 
-        // 트랜잭션과 무관한 Discord 연동 초기화
+        // 트랜잭션과 무관한 알람 시스템 초기화
         initializeDiscord();
 
         // 초기 권한
@@ -52,7 +52,7 @@ public class DetalkInitializer implements ApplicationRunner {
     private void initializeDiscord() {
         try {
             alarmSender.initialize();
-        } catch (Exception e) {
+        }catch (RuntimeException e) {
             log.error("alarmSender 봇 초기화 실패: {}", e.getMessage(), e);
         }
     }
