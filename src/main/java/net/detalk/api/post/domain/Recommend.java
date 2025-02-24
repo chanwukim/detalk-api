@@ -1,4 +1,4 @@
-package net.detalk.api.domain;
+package net.detalk.api.post.domain;
 
 import java.time.Instant;
 import lombok.Builder;

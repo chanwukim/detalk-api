@@ -1,17 +1,18 @@
-package net.detalk.api.repository;
+package net.detalk.api.post.repository.impl;
 
 import static net.detalk.jooq.tables.JRecommendProduct.*;
 
 import java.time.Instant;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import net.detalk.api.domain.RecommendProduct;
+import net.detalk.api.post.domain.RecommendProduct;
+import net.detalk.api.post.repository.RecommendProductRepository;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Repository;
 
 @Repository
 @RequiredArgsConstructor
-public class RecommendProductRepository {
+public class RecommendProductRepositoryImpl implements RecommendProductRepository {
 
     private final DSLContext dsl;
 
@@ -23,6 +24,7 @@ public class RecommendProductRepository {
      * @param productPostId  게시글 ID
      * @return 중복 여부 (true: 중복, false: 중복 아님)
      */
+    @Override
     public boolean isAlreadyRecommended(Long memberId, Long recommendId,
         Long productPostId) {
         return dsl.fetchExists(
@@ -43,6 +45,7 @@ public class RecommendProductRepository {
      * @param now            현재 시각
      * @return 저장된 RecommendProduct 객체
      */
+    @Override
     public RecommendProduct save(Long recommendId, Long productPostId, Long memberId, Instant now) {
         return dsl.insertInto(RECOMMEND_PRODUCT)
             .set(RECOMMEND_PRODUCT.RECOMMEND_ID, recommendId)
@@ -53,6 +56,7 @@ public class RecommendProductRepository {
             .fetchOneInto(RecommendProduct.class);
     }
 
+    @Override
     public void saveAll(List<RecommendProduct> recommendProducts) {
 
         var baseQuery = dsl

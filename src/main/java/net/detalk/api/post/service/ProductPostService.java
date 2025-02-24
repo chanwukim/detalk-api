@@ -20,7 +20,7 @@ import net.detalk.api.post.repository.ProductPostSnapshotTagRepository;
 import net.detalk.api.product.domain.ProductLink;
 import net.detalk.api.domain.exception.DuplicateCreatePostException;
 import net.detalk.api.domain.exception.InvalidPageSizeException;
-import net.detalk.api.domain.exception.InvalidRecommendCountRequest;
+import net.detalk.api.post.domain.exception.InvalidRecommendCountRequest;
 import net.detalk.api.post.domain.exception.ProductPostForbiddenException;
 import net.detalk.api.post.domain.exception.ProductPostNotFoundException;
 import net.detalk.api.post.domain.exception.ProductPostSnapshotUpdateException;
