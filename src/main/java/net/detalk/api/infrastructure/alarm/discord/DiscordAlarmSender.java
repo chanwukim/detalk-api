@@ -1,10 +1,10 @@
-package net.detalk.api.service;
+package net.detalk.api.infrastructure.alarm.discord;
 
 import java.util.EnumSet;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.detalk.api.domain.DiscordErrorMessage;
-import net.detalk.api.support.DiscordConfig;
+import net.detalk.api.infrastructure.alarm.AlarmErrorMessage;
+import net.detalk.api.infrastructure.alarm.AlarmSender;
 import net.detalk.api.support.EnvironmentHolder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @RequiredArgsConstructor
 @Service
-public class DiscordServiceImpl implements DiscordService {
+public class DiscordAlarmSender implements AlarmSender {
 
     private final DiscordConfig config;
     private final EnvironmentHolder env;
@@ -80,12 +80,12 @@ public class DiscordServiceImpl implements DiscordService {
     }
 
     @Override
-    public void sendError(DiscordErrorMessage message) {
+    public void sendError(AlarmErrorMessage message) {
         if (!isReady()) {
-            log.warn("JDA not initialized or channel is null. Cannot send message: {}", message.toDiscordFormat());
+            log.warn("JDA not initialized or channel is null. Cannot send message: {}", message.toString());
             return;
         }
-        String formattedMessage = message.toDiscordFormat();
+        String formattedMessage = message.toString();
 
         sendToChannel(formattedMessage);
     }

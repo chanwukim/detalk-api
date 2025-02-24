@@ -2,7 +2,7 @@ package net.detalk.api.support.listener;
 
 import java.time.Duration;
 import lombok.RequiredArgsConstructor;
-import net.detalk.api.service.DiscordService;
+import net.detalk.api.infrastructure.alarm.AlarmSender;
 import org.jooq.ExecuteContext;
 import org.jooq.ExecuteListener;
 import org.jooq.Query;
@@ -15,7 +15,7 @@ import org.springframework.util.StopWatch;
 @Component
 public class PerformanceListener implements ExecuteListener {
 
-    private final DiscordService discordService;
+    private final AlarmSender alarmSender;
     private static final Logger log = LoggerFactory.getLogger(PerformanceListener.class);
     private final ThreadLocal<StopWatch> watch = ThreadLocal.withInitial(() -> null);
     private static final Duration SLOW_QUERY_LIMIT= Duration.ofSeconds(5);
@@ -74,7 +74,7 @@ public class PerformanceListener implements ExecuteListener {
                 }
 
                 log.warn(slowQueryMessage);
-                discordService.sendMessage(slowQueryMessage);
+                alarmSender.sendMessage(slowQueryMessage);
             }
         } catch (Exception e) {
             log.error("쿼리 실행 시간 측정 중 오류 발생");

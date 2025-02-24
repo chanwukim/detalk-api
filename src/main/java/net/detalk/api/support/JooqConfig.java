@@ -1,7 +1,7 @@
 package net.detalk.api.support;
 
 import lombok.RequiredArgsConstructor;
-import net.detalk.api.service.DiscordService;
+import net.detalk.api.infrastructure.alarm.AlarmSender;
 import net.detalk.api.support.listener.PerformanceListener;
 import org.springframework.boot.autoconfigure.jooq.DefaultConfigurationCustomizer;
 import org.springframework.context.annotation.Bean;
@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class JooqConfig {
 
-    private final DiscordService discordService;
+    private final AlarmSender alarmSender;
 
     @Bean
     public DefaultConfigurationCustomizer jooqDefaultConfigurationCustomizer() {
@@ -22,6 +22,6 @@ public class JooqConfig {
 
     @Bean
     public PerformanceListener performanceListener() {
-        return new PerformanceListener(discordService);
+        return new PerformanceListener(alarmSender);
     }
 }
