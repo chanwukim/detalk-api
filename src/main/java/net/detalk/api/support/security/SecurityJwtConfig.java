@@ -3,7 +3,7 @@ package net.detalk.api.support.security;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import net.detalk.api.service.AuthService;
+import net.detalk.api.auth.service.JwtOAuth2Service;
 import net.detalk.api.support.error.ErrorCode;
 import net.detalk.api.support.error.ErrorMessage;
 import net.detalk.api.support.security.oauth.JwtOAuthSuccessHandler;
@@ -28,7 +28,7 @@ import java.io.PrintWriter;
 public class SecurityJwtConfig {
     private final OAuthFailHandler oAuthFailHandler;
     private final OAuth2AuthorizationRequestRepository authorizationRequestRepository;
-    private final AuthService authService;
+    private final JwtOAuth2Service authService;
     private final TokenProvider tokenProvider;
     private final JwtOAuthSuccessHandler oAuthSuccessHandler;
 

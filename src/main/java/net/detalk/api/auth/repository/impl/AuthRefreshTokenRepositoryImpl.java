@@ -1,7 +1,8 @@
-package net.detalk.api.repository;
+package net.detalk.api.auth.repository.impl;
 
 import lombok.RequiredArgsConstructor;
-import net.detalk.api.domain.AuthRefreshToken;
+import net.detalk.api.auth.repository.AuthRefreshTokenRepository;
+import net.detalk.api.auth.domain.AuthRefreshToken;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Repository;
 

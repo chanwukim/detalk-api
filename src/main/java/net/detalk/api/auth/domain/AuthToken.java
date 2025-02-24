@@ -1,4 +1,4 @@
-package net.detalk.api.domain;
+package net.detalk.api.auth.domain;
 
 public record AuthToken (
     String accessToken,

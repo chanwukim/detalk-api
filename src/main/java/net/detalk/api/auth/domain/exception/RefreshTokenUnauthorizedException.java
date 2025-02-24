@@ -1,12 +1,12 @@
-package net.detalk.api.domain.exception;
+package net.detalk.api.auth.domain.exception;
 
 import net.detalk.api.support.error.ApiException;
 import org.springframework.http.HttpStatus;
 
-public class RefreshTokenNotFoundException extends ApiException {
+public class RefreshTokenUnauthorizedException extends ApiException {
 
-    public RefreshTokenNotFoundException() {
-        super("존재하지 않는 리프레시 토큰입니다.");
+    public RefreshTokenUnauthorizedException() {
+        super();
     }
 
     @Override
@@ -16,7 +16,7 @@ public class RefreshTokenNotFoundException extends ApiException {
 
     @Override
     public String getErrorCode() {
-        return "refresh_token_not_found";
+        return "unauthorized";
     }
 
     @Override

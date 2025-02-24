@@ -1,12 +1,12 @@
-package net.detalk.api.controller.v1;
+package net.detalk.api.auth.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import net.detalk.api.controller.v1.response.SessionInfoResponse;
-import net.detalk.api.domain.AuthToken;
-import net.detalk.api.domain.exception.RefreshTokenUnauthorizedException;
-import net.detalk.api.service.AuthService;
+import net.detalk.api.auth.controller.response.SessionInfoResponse;
+import net.detalk.api.auth.domain.AuthToken;
+import net.detalk.api.auth.domain.exception.RefreshTokenUnauthorizedException;
+import net.detalk.api.auth.service.JwtOAuth2Service;
 import net.detalk.api.support.EnvironmentHolder;
 import net.detalk.api.support.error.ApiException;
 import net.detalk.api.support.error.ErrorMessage;
@@ -31,7 +31,7 @@ import static net.detalk.api.support.Constant.COOKIE_REFRESH_TOKEN;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final AuthService authService;
+    private final JwtOAuth2Service authService;
     private final EnvironmentHolder env;
 
     @PostMapping("/refresh")

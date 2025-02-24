@@ -1,4 +1,4 @@
-package net.detalk.api.service;
+package net.detalk.api.auth.service;
 
 import java.time.Instant;
 import java.util.List;
@@ -32,7 +32,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class SessionAuthService extends DefaultOAuth2UserService {
+public class SessionOAuth2Service extends DefaultOAuth2UserService {
 
     private final MemberRepository memberRepository;
     private final MemberProfileRepository memberProfileRepository;
