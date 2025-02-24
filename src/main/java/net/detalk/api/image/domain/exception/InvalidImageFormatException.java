@@ -1,4 +1,4 @@
-package net.detalk.api.domain.exception;
+package net.detalk.api.image.domain.exception;
 
 import net.detalk.api.support.error.ApiException;
 import org.springframework.http.HttpStatus;

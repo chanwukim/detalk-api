@@ -1,8 +1,8 @@
-package net.detalk.api.domain;
+package net.detalk.api.image.domain;
 
 import lombok.Builder;
 import lombok.Getter;
-import net.detalk.api.service.ImageService;
+import net.detalk.api.image.service.ImageService;
 
 import java.util.UUID;
 

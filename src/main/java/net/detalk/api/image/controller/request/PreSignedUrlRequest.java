@@ -1,4 +1,4 @@
-package net.detalk.api.controller.v1.request;
+package net.detalk.api.image.controller.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

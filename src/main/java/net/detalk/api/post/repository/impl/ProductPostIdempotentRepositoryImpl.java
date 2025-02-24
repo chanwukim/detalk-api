@@ -1,16 +1,17 @@
-package net.detalk.api.repository;
+package net.detalk.api.post.repository.impl;
 
 import static net.detalk.jooq.tables.JProductPostIdempotentRequests.PRODUCT_POST_IDEMPOTENT_REQUESTS;
 
 import java.time.Instant;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import net.detalk.api.post.repository.ProductPostIdempotentRepository;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Repository;
 
 @RequiredArgsConstructor
 @Repository
-public class ProductPostIdempotentRepository {
+public class ProductPostIdempotentRepositoryImpl implements ProductPostIdempotentRepository {
 
     private final DSLContext dsl;
 
@@ -19,6 +20,7 @@ public class ProductPostIdempotentRepository {
      * 성공 시 @return true (1)
      * 실패 시 @return false (0)
      */
+    @Override
     public boolean insertIdempotentKey(UUID idempotentKey, Instant now) {
         int rows = dsl
             .insertInto(PRODUCT_POST_IDEMPOTENT_REQUESTS)

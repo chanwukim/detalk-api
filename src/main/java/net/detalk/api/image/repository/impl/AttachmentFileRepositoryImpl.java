@@ -1,7 +1,8 @@
-package net.detalk.api.repository;
+package net.detalk.api.image.repository.impl;
 
 import lombok.RequiredArgsConstructor;
-import net.detalk.api.domain.AttachmentFile;
+import net.detalk.api.image.domain.AttachmentFile;
+import net.detalk.api.image.repository.AttachmentFileRepository;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Repository;
 
