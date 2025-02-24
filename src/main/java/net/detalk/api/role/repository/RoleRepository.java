@@ -1,4 +1,4 @@
-package net.detalk.api.repository;
+package net.detalk.api.role.repository;
 
 import static net.detalk.jooq.tables.JMemberRole.MEMBER_ROLE;
 import static net.detalk.jooq.tables.JRole.ROLE;
@@ -7,7 +7,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import net.detalk.api.domain.Role;
+import net.detalk.api.role.domain.Role;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Repository;
 
