@@ -1,14 +1,14 @@
-package net.detalk.api.controller.v1;
+package net.detalk.api.admin.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import net.detalk.api.controller.v1.response.ActiveSessionResponse;
-import net.detalk.api.controller.v1.response.VisitorLogResponse;
-import net.detalk.api.service.SessionTrackingService;
-import net.detalk.api.service.VisitorLogService;
+import net.detalk.api.admin.controller.response.ActiveSessionResponse;
+import net.detalk.api.admin.controller.response.VisitorLogResponse;
+import net.detalk.api.admin.service.SessionTrackingService;
+import net.detalk.api.admin.service.VisitorLogService;
 import net.detalk.api.support.PagingData;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;

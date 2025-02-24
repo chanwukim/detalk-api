@@ -9,7 +9,7 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.detalk.api.service.VisitorLogService;
+import net.detalk.api.admin.service.VisitorLogService;
 import net.detalk.api.support.util.CookieUtil;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;

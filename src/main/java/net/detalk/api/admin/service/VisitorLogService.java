@@ -1,4 +1,4 @@
-package net.detalk.api.service;
+package net.detalk.api.admin.service;
 
 import com.maxmind.geoip2.DatabaseReader;
 import com.maxmind.geoip2.exception.GeoIp2Exception;
@@ -6,13 +6,12 @@ import com.maxmind.geoip2.model.CityResponse;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.time.LocalDateTime;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.detalk.api.controller.v1.response.VisitorLogResponse;
-import net.detalk.api.domain.VisitorLog;
-import net.detalk.api.domain.exception.VisitorLocationSaveException;
-import net.detalk.api.repository.VisitorLogRepository;
+import net.detalk.api.admin.controller.response.VisitorLogResponse;
+import net.detalk.api.admin.domain.VisitorLog;
+import net.detalk.api.admin.domain.exception.VisitorLocationSaveException;
+import net.detalk.api.admin.repository.VisitorLogRepository;
 import net.detalk.api.support.EnvironmentHolder;
 import net.detalk.api.support.PagingData;
 import net.detalk.api.support.TimeHolder;

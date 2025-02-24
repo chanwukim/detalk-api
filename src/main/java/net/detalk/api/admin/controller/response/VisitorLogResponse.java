@@ -1,4 +1,4 @@
-package net.detalk.api.controller.v1.response;
+package net.detalk.api.admin.controller.response;
 
 import java.time.LocalDateTime;
 

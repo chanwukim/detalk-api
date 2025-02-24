@@ -1,4 +1,4 @@
-package net.detalk.api.domain;
+package net.detalk.api.admin.domain;
 
 import java.time.LocalDateTime;
 import lombok.Builder;
