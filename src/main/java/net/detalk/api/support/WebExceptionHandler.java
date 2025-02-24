@@ -3,8 +3,8 @@ package net.detalk.api.support;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import lombok.extern.slf4j.Slf4j;
-import net.detalk.api.domain.DiscordErrorMessage;
-import net.detalk.api.service.DiscordService;
+import net.detalk.api.infrastructure.alarm.AlarmErrorMessage;
+import net.detalk.api.infrastructure.alarm.AlarmSender;
 import net.detalk.api.support.error.ApiException;
 import net.detalk.api.support.error.ErrorCode;
 import net.detalk.api.support.error.ErrorMessage;
@@ -28,10 +28,10 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class WebExceptionHandler {
 
-    private final DiscordService discordService;
+    private final AlarmSender alarmSender;
 
-    public WebExceptionHandler(DiscordService discordService) {
-        this.discordService = discordService;
+    public WebExceptionHandler(AlarmSender alarmSender) {
+        this.alarmSender = alarmSender;
     }
 
     @ExceptionHandler(ApiException.class)
@@ -114,14 +114,14 @@ public class WebExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorMessage> handleException(Exception e, HttpServletRequest request) {
 
-        DiscordErrorMessage discordErrorMessage = new DiscordErrorMessage(
+        AlarmErrorMessage discordErrorMessage = new AlarmErrorMessage(
             request.getRequestURI(),
             e.getClass().getSimpleName(),
             getAllMessage(e),
             getStackTrace(e)
         );
 
-        discordService.sendError(discordErrorMessage);
+        alarmSender.sendError(discordErrorMessage);
 
         return ResponseEntity
             .status(HttpStatus.INTERNAL_SERVER_ERROR)

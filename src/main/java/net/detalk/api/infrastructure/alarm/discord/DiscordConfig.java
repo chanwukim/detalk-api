@@ -1,4 +1,4 @@
-package net.detalk.api.support;
+package net.detalk.api.infrastructure.alarm.discord;
 
 import lombok.Getter;
 import lombok.Setter;

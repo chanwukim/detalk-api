@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.detalk.api.infrastructure.alarm.AlarmSender;
 import net.detalk.api.role.domain.Role;
 import net.detalk.api.plan.service.PricingPlanCache;
 import net.detalk.api.role.repository.RoleRepository;
@@ -24,7 +25,7 @@ public class DetalkInitializer implements ApplicationRunner {
 
     private final PricingPlanCache pricingPlanCache;
 
-    private final DiscordService discordService;
+    private final AlarmSender alarmSender;
 
     private final RoleRepository roleRepository;
 
@@ -44,15 +45,15 @@ public class DetalkInitializer implements ApplicationRunner {
 
         if ("prod".equals(env.getActiveProfile())) {
             log.info("운영 서버 톰캣 실행 완료");
-            discordService.sendMessage("운영 서버 톰캣 실행 완료");
+            alarmSender.sendMessage("운영 서버 톰캣 실행 완료");
         }
     }
 
     private void initializeDiscord() {
         try {
-            discordService.initialize();
+            alarmSender.initialize();
         } catch (Exception e) {
-            log.error("Discord 봇 초기화 실패: {}", e.getMessage(), e);
+            log.error("alarmSender 봇 초기화 실패: {}", e.getMessage(), e);
         }
     }
 
