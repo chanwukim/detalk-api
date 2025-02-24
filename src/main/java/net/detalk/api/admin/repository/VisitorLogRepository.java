@@ -1,11 +1,11 @@
-package net.detalk.api.repository;
+package net.detalk.api.admin.repository;
 
 import static net.detalk.jooq.tables.JVisitorLog.VISITOR_LOG;
 
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import net.detalk.api.domain.VisitorLog;
+import net.detalk.api.admin.domain.VisitorLog;
 import org.jooq.DSLContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;

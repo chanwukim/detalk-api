@@ -1,4 +1,4 @@
-package net.detalk.api.controller;
+package net.detalk.api.support;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
