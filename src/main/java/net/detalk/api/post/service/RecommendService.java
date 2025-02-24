@@ -1,4 +1,4 @@
-package net.detalk.api.service;
+package net.detalk.api.post.service;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -6,13 +6,12 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.detalk.api.controller.v1.request.CreateRecommendRequest;
-import net.detalk.api.domain.Recommend;
-import net.detalk.api.domain.RecommendProduct;
-import net.detalk.api.domain.exception.DuplicateRecommendationException;
-import net.detalk.api.post.service.ProductPostService;
-import net.detalk.api.repository.RecommendProductRepository;
-import net.detalk.api.repository.RecommendRepository;
+import net.detalk.api.post.controller.request.CreateRecommendRequest;
+import net.detalk.api.post.domain.Recommend;
+import net.detalk.api.post.domain.RecommendProduct;
+import net.detalk.api.post.domain.exception.DuplicateRecommendationException;
+import net.detalk.api.post.repository.RecommendProductRepository;
+import net.detalk.api.post.repository.RecommendRepository;
 import net.detalk.api.support.TimeHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
