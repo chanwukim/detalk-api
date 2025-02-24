@@ -114,14 +114,14 @@ public class WebExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorMessage> handleException(Exception e, HttpServletRequest request) {
 
-        AlarmErrorMessage discordErrorMessage = new AlarmErrorMessage(
+        AlarmErrorMessage alarmErrorMessage = new AlarmErrorMessage(
             request.getRequestURI(),
             e.getClass().getSimpleName(),
             getAllMessage(e),
             getStackTrace(e)
         );
 
-        alarmSender.sendError(discordErrorMessage);
+        alarmSender.sendError(alarmErrorMessage);
 
         return ResponseEntity
             .status(HttpStatus.INTERNAL_SERVER_ERROR)
