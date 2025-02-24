@@ -1,8 +1,13 @@
 package net.detalk.api.infrastructure.alarm;
 
+import lombok.Builder;
+import lombok.Getter;
+
 /**
  * 알람 시스템용 에러 메시지
  */
+@Getter
+@Builder
 public class AlarmErrorMessage {
 
     private final String endpoint;
@@ -30,6 +35,11 @@ public class AlarmErrorMessage {
     public String toDefaultFormat() {
         return String.format("[%s]\nEndpoint: %s\nMessage: %s\nStackTrace: %s",
             errorClass, endpoint, errorMessage, stackTrace);
+    }
+
+    @Override
+    public String toString() {
+        return toDefaultFormat();
     }
 
 }

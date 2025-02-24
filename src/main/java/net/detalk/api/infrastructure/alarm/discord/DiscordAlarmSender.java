@@ -82,10 +82,10 @@ public class DiscordAlarmSender implements AlarmSender {
     @Override
     public void sendError(AlarmErrorMessage message) {
         if (!isReady()) {
-            log.warn("JDA not initialized or channel is null. Cannot send message: {}", message.toDefaultFormat());
+            log.warn("JDA not initialized or channel is null. Cannot send message: {}", message.toString());
             return;
         }
-        String formattedMessage = message.toDefaultFormat();
+        String formattedMessage = message.toString();
 
         sendToChannel(formattedMessage);
     }
