@@ -37,8 +37,8 @@ import net.detalk.api.post.controller.request.CreateProductPostRequest;
 import net.detalk.api.post.domain.ProductPost;
 import net.detalk.api.post.domain.ProductPostSnapshot;
 import net.detalk.api.post.domain.ProductPostSnapshotTag;
-import net.detalk.api.support.TimeHolder;
-import net.detalk.api.support.UUIDGenerator;
+import net.detalk.api.support.util.TimeHolder;
+import net.detalk.api.support.util.UUIDGenerator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

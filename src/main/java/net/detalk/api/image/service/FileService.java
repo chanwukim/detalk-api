@@ -5,8 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import net.detalk.api.image.domain.AttachmentFile;
 import net.detalk.api.image.domain.PreSignedData;
 import net.detalk.api.image.repository.AttachmentFileRepository;
-import net.detalk.api.support.TimeHolder;
-import net.detalk.api.support.UUIDGenerator;
+import net.detalk.api.support.util.TimeHolder;
+import net.detalk.api.support.util.UUIDGenerator;
 import net.detalk.api.support.s3.StorageClient;
 import org.springframework.stereotype.Service;
 

@@ -16,7 +16,7 @@ import net.detalk.api.member.repository.MemberExternalRepository;
 import net.detalk.api.member.repository.MemberProfileRepository;
 import net.detalk.api.member.repository.MemberRepository;
 import net.detalk.api.role.repository.RoleRepository;
-import net.detalk.api.support.TimeHolder;
+import net.detalk.api.support.util.TimeHolder;
 import net.detalk.api.support.security.oauth.OAuthProvider;
 import net.detalk.api.support.security.oauth.OAuthUser;
 import net.detalk.api.support.security.SecurityRole;

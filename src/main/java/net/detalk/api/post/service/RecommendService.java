@@ -12,7 +12,7 @@ import net.detalk.api.post.domain.RecommendProduct;
 import net.detalk.api.post.domain.exception.DuplicateRecommendationException;
 import net.detalk.api.post.repository.RecommendProductRepository;
 import net.detalk.api.post.repository.RecommendRepository;
-import net.detalk.api.support.TimeHolder;
+import net.detalk.api.support.util.TimeHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

@@ -1,7 +1,7 @@
 package net.detalk.api.mock;
 
 import java.util.UUID;
-import net.detalk.api.support.UUIDGenerator;
+import net.detalk.api.support.util.UUIDGenerator;
 
 public class FakeUUIDGenerator implements UUIDGenerator {
 

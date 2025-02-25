@@ -20,8 +20,8 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
-import static net.detalk.api.support.Constant.COOKIE_ACCESS_TOKEN;
-import static net.detalk.api.support.Constant.COOKIE_REFRESH_TOKEN;
+import static net.detalk.api.support.util.Constant.COOKIE_ACCESS_TOKEN;
+import static net.detalk.api.support.util.Constant.COOKIE_REFRESH_TOKEN;
 import static net.detalk.api.support.security.oauth.OAuth2AuthorizationRequestRepository.REDIRECT_URI_COOKIE_NAME;
 
 @Slf4j

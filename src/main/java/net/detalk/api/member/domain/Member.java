@@ -2,7 +2,7 @@ package net.detalk.api.member.domain;
 
 import lombok.Builder;
 import lombok.Getter;
-import net.detalk.api.support.TimeHolder;
+import net.detalk.api.support.util.TimeHolder;
 
 import java.time.Instant;
 

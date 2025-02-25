@@ -24,7 +24,7 @@ import java.io.PrintWriter;
 import java.util.List;
 import java.util.Optional;
 
-import static net.detalk.api.support.Constant.COOKIE_ACCESS_TOKEN;
+import static net.detalk.api.support.util.Constant.COOKIE_ACCESS_TOKEN;
 
 /**
  * 요청 헤더에서 액세스 토큰을 추출하고 인증을 처리하는 Filter.

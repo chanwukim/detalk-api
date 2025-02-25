@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.detalk.api.alarm.domain.AlarmErrorMessage;
 import net.detalk.api.alarm.service.AlarmSender;
-import net.detalk.api.support.EnvironmentHolder;
+import net.detalk.api.support.util.EnvironmentHolder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;

@@ -7,7 +7,7 @@ import net.detalk.api.auth.controller.response.SessionInfoResponse;
 import net.detalk.api.auth.domain.AuthToken;
 import net.detalk.api.auth.domain.exception.RefreshTokenUnauthorizedException;
 import net.detalk.api.auth.service.JwtOAuth2Service;
-import net.detalk.api.support.EnvironmentHolder;
+import net.detalk.api.support.util.EnvironmentHolder;
 import net.detalk.api.support.error.ApiException;
 import net.detalk.api.support.error.ErrorMessage;
 import net.detalk.api.support.security.HasRole;
@@ -23,8 +23,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Arrays;
 
-import static net.detalk.api.support.Constant.COOKIE_ACCESS_TOKEN;
-import static net.detalk.api.support.Constant.COOKIE_REFRESH_TOKEN;
+import static net.detalk.api.support.util.Constant.COOKIE_ACCESS_TOKEN;
+import static net.detalk.api.support.util.Constant.COOKIE_REFRESH_TOKEN;
 
 @RestController
 @RequestMapping("/api/v1/auth")
