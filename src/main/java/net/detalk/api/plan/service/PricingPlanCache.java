@@ -10,7 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.detalk.api.plan.domain.PricingPlan;
 import net.detalk.api.plan.domain.exception.PricingPlanNotFoundException;
 import net.detalk.api.plan.repository.PricingPlanRepository;
-import net.detalk.api.service.DetalkCache;
+import net.detalk.api.support.cache.DetalkCache;
 import org.springframework.stereotype.Component;
 
 /**

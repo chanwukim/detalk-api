@@ -1,4 +1,4 @@
-package net.detalk.api.service;
+package net.detalk.api.support.cache;
 
 import java.util.Map;
 
