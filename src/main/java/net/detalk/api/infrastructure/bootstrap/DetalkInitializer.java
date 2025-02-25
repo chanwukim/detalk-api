@@ -1,4 +1,4 @@
-package net.detalk.api.service;
+package net.detalk.api.infrastructure.bootstrap;
 
 
 import jakarta.transaction.Transactional;
@@ -8,11 +8,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.detalk.api.infrastructure.alarm.AlarmSender;
+import net.detalk.api.alarm.service.AlarmSender;
 import net.detalk.api.role.domain.Role;
 import net.detalk.api.plan.service.PricingPlanCache;
 import net.detalk.api.role.repository.RoleRepository;
-import net.detalk.api.support.EnvironmentHolder;
+import net.detalk.api.support.util.EnvironmentHolder;
 import net.detalk.api.support.security.SecurityRole;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;

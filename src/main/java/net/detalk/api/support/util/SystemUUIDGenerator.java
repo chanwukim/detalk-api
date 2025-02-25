@@ -1,4 +1,4 @@
-package net.detalk.api.support;
+package net.detalk.api.support.util;
 
 import com.fasterxml.uuid.Generators;
 import java.util.UUID;

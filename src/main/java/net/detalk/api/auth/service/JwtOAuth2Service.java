@@ -20,8 +20,8 @@ import net.detalk.api.auth.repository.AuthRefreshTokenRepository;
 import net.detalk.api.member.repository.MemberExternalRepository;
 import net.detalk.api.member.repository.MemberProfileRepository;
 import net.detalk.api.member.repository.MemberRepository;
-import net.detalk.api.support.TimeHolder;
-import net.detalk.api.support.UUIDGenerator;
+import net.detalk.api.support.util.TimeHolder;
+import net.detalk.api.support.util.UUIDGenerator;
 import net.detalk.api.support.security.*;
 
 import net.detalk.api.support.security.oauth.OAuthProvider;

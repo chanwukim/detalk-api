@@ -3,7 +3,7 @@ package net.detalk.api.product.domain;
 import java.time.Instant;
 import lombok.Builder;
 import lombok.Getter;
-import net.detalk.api.support.TimeHolder;
+import net.detalk.api.support.util.TimeHolder;
 
 @Getter
 public class ProductMaker {

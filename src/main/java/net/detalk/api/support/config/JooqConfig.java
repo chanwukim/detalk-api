@@ -1,8 +1,8 @@
-package net.detalk.api.support;
+package net.detalk.api.support.config;
 
 import lombok.RequiredArgsConstructor;
-import net.detalk.api.infrastructure.alarm.AlarmSender;
-import net.detalk.api.support.listener.PerformanceListener;
+import net.detalk.api.alarm.service.AlarmSender;
+import net.detalk.api.support.web.listener.PerformanceListener;
 import org.springframework.boot.autoconfigure.jooq.DefaultConfigurationCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

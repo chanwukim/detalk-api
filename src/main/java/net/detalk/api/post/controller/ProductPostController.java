@@ -10,7 +10,7 @@ import net.detalk.api.post.controller.response.CreateProductPostResponse;
 import net.detalk.api.post.controller.response.GetProductPostResponse;
 import net.detalk.api.post.controller.request.CreateRecommendRequest;
 import net.detalk.api.post.service.RecommendService;
-import net.detalk.api.support.CursorPageData;
+import net.detalk.api.support.paging.CursorPageData;
 import net.detalk.api.post.controller.request.CreateProductPostRequest;
 import net.detalk.api.post.service.ProductPostService;
 import net.detalk.api.support.security.HasRole;

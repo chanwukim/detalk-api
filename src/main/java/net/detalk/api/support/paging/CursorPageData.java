@@ -1,4 +1,4 @@
-package net.detalk.api.support;
+package net.detalk.api.support.paging;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;

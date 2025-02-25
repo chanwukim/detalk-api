@@ -1,7 +1,7 @@
 package net.detalk.api.support.error;
 
 import lombok.Getter;
-import net.detalk.api.support.WebExceptionHandler;
+import net.detalk.api.support.util.WebExceptionHandler;
 
 /**
  * "잘못된 상태"를 처리하는 예외입니다.

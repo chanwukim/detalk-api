@@ -1,4 +1,4 @@
-package net.detalk.api.infrastructure.alarm;
+package net.detalk.api.alarm.domain;
 
 import lombok.Builder;
 import lombok.Getter;

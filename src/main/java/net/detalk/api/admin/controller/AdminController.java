@@ -9,7 +9,7 @@ import net.detalk.api.admin.controller.response.ActiveSessionResponse;
 import net.detalk.api.admin.controller.response.VisitorLogResponse;
 import net.detalk.api.admin.service.SessionTrackingService;
 import net.detalk.api.admin.service.VisitorLogService;
-import net.detalk.api.support.PagingData;
+import net.detalk.api.support.paging.PagingData;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;

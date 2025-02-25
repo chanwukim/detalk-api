@@ -2,7 +2,7 @@ package net.detalk.api.mock;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
-import net.detalk.api.support.TimeHolder;
+import net.detalk.api.support.util.TimeHolder;
 
 
 public class FakeTimeHolder implements TimeHolder {

@@ -25,7 +25,7 @@ import net.detalk.api.post.repository.RecommendProductRepository;
 import net.detalk.api.post.repository.RecommendRepository;
 import net.detalk.api.post.service.ProductPostService;
 import net.detalk.api.post.service.RecommendService;
-import net.detalk.api.support.TimeHolder;
+import net.detalk.api.support.util.TimeHolder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

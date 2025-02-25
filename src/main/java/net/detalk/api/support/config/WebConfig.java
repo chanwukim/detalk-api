@@ -1,9 +1,8 @@
-package net.detalk.api.support;
+package net.detalk.api.support.config;
 
 import lombok.RequiredArgsConstructor;
 import net.detalk.api.support.security.HasRoleArgumentResolver;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
