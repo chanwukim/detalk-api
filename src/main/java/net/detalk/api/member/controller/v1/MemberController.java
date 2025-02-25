@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import net.detalk.api.member.controller.v1.request.CreateMemberProfileRequest;
 import net.detalk.api.member.controller.v1.request.UpdateMemberProfileRequest;
 import net.detalk.api.member.controller.v1.response.GetMemberProfileResponse;
-import net.detalk.api.post.controller.response.GetProductPostResponse;
+import net.detalk.api.post.controller.v1.response.GetProductPostResponse;
 import net.detalk.api.member.service.MemberService;
 import net.detalk.api.post.service.ProductPostService;
 import net.detalk.api.support.paging.CursorPageData;

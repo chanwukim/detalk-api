@@ -3,7 +3,7 @@ package net.detalk.api.image.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.detalk.api.image.domain.AttachmentFile;
-import net.detalk.api.image.controller.response.UploadImageData;
+import net.detalk.api.image.controller.v1.response.UploadImageData;
 import net.detalk.api.image.domain.exception.InvalidImageFormatException;
 import net.detalk.api.image.repository.AttachmentFileRepository;
 import net.detalk.api.support.util.TimeHolder;

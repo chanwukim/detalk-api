@@ -3,7 +3,7 @@ package net.detalk.api.post.repository;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
-import net.detalk.api.post.controller.response.GetProductPostResponse;
+import net.detalk.api.post.controller.v1.response.GetProductPostResponse;
 import net.detalk.api.post.domain.ProductPost;
 
 public interface ProductPostRepository {

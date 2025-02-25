@@ -99,7 +99,7 @@ jooq {
 				forcedTypes {
 					forcedType {
 						userType = 'java.time.Instant'
-						converter = 'net.detalk.api.support.InstantConverter'
+						converter = 'net.detalk.api.support.util.InstantConverter'
 						includeExpression = '.*(_AT)$'
 						includeTypes = 'BIGINT'
 					}

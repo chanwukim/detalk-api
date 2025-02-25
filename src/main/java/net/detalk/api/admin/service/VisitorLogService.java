@@ -8,7 +8,7 @@ import java.net.InetAddress;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.detalk.api.admin.controller.response.VisitorLogResponse;
+import net.detalk.api.admin.controller.v1.response.GetVisitorLogResponse;
 import net.detalk.api.admin.domain.VisitorLog;
 import net.detalk.api.admin.domain.exception.VisitorLocationSaveException;
 import net.detalk.api.admin.repository.VisitorLogRepository;
@@ -91,12 +91,12 @@ public class VisitorLogService {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    public PagingData<VisitorLogResponse> findAll(Pageable pageable) {
+    public PagingData<GetVisitorLogResponse> findAll(Pageable pageable) {
 
         Page<VisitorLog> page = visitorLogRepository.findAll(pageable);
 
         var content = page.getContent().stream()
-            .map(result -> new VisitorLogResponse(
+            .map(result -> new GetVisitorLogResponse(
                 result.getSessionId(),
                 result.getContinentCode(),
                 result.getCountryIso(),

@@ -2,7 +2,7 @@ package net.detalk.api.tag.service;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import net.detalk.api.tag.controller.response.GetTagResponse;
+import net.detalk.api.tag.controller.v1.response.GetTagResponse;
 import net.detalk.api.tag.domain.Tag;
 import net.detalk.api.tag.repository.TagRepository;
 import org.springframework.stereotype.Service;

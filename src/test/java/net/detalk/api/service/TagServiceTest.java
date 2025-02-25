@@ -9,7 +9,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Optional;
-import net.detalk.api.tag.controller.response.GetTagResponse;
+import net.detalk.api.tag.controller.v1.response.GetTagResponse;
 import net.detalk.api.tag.domain.Tag;
 import net.detalk.api.tag.repository.TagRepository;
 import net.detalk.api.tag.service.TagService;

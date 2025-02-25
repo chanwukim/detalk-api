@@ -2,8 +2,8 @@ package net.detalk.api.support.paging;
 
 import java.util.List;
 import java.util.Objects;
-import net.detalk.api.domain.exception.InvalidPageException;
-import net.detalk.api.domain.exception.InvalidPageSizeException;
+import net.detalk.api.support.error.InvalidPageException;
+import net.detalk.api.support.error.InvalidPageSizeException;
 
 /**
  * 페이징 응답 클래스
