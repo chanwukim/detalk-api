@@ -1,4 +1,4 @@
-package net.detalk.api.support.listener;
+package net.detalk.api.support.web.listener;
 
 import java.time.Duration;
 import lombok.RequiredArgsConstructor;
