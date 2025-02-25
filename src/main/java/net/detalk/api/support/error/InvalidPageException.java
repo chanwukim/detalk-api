@@ -1,6 +1,5 @@
-package net.detalk.api.domain.exception;
+package net.detalk.api.support.error;
 
-import net.detalk.api.support.error.ApiException;
 import org.springframework.http.HttpStatus;
 
 public class InvalidPageException extends ApiException {

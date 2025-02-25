@@ -10,7 +10,7 @@ import net.detalk.api.member.domain.exception.MemberInvalidStatusException;
 import net.detalk.api.member.domain.exception.MemberNeedSignUpException;
 import net.detalk.api.member.domain.exception.MemberNotFoundException;
 import net.detalk.api.member.domain.exception.MemberProfileNotFoundException;
-import net.detalk.api.domain.exception.UserHandleDuplicatedException;
+import net.detalk.api.member.domain.exception.UserHandleDuplicatedException;
 import net.detalk.api.member.repository.MemberProfileRepository;
 import net.detalk.api.member.repository.MemberRepository;
 import net.detalk.api.support.util.TimeHolder;

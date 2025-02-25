@@ -1,12 +1,12 @@
-package net.detalk.api.domain.exception;
+package net.detalk.api.member.domain.exception;
 
 import net.detalk.api.support.error.ApiException;
 import org.springframework.http.HttpStatus;
 
-public class DuplicateCreatePostException extends ApiException {
+public class UserHandleDuplicatedException extends ApiException {
 
-    public DuplicateCreatePostException() {
-        super("이 요청은 이미 처리되었습니다.");
+    public UserHandleDuplicatedException(String userHandle) {
+        super(String.format("이미 존재하는 userhandle입니다: %s", userHandle));
     }
 
     @Override
@@ -16,7 +16,7 @@ public class DuplicateCreatePostException extends ApiException {
 
     @Override
     public String getErrorCode() {
-        return "duplicate_create_post";
+        return "user_handle_conflict";
     }
 
     @Override

@@ -30,7 +30,7 @@ import net.detalk.api.product.domain.ProductLink;
 import net.detalk.api.post.domain.ProductPost;
 import net.detalk.api.post.domain.ProductPostSnapshot;
 import net.detalk.api.tag.domain.Tag;
-import net.detalk.api.domain.exception.DuplicateCreatePostException;
+import net.detalk.api.post.domain.exception.DuplicateCreatePostException;
 import net.detalk.api.post.domain.exception.InvalidRecommendCountRequest;
 import net.detalk.api.mock.FakeTimeHolder;
 import net.detalk.api.mock.FakeUUIDGenerator;

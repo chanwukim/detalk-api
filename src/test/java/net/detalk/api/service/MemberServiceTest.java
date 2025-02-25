@@ -17,7 +17,7 @@ import net.detalk.api.member.domain.MemberProfile;
 import net.detalk.api.member.domain.MemberStatus;
 import net.detalk.api.member.domain.exception.MemberNotFoundException;
 import net.detalk.api.member.domain.exception.MemberProfileNotFoundException;
-import net.detalk.api.domain.exception.UserHandleDuplicatedException;
+import net.detalk.api.member.domain.exception.UserHandleDuplicatedException;
 import net.detalk.api.member.service.MemberService;
 import net.detalk.api.mock.FakeTimeHolder;
 import net.detalk.api.mock.FakeUUIDGenerator;
