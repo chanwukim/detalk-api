@@ -1,4 +1,4 @@
-package net.detalk.api.admin.controller.response;
+package net.detalk.api.admin.controller.v1.response;
 
 import java.util.Date;
 

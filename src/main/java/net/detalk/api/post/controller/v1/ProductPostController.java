@@ -1,17 +1,17 @@
-package net.detalk.api.post.controller;
+package net.detalk.api.post.controller.v1;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Size;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import net.detalk.api.post.controller.request.UpdateProductPostRequest;
-import net.detalk.api.post.controller.response.CreateProductPostResponse;
-import net.detalk.api.post.controller.response.GetProductPostResponse;
-import net.detalk.api.post.controller.request.CreateRecommendRequest;
+import net.detalk.api.post.controller.v1.request.UpdateProductPostRequest;
+import net.detalk.api.post.controller.v1.response.CreateProductPostResponse;
+import net.detalk.api.post.controller.v1.response.GetProductPostResponse;
+import net.detalk.api.post.controller.v1.request.CreateRecommendRequest;
 import net.detalk.api.post.service.RecommendService;
 import net.detalk.api.support.paging.CursorPageData;
-import net.detalk.api.post.controller.request.CreateProductPostRequest;
+import net.detalk.api.post.controller.v1.request.CreateProductPostRequest;
 import net.detalk.api.post.service.ProductPostService;
 import net.detalk.api.support.security.HasRole;
 import net.detalk.api.support.security.SecurityRole;

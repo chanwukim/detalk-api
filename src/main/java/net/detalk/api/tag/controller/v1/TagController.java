@@ -1,8 +1,8 @@
-package net.detalk.api.tag.controller;
+package net.detalk.api.tag.controller.v1;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import net.detalk.api.tag.controller.response.GetTagResponse;
+import net.detalk.api.tag.controller.v1.response.GetTagResponse;
 import net.detalk.api.tag.service.TagService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

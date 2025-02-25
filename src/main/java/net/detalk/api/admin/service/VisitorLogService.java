@@ -8,7 +8,7 @@ import java.net.InetAddress;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.detalk.api.admin.controller.response.GetVisitorLogResponse;
+import net.detalk.api.admin.controller.v1.response.GetVisitorLogResponse;
 import net.detalk.api.admin.domain.VisitorLog;
 import net.detalk.api.admin.domain.exception.VisitorLocationSaveException;
 import net.detalk.api.admin.repository.VisitorLogRepository;

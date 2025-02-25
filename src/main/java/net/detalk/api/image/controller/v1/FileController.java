@@ -1,8 +1,8 @@
-package net.detalk.api.image.controller;
+package net.detalk.api.image.controller.v1;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import net.detalk.api.image.controller.request.PreSignedUrlRequest;
+import net.detalk.api.image.controller.v1.request.PreSignedUrlRequest;
 import net.detalk.api.image.domain.PreSignedData;
 import net.detalk.api.image.service.FileService;
 import net.detalk.api.support.security.HasRole;

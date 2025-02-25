@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.detalk.api.post.controller.request.CreateRecommendRequest;
+import net.detalk.api.post.controller.v1.request.CreateRecommendRequest;
 import net.detalk.api.post.domain.Recommend;
 import net.detalk.api.post.domain.RecommendProduct;
 import net.detalk.api.post.domain.exception.DuplicateRecommendationException;

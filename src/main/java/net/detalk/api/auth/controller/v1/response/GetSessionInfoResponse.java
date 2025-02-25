@@ -1,4 +1,4 @@
-package net.detalk.api.auth.controller.response;
+package net.detalk.api.auth.controller.v1.response;
 
 import java.util.List;
 import lombok.Builder;

@@ -16,7 +16,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import net.detalk.api.post.controller.request.CreateRecommendRequest;
+import net.detalk.api.post.controller.v1.request.CreateRecommendRequest;
 import net.detalk.api.post.domain.Recommend;
 import net.detalk.api.post.domain.exception.DuplicateRecommendationException;
 import net.detalk.api.post.domain.exception.ProductPostNotFoundException;

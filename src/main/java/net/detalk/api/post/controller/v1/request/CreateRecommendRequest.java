@@ -1,4 +1,4 @@
-package net.detalk.api.post.controller.request;
+package net.detalk.api.post.controller.v1.request;
 
 import jakarta.validation.constraints.NotEmpty;
 import java.util.List;

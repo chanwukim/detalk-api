@@ -1,9 +1,9 @@
-package net.detalk.api.auth.controller;
+package net.detalk.api.auth.controller.v1;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import net.detalk.api.auth.controller.response.GetSessionInfoResponse;
+import net.detalk.api.auth.controller.v1.response.GetSessionInfoResponse;
 import net.detalk.api.auth.domain.AuthToken;
 import net.detalk.api.auth.domain.exception.RefreshTokenUnauthorizedException;
 import net.detalk.api.auth.service.JwtOAuth2Service;

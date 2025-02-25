@@ -1,4 +1,4 @@
-package net.detalk.api.post.controller.response;
+package net.detalk.api.post.controller.v1.response;
 
 /**
  * 상품 포스트 생성 응답 DTO

@@ -1,4 +1,4 @@
-package net.detalk.api.post.controller.response;
+package net.detalk.api.post.controller.v1.response;
 
 import java.time.Instant;
 import java.util.List;

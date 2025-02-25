@@ -3,7 +3,7 @@ package net.detalk.api.auth.service;
 import java.util.UUID;
 import net.detalk.api.auth.domain.AuthRefreshToken;
 import net.detalk.api.auth.domain.AuthToken;
-import net.detalk.api.auth.controller.response.GetSessionInfoResponse;
+import net.detalk.api.auth.controller.v1.response.GetSessionInfoResponse;
 import net.detalk.api.image.domain.AttachmentFile;
 import net.detalk.api.member.domain.LoginType;
 import net.detalk.api.member.domain.MemberStatus;

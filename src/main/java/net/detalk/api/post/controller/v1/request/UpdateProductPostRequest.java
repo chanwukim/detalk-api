@@ -1,4 +1,4 @@
-package net.detalk.api.post.controller.request;
+package net.detalk.api.post.controller.v1.request;
 
 import java.util.List;
 import lombok.Builder;

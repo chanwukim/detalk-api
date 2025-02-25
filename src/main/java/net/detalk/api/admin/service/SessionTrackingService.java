@@ -2,7 +2,7 @@ package net.detalk.api.admin.service;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import net.detalk.api.admin.controller.response.GetActiveSessionResponse;
+import net.detalk.api.admin.controller.v1.response.GetActiveSessionResponse;
 import net.detalk.api.support.security.oauth.OAuthUser;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.session.SessionRegistry;
