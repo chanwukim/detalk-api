@@ -2,7 +2,7 @@ package net.detalk.api.support.listener;
 
 import java.time.Duration;
 import lombok.RequiredArgsConstructor;
-import net.detalk.api.infrastructure.alarm.AlarmSender;
+import net.detalk.api.alarm.service.AlarmSender;
 import org.jooq.ExecuteContext;
 import org.jooq.ExecuteListener;
 import org.jooq.Query;

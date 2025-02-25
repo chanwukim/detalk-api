@@ -1,4 +1,6 @@
-package net.detalk.api.infrastructure.alarm;
+package net.detalk.api.alarm.service;
+
+import net.detalk.api.alarm.domain.AlarmErrorMessage;
 
 /**
  * 알람 전송을 위한 인터페이스
