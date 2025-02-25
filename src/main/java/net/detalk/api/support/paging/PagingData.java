@@ -1,4 +1,4 @@
-package net.detalk.api.support;
+package net.detalk.api.support.paging;
 
 import java.util.List;
 import java.util.Objects;

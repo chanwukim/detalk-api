@@ -28,7 +28,7 @@ import net.detalk.api.product.repository.ProductLinkRepository;
 import net.detalk.api.product.repository.ProductMakerRepository;
 import net.detalk.api.product.repository.ProductRepository;
 import net.detalk.api.tag.service.TagService;
-import net.detalk.api.support.CursorPageData;
+import net.detalk.api.support.paging.CursorPageData;
 import net.detalk.api.product.domain.ProductMaker;
 import net.detalk.api.post.domain.ProductPostSnapshotAttachmentFile;
 import net.detalk.api.plan.domain.PricingPlan;

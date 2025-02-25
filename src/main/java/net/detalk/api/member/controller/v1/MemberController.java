@@ -9,7 +9,7 @@ import net.detalk.api.member.controller.v1.response.GetMemberProfileResponse;
 import net.detalk.api.post.controller.response.GetProductPostResponse;
 import net.detalk.api.member.service.MemberService;
 import net.detalk.api.post.service.ProductPostService;
-import net.detalk.api.support.CursorPageData;
+import net.detalk.api.support.paging.CursorPageData;
 import net.detalk.api.support.security.HasRole;
 import net.detalk.api.support.security.SecurityRole;
 import net.detalk.api.support.security.SecurityUser;

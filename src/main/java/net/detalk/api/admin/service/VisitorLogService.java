@@ -13,7 +13,7 @@ import net.detalk.api.admin.domain.VisitorLog;
 import net.detalk.api.admin.domain.exception.VisitorLocationSaveException;
 import net.detalk.api.admin.repository.VisitorLogRepository;
 import net.detalk.api.support.EnvironmentHolder;
-import net.detalk.api.support.PagingData;
+import net.detalk.api.support.paging.PagingData;
 import net.detalk.api.support.TimeHolder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

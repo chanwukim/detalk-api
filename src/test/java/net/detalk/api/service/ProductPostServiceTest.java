@@ -39,7 +39,7 @@ import net.detalk.api.product.repository.ProductMakerRepository;
 import net.detalk.api.product.repository.ProductRepository;
 import net.detalk.api.post.service.ProductPostIdempotentService;
 import net.detalk.api.post.service.ProductPostService;
-import net.detalk.api.support.CursorPageData;
+import net.detalk.api.support.paging.CursorPageData;
 import net.detalk.api.support.TimeHolder;
 import net.detalk.api.support.UUIDGenerator;
 import net.detalk.api.support.error.ApiException;
