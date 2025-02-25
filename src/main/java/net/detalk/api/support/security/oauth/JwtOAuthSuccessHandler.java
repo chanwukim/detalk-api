@@ -5,7 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.detalk.api.support.AppProperties;
+import net.detalk.api.support.config.AppProperties;
 import net.detalk.api.support.util.CookieUtil;
 import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseCookie;

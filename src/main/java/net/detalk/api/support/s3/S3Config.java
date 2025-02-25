@@ -2,7 +2,7 @@ package net.detalk.api.support.s3;
 
 import lombok.RequiredArgsConstructor;
 import net.detalk.api.image.service.ImageService;
-import net.detalk.api.support.AppProperties;
+import net.detalk.api.support.config.AppProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;

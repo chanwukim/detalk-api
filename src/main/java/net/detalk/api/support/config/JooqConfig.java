@@ -1,4 +1,4 @@
-package net.detalk.api.support;
+package net.detalk.api.support.config;
 
 import lombok.RequiredArgsConstructor;
 import net.detalk.api.alarm.service.AlarmSender;

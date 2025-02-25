@@ -1,4 +1,4 @@
-package net.detalk.api.support;
+package net.detalk.api.support.config;
 
 import com.maxmind.geoip2.DatabaseReader;
 import java.io.IOException;

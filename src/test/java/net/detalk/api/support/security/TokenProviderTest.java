@@ -3,7 +3,7 @@ package net.detalk.api.support.security;
 import java.util.List;
 import java.util.UUID;
 import net.detalk.api.mock.FakeUUIDGenerator;
-import net.detalk.api.support.AppProperties;
+import net.detalk.api.support.config.AppProperties;
 import net.detalk.api.support.UUIDGenerator;
 import net.detalk.api.support.error.ExpiredTokenException;
 import net.detalk.api.support.error.TokenException;

@@ -5,7 +5,7 @@ import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
-import net.detalk.api.support.AppProperties;
+import net.detalk.api.support.config.AppProperties;
 import net.detalk.api.support.UUIDGenerator;
 import net.detalk.api.support.error.ExpiredTokenException;
 import net.detalk.api.support.error.TokenException;

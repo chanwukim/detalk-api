@@ -1,4 +1,4 @@
-package net.detalk.api.support;
+package net.detalk.api.support.config;
 
 import java.util.concurrent.Executor;
 import org.springframework.context.annotation.Bean;
