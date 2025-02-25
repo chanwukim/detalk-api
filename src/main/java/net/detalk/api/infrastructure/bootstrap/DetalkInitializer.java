@@ -1,4 +1,4 @@
-package net.detalk.api.service;
+package net.detalk.api.infrastructure.bootstrap;
 
 
 import jakarta.transaction.Transactional;
