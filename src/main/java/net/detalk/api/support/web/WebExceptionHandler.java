@@ -1,4 +1,4 @@
-package net.detalk.api.support.util;
+package net.detalk.api.support.web;
 
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Arrays;
@@ -9,6 +9,7 @@ import net.detalk.api.support.error.ApiException;
 import net.detalk.api.support.error.ErrorCode;
 import net.detalk.api.support.error.ErrorMessage;
 import net.detalk.api.support.error.InvalidStateException;
+import net.detalk.api.support.util.StringUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
