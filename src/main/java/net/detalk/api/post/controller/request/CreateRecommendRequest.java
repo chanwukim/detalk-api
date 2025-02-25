@@ -7,6 +7,11 @@ import lombok.Builder;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
+/**
+ * 추천 생성 요청 DTO
+ * @param reasons 추천 이유 목록
+ * @param content 추천 내용
+ */
 @Builder
 public record CreateRecommendRequest(
 

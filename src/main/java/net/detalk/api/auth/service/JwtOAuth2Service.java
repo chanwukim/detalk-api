@@ -3,7 +3,7 @@ package net.detalk.api.auth.service;
 import java.util.UUID;
 import net.detalk.api.auth.domain.AuthRefreshToken;
 import net.detalk.api.auth.domain.AuthToken;
-import net.detalk.api.auth.controller.response.SessionInfoResponse;
+import net.detalk.api.auth.controller.response.GetSessionInfoResponse;
 import net.detalk.api.image.domain.AttachmentFile;
 import net.detalk.api.member.domain.LoginType;
 import net.detalk.api.member.domain.MemberStatus;
@@ -107,7 +107,7 @@ public class JwtOAuth2Service extends DefaultOAuth2UserService {
     }
 
     @Transactional(readOnly = true)
-    public SessionInfoResponse getSessionInfo(Long memberId) {
+    public GetSessionInfoResponse getSessionInfo(Long memberId) {
 
         Member member =  memberRepository.findById(memberId).orElseThrow(() -> {
             log.info("[getSessionInfo] 회원 ID {}는 존재하지 않습니다", memberId);
@@ -124,7 +124,7 @@ public class JwtOAuth2Service extends DefaultOAuth2UserService {
 
         List<String> roles = member.isPendingExternalMember() ? List.of() : List.of("member");
 
-        return SessionInfoResponse.builder()
+        return GetSessionInfoResponse.builder()
             .id(memberId)
             .userhandle(memberProfileDto.userhandle())
             .nickname(memberProfileDto.nickname())

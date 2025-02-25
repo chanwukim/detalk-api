@@ -13,7 +13,7 @@ import lombok.Builder;
  @param roles 사용자 권한 목록
  */
 @Builder
-public record SessionInfoResponse(
+public record GetSessionInfoResponse(
     Long id,
     String userhandle,
     String nickname,

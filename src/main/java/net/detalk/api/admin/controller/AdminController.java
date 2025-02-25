@@ -5,8 +5,8 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import net.detalk.api.admin.controller.response.ActiveSessionResponse;
-import net.detalk.api.admin.controller.response.VisitorLogResponse;
+import net.detalk.api.admin.controller.response.GetActiveSessionResponse;
+import net.detalk.api.admin.controller.response.GetVisitorLogResponse;
 import net.detalk.api.admin.service.SessionTrackingService;
 import net.detalk.api.admin.service.VisitorLogService;
 import net.detalk.api.support.paging.PagingData;
@@ -32,8 +32,8 @@ public class AdminController {
     @ApiResponse(responseCode = "200", description = "조회 성공")
     @ApiResponse(responseCode = "403", description = "권한 없음")
     @GetMapping("/sessions")
-    public ResponseEntity<List<ActiveSessionResponse>> getActiveSessions() {
-        List<ActiveSessionResponse> activeSessions = sessionTrackingService.getActiveSessions();
+    public ResponseEntity<List<GetActiveSessionResponse>> getActiveSessions() {
+        List<GetActiveSessionResponse> activeSessions = sessionTrackingService.getActiveSessions();
         return ResponseEntity.ok(activeSessions);
     }
 
@@ -43,12 +43,12 @@ public class AdminController {
     @Parameter(name = "page", description = "페이지 번호 (0부터 시작)", example = "0")
     @Parameter(name = "size", description = "페이지당 항목 수", example = "10")
     @GetMapping("/visitor-logs")
-    public ResponseEntity<PagingData<VisitorLogResponse>> getVisitorLogs(
+    public ResponseEntity<PagingData<GetVisitorLogResponse>> getVisitorLogs(
         @RequestParam(name = "page", defaultValue = "0") int page,
         @RequestParam(name = "size", defaultValue = "10") int size
     ) {
         Pageable pageable = PageRequest.of(page, size);
-        PagingData<VisitorLogResponse> result = visitorLogService.findAll(pageable);
+        PagingData<GetVisitorLogResponse> result = visitorLogService.findAll(pageable);
         return ResponseEntity.ok(result);
     }
 

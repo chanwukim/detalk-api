@@ -3,7 +3,7 @@ package net.detalk.api.auth.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import net.detalk.api.auth.controller.response.SessionInfoResponse;
+import net.detalk.api.auth.controller.response.GetSessionInfoResponse;
 import net.detalk.api.auth.domain.AuthToken;
 import net.detalk.api.auth.domain.exception.RefreshTokenUnauthorizedException;
 import net.detalk.api.auth.service.JwtOAuth2Service;
@@ -93,10 +93,10 @@ public class AuthController {
     }
 
     @GetMapping("/session")
-    public ResponseEntity<SessionInfoResponse> getSessionInfo(
+    public ResponseEntity<GetSessionInfoResponse> getSessionInfo(
         @HasRole({SecurityRole.MEMBER, SecurityRole.ADMIN}) SecurityUser user
     ) {
-        SessionInfoResponse sessionInfo = authService.getSessionInfo(user.getId());
+        GetSessionInfoResponse sessionInfo = authService.getSessionInfo(user.getId());
         return ResponseEntity.ok(sessionInfo);
     }
 
