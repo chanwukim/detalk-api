@@ -19,11 +19,10 @@ public class ProductPostIdempotentService {
 
     public boolean insertIdempotentKey(String idempotentKey, Instant now) {
         UUID uuidIdempotentKey = uuidGenerator.fromString(idempotentKey);
-        boolean isDuplicated = postIdempotentRepository.insertIdempotentKey(uuidIdempotentKey, now);
-        if (isDuplicated) {
-            log.info("게시글 Idempotent 발생! 이 요청은 이미 처리되었습니다.");
+        boolean isNew = postIdempotentRepository.insertIdempotentKey(uuidIdempotentKey, now);
+        if (!isNew) {
             throw new DuplicatedIdempotentKeyException();
         }
-        return false;
+        return true;
     }
 }
