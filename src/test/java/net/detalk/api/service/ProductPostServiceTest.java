@@ -14,11 +14,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import net.detalk.api.post.controller.v1.request.CreateProductPostRequest;
-import net.detalk.api.post.controller.v1.request.UpdateProductPostRequest;
 import net.detalk.api.post.controller.v1.response.GetProductPostResponse;
 import net.detalk.api.post.controller.v1.response.GetProductPostResponse.Media;
 import net.detalk.api.plan.domain.PricingPlan;
 import net.detalk.api.plan.service.PricingPlanService;
+import net.detalk.api.post.domain.exception.InvalidRecommendCountRequest;
 import net.detalk.api.post.repository.ProductPostLastSnapshotRepository;
 import net.detalk.api.post.repository.ProductPostLinkRepository;
 import net.detalk.api.post.repository.ProductPostRepository;
@@ -29,20 +29,18 @@ import net.detalk.api.product.domain.Product;
 import net.detalk.api.product.domain.ProductLink;
 import net.detalk.api.post.domain.ProductPost;
 import net.detalk.api.post.domain.ProductPostSnapshot;
+import net.detalk.api.product.service.ProductLinkService;
+import net.detalk.api.product.service.ProductService;
+import net.detalk.api.support.error.ApiException;
+import net.detalk.api.support.paging.CursorPageData;
 import net.detalk.api.tag.domain.Tag;
-import net.detalk.api.post.domain.exception.DuplicateCreatePostException;
-import net.detalk.api.post.domain.exception.InvalidRecommendCountRequest;
 import net.detalk.api.mock.FakeTimeHolder;
 import net.detalk.api.mock.FakeUUIDGenerator;
-import net.detalk.api.product.repository.ProductLinkRepository;
 import net.detalk.api.product.repository.ProductMakerRepository;
-import net.detalk.api.product.repository.ProductRepository;
 import net.detalk.api.post.service.ProductPostIdempotentService;
 import net.detalk.api.post.service.ProductPostService;
-import net.detalk.api.support.paging.CursorPageData;
 import net.detalk.api.support.util.TimeHolder;
 import net.detalk.api.support.util.UUIDGenerator;
-import net.detalk.api.support.error.ApiException;
 import net.detalk.api.tag.service.TagService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -64,13 +62,11 @@ class ProductPostServiceTest {
      * mock repository, service
      */
     @Mock
-    private ProductRepository productRepository;
+    private ProductLinkService productLinkService;
     @Mock
     private ProductPostRepository postRepository;
     @Mock
     private ProductPostLastSnapshotRepository postLastSnapshotRepository;
-    @Mock
-    private ProductLinkRepository linkRepository;
     @Mock
     private ProductPostSnapshotAttachmentFileRepository snapshotAttachmentFileRepository;
     @Mock
@@ -82,11 +78,13 @@ class ProductPostServiceTest {
     @Mock
     private ProductPostLinkRepository productPostLinkRepository;
     @Mock
+    private ProductService productService;
+    @Mock
     private TagService tagService;
     @Mock
     private PricingPlanService planService;
     @Mock
-    private ProductPostIdempotentService postIdempotentService;
+    private ProductPostIdempotentService IdempotentService;
 
     /**
      * fake random classes
@@ -116,6 +114,7 @@ class ProductPostServiceTest {
     private Long linkId = 1L;
     private Long tagId = 1L;
     private String productName;
+    private String description;
     private String plan;
     private String productUrl;
     private String tagName;
@@ -128,16 +127,16 @@ class ProductPostServiceTest {
     void setUp() {
 
         productPostService = new ProductPostService(
-            productRepository,
-            linkRepository,
+            productLinkService,
             makerRepository,
+            productService,
             postRepository,
             postLastSnapshotRepository,
             snapshotAttachmentFileRepository,
             postSnapshotTagRepository,
             postSnapshotRepository,
             productPostLinkRepository,
-            postIdempotentService,
+            IdempotentService,
             planService,
             tagService,
             timeHolder,
@@ -181,6 +180,7 @@ class ProductPostServiceTest {
 
         productName = "chatGpt";
         plan = "FREE";
+        description = "description";
         productUrl = "https://openai.com";
         tagName = "ai";
         nickname = "foo";
@@ -197,116 +197,35 @@ class ProductPostServiceTest {
         );
     }
 
-    @DisplayName("성공[create] - 제품이 존재하지 않아 새제품 생성 후 게시글 생성")
+    @DisplayName("성공[create] - 게시글 생성")
     @Test
     void create_success_newProduct() {
-
+        // given
         UUID idempotentKey = uuidGenerator.generateV7();
 
-        // given
         CreateProductPostRequest request = CreateProductPostRequest.builder()
-            .name("newProduct")
+            .name(productName)
             .url(productUrl)
-            .description("new product description")
+            .description(description)
             .imageIds(List.of(imageId))
             .isMaker(false)
-            .tags(List.of("newTag"))
+            .tags(List.of(tagName))
             .pricingPlan(plan)
             .idempotentKey(String.valueOf(idempotentKey))
             .build();
 
-        Product newProduct = Product.builder()
-            .id(2L)
-            .name("newProduct")
-            .cratedAt(timeHolder.now())
-            .build();
-
-        // 새로운 제품이니 empty 리턴 -> DB저장
-        when(productRepository.findByName("newProduct")).thenReturn(Optional.empty());
-        when(productRepository.save("newProduct", timeHolder.now())).thenReturn(newProduct);
-        when(postRepository.save(memberId, 2L, timeHolder.now())).thenReturn(productPost);
+        when(IdempotentService.insertIdempotentKey(request.idempotentKey(),
+            timeHolder.now())).thenReturn(true);
+        when(productService.getOrCreateProduct(productName, fixedInstant)).thenReturn(product);
+        when(postRepository.save(memberId, productPostId, fixedInstant)).thenReturn(productPost);
         when(planService.findByName(plan)).thenReturn(pricingPlan);
         when(postSnapshotRepository.save(any(ProductPostSnapshot.class))).thenReturn(
             productPostSnapshot);
         when(postLastSnapshotRepository.save(anyLong(), anyLong())).thenReturn(null);
-        when(linkRepository.findByUrl(request.url())).thenReturn(Optional.ofNullable(productLink));
-        when(tagService.getOrCreateTag("newTag")).thenReturn(tag);
-        when(postIdempotentService.insertIdempotentKey(idempotentKey, timeHolder.now())).thenReturn(
-            true);
-
-        // when
-        Long result = productPostService.create(request, memberId);
-
-        // then
-        assertThat(result).isEqualTo(1L);
-    }
-
-
-    @DisplayName("성공[create] - 기존 제품 이용하여 게시글 생성")
-    @Test
-    void create_success() {
-        UUID idempotentKey = uuidGenerator.generateV7();
-        // given
-        CreateProductPostRequest request = CreateProductPostRequest.builder()
-            .name("chatGpt")
-            .url(productUrl)
-            .description("ai skills")
-            .imageIds(List.of(imageId))
-            .isMaker(false)
-            .tags(List.of("ai"))
-            .pricingPlan(plan)
-            .idempotentKey(String.valueOf(idempotentKey))
-            .build();
-
-        when(productRepository.findByName(productName)).thenReturn(Optional.ofNullable(product));
-        when(postRepository.save(memberId, productId, timeHolder.now())).thenReturn(productPost);
-        when(planService.findByName(plan)).thenReturn(pricingPlan);
-        when(postSnapshotRepository.save(any(ProductPostSnapshot.class))).thenReturn(
-            productPostSnapshot);
-        when(postLastSnapshotRepository.save(productPostId, productPostSnapshotId)).thenReturn(
-            null);
-        when(linkRepository.findByUrl(request.url())).thenReturn(Optional.ofNullable(productLink));
-        when(tagService.getOrCreateTag(tagName)).thenReturn(tag);
-        when(postIdempotentService.insertIdempotentKey(idempotentKey, timeHolder.now())).thenReturn(
-            true);
-
-        Long result = productPostService.create(request, memberId);
-        assertThat(result).isEqualTo(1L);
-    }
-
-    @DisplayName("성공[create] - 새 링크 저장 후, 게시글 생성")
-    @Test
-    void create_success_newLink() {
-
-        UUID idempotentKey = uuidGenerator.generateV7();
-
-        // given
-        CreateProductPostRequest request = CreateProductPostRequest.builder()
-            .name(productName)
-            .url("https://newlink.com")
-            .description("ai skills")
-            .imageIds(List.of(imageId))
-            .isMaker(false)
-            .tags(List.of("ai"))
-            .pricingPlan(plan)
-            .idempotentKey(String.valueOf(idempotentKey))
-            .build();
-
-        when(productRepository.findByName(productName)).thenReturn(Optional.of(product));
-        when(postRepository.save(memberId, productId, timeHolder.now())).thenReturn(productPost);
-        when(planService.findByName(plan)).thenReturn(pricingPlan);
-        when(postSnapshotRepository.save(any(ProductPostSnapshot.class))).thenReturn(
-            productPostSnapshot);
-        when(postLastSnapshotRepository.save(productPostId, productPostSnapshotId)).thenReturn(
-            null);
-        when(linkRepository.findByUrl("https://newlink.com")).thenReturn(Optional.empty());
-        when(linkRepository.save(productId, "https://newlink.com", timeHolder.now())).thenReturn(
-            productLink);
+        when(productLinkService.getOrCreateProductLink(productUrl, productId,
+            fixedInstant)).thenReturn(productLink);
         when(tagService.getOrCreateTag(tagName)).thenReturn(tag);
 
-        when(postIdempotentService.insertIdempotentKey(idempotentKey, timeHolder.now())).thenReturn(
-            true);
-
         // when
         Long result = productPostService.create(request, memberId);
 
@@ -314,79 +233,6 @@ class ProductPostServiceTest {
         assertThat(result).isEqualTo(1L);
     }
 
-
-    @DisplayName("성공[create] - 새로운 태그가 생성됨")
-    @Test
-    void create_success_newTag() {
-
-        UUID idempotentKey = uuidGenerator.generateV7();
-
-        // given
-        CreateProductPostRequest request = CreateProductPostRequest.builder()
-            .name(productName)
-            .url(productUrl)
-            .description("ai skills")
-            .imageIds(List.of(imageId))
-            .isMaker(false)
-            .tags(List.of("newTag"))
-            .pricingPlan(plan)
-            .idempotentKey(String.valueOf(idempotentKey))
-            .build();
-
-        Tag newTag = Tag.builder()
-            .id(2L)
-            .name("newTag")
-            .build();
-
-        when(productRepository.findByName(productName)).thenReturn(Optional.of(product));
-        when(postRepository.save(memberId, productId, timeHolder.now())).thenReturn(productPost);
-        when(planService.findByName(plan)).thenReturn(pricingPlan);
-        when(postSnapshotRepository.save(any(ProductPostSnapshot.class))).thenReturn(
-            productPostSnapshot);
-        when(postLastSnapshotRepository.save(productPostId, productPostSnapshotId)).thenReturn(
-            null);
-        when(linkRepository.findByUrl(productUrl)).thenReturn(Optional.of(productLink));
-        when(tagService.getOrCreateTag("newTag")).thenReturn(newTag);
-
-        when(postIdempotentService.insertIdempotentKey(idempotentKey, timeHolder.now())).thenReturn(
-            true);
-
-        // when
-        Long result = productPostService.create(request, memberId);
-
-        // then
-        assertThat(result).isEqualTo(1L);
-    }
-
-    @DisplayName("실패[create] - 동시에 게시글 여러번 생성 시, 멱등성으로 인해 실패한다.")
-    @Test
-    void create_fail_idempotent() {
-
-        UUID idempotentKey = uuidGenerator.generateV7();
-        // given
-        CreateProductPostRequest request = CreateProductPostRequest.builder()
-            .name("chatGpt")
-            .url(productUrl)
-            .description("ai skills")
-            .imageIds(List.of(imageId))
-            .isMaker(false)
-            .tags(List.of("ai"))
-            .pricingPlan(plan)
-            .idempotentKey(String.valueOf(idempotentKey))
-            .build();
-
-        when(postIdempotentService.insertIdempotentKey(idempotentKey, timeHolder.now())).thenReturn(
-            false);
-
-        DuplicateCreatePostException exception = assertThrows(
-            DuplicateCreatePostException.class,
-            () -> productPostService.create(request, memberId));
-
-        assertThat(exception.getMessage()).isEqualTo("이 요청은 이미 처리되었습니다.");
-        assertThat(exception.getHttpStatus()).isEqualTo(HttpStatus.CONFLICT);
-        assertThat(exception.getErrorCode()).isEqualTo("duplicate_create_post");
-
-    }
 
     @DisplayName("성공[getProductPosts] - 다음 데이터가 없으면 hasNext,nextId null 을 반환한다")
     @Test
@@ -467,8 +313,8 @@ class ProductPostServiceTest {
         assertThat(result.getNextId()).isEqualTo(5L); // 5번째 게시글의 ID
         assertThat(result.hasNext()).isTrue(); // 다음 페이지 존재
 
-
     }
+
 
     @DisplayName("실패[getProductPosts] - 잘못된 pageSize")
     @Test
@@ -490,7 +336,6 @@ class ProductPostServiceTest {
         assertThat(exceptionNegative.getMessage()).isEqualTo("잘못된 페이지 크기입니다: -99 (허용 범위: 1-20)");
 
     }
-
 
     @DisplayName("성공[getProductPostsByMemberId] - pageSize=5, 데이터가 6개일 때(hasNext=true)")
     @Test
@@ -611,169 +456,8 @@ class ProductPostServiceTest {
         assertThat(exception.getMessage()).isEqualTo("상품-게시글(ID: 9999)을 찾을 수 없습니다.");
     }
 
-    @DisplayName("성공[update]")
-    @Test
-    void update_success() {
-        String newImgId = String.valueOf(uuidGenerator.generateV7());
-        String newPlanName = "PAY";
-        Long newPlanId = 2L;
-        Long newSnapshotId = 2L;
-        String newDescription = "new description";
 
-        String newTag1 = "newTag1";
-        String newTag2 = "newTag2";
-        List<String> newTags = List.of(newTag1, newTag2);
-        String newUrl = "newUrl";
 
-        PricingPlan newPlan = PricingPlan.builder()
-            .id(newPlanId)
-            .name(newPlanName)
-            .build();
-
-        UpdateProductPostRequest updateRequest = UpdateProductPostRequest.builder()
-            .name(productPostSnapshot.getTitle())
-            .pricingPlan(newPlanName)
-            .description(newDescription)
-            .tags(newTags)
-            .url(newUrl)
-            .imageIds(List.of(newImgId))
-            .isMaker(true)
-            .build();
-
-        when(postRepository.findById(productPostId)).thenReturn(Optional.ofNullable(productPost));
-        when(productRepository.findByName(productName)).thenReturn(Optional.ofNullable(product));
-        when(planService.findByName(newPlanName)).thenReturn(newPlan);
-
-        ProductPostSnapshot newSnapshot = ProductPostSnapshot.builder()
-            .id(newSnapshotId)
-            .postId(productPostId)
-            .pricingPlanId(newPlanId)
-            .title(productPostSnapshot.getTitle())
-            .description(newDescription)
-            .createdAt(timeHolder.now())
-            .build();
-
-        when(postSnapshotRepository.save(any())).thenReturn(newSnapshot);
-
-        when(tagService.getOrCreateTag("newTag1")).thenReturn(
-            Tag.builder()
-                .id(1L)
-                .name(newTag1)
-                .build()
-        );
-
-        when(tagService.getOrCreateTag("newTag2")).thenReturn(
-            Tag.builder()
-                .id(2L)
-                .name(newTag2)
-                .build()
-        );
-
-        when(postLastSnapshotRepository.update(productPostId, newSnapshot)).thenReturn(1);
-
-        // when
-        Long result = productPostService.update(productPostId, updateRequest, memberId);
-
-        // then
-        assertThat(result).isEqualTo(newSnapshotId);
-    }
-
-    @DisplayName("실패[update] - 게시글이 존재하지 않음")
-    @Test
-    void update_fail_NotExistsPost() {
-
-        String newImgId = String.valueOf(uuidGenerator.generateV7());
-        String newPlanName = "PAY";
-        String newDescription = "new description";
-
-        String newTag1 = "newTag1";
-        String newTag2 = "newTag2";
-        List<String> newTags = List.of(newTag1, newTag2);
-        String newUrl = "newUrl";
-
-        Long notExistsId = 9999L;
-
-        UpdateProductPostRequest updateRequest = UpdateProductPostRequest.builder()
-            .name(productPostSnapshot.getTitle())
-            .pricingPlan(newPlanName)
-            .description(newDescription)
-            .tags(newTags)
-            .url(newUrl)
-            .imageIds(List.of(newImgId))
-            .isMaker(true)
-            .build();
-
-        ApiException exception = assertThrows(ApiException.class,
-            () -> productPostService.update(notExistsId, updateRequest, memberId));
-
-        assertThat(exception.getMessage()).isEqualTo("상품-게시글(ID: 9999)을 찾을 수 없습니다.");
-    }
-
-    @DisplayName("실패[update] - 최근 스냅샷 업데이트 실패")
-    @Test
-    void update_fail_LastSnapShotUpdate() {
-
-        String newImgId = String.valueOf(uuidGenerator.generateV7());
-        String newPlanName = "PAY";
-        Long newPlanId = 2L;
-        Long newSnapshotId = 2L;
-        String newDescription = "new description";
-
-        String newTag1 = "newTag1";
-        String newTag2 = "newTag2";
-        List<String> newTags = List.of(newTag1, newTag2);
-        String newUrl = "newUrl";
-
-        PricingPlan newPlan = PricingPlan.builder()
-            .id(newPlanId)
-            .name(newPlanName)
-            .build();
-
-        UpdateProductPostRequest updateRequest = UpdateProductPostRequest.builder()
-            .name(productPostSnapshot.getTitle())
-            .pricingPlan(newPlanName)
-            .description(newDescription)
-            .tags(newTags)
-            .url(newUrl)
-            .imageIds(List.of(newImgId))
-            .isMaker(true)
-            .build();
-
-        when(postRepository.findById(productPostId)).thenReturn(Optional.ofNullable(productPost));
-        when(productRepository.findByName(productName)).thenReturn(Optional.ofNullable(product));
-        when(planService.findByName(newPlanName)).thenReturn(newPlan);
-
-        ProductPostSnapshot newSnapshot = ProductPostSnapshot.builder()
-            .id(newSnapshotId)
-            .postId(productPostId)
-            .pricingPlanId(newPlanId)
-            .title(productPostSnapshot.getTitle())
-            .description(newDescription)
-            .createdAt(timeHolder.now())
-            .build();
-
-        when(postSnapshotRepository.save(any())).thenReturn(newSnapshot);
-
-        when(tagService.getOrCreateTag("newTag1")).thenReturn(
-            Tag.builder()
-                .id(1L)
-                .name(newTag1)
-                .build()
-        );
-
-        when(tagService.getOrCreateTag("newTag2")).thenReturn(
-            Tag.builder()
-                .id(2L)
-                .name(newTag2)
-                .build()
-        );
-
-        ApiException exception = assertThrows(ApiException.class,
-            () -> productPostService.update(productPostId, updateRequest, memberId));
-
-        assertThat(exception.getMessage()).isEqualTo("스냅샷 업데이트에 실패했습니다. postId=1, newPostSnapshot=2");
-
-    }
 
     @DisplayName("성공[getRecommendedPostsByMemberId]")
     @Test

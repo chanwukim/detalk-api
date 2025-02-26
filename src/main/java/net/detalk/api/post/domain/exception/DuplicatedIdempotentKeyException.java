@@ -3,9 +3,9 @@ package net.detalk.api.post.domain.exception;
 import net.detalk.api.support.error.ApiException;
 import org.springframework.http.HttpStatus;
 
-public class DuplicateCreatePostException extends ApiException {
+public class DuplicatedIdempotentKeyException extends ApiException {
 
-    public DuplicateCreatePostException() {
+    public DuplicatedIdempotentKeyException() {
         super("이 요청은 이미 처리되었습니다.");
     }
 
@@ -16,7 +16,7 @@ public class DuplicateCreatePostException extends ApiException {
 
     @Override
     public String getErrorCode() {
-        return "duplicate_create_post";
+        return "duplicate_idempotent_key";
     }
 
     @Override
