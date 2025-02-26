@@ -16,4 +16,9 @@ public class ProductPostSnapshotTag {
         this.postId = postId;
         this.tagId = tagId;
     }
+
+    public ProductPostSnapshotTag(Long postId, Long tagId) {
+        this.postId = postId;
+        this.tagId = tagId;
+    }
 }

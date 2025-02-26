@@ -22,13 +22,4 @@ public class ProductPostSnapshotAttachmentFile {
         this.sequence = sequence;
     }
 
-    public static ProductPostSnapshotAttachmentFile create(Long snapshotId, UUID attachmentFileId,
-        int sequence) {
-        return ProductPostSnapshotAttachmentFile.builder()
-            .snapshotId(snapshotId)
-            .attachmentFileId(attachmentFileId)
-            .sequence(sequence)
-            .build();
-    }
-
 }
