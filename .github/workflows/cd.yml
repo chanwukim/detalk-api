@@ -1,0 +1,19 @@
+name: Java CD with Gradle
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download JAR from CI workflow
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          workflow: "Java CI with Gradle"
+          name: application
+
+      - name: Display structure of downloaded files
+        run: ls -la
