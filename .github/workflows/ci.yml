@@ -31,7 +31,7 @@ jobs:
 
       # JAR 파일 아티팩트(임시저장)로 저장 (CD에서 사용)
       - name: Upload JAR for CD
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: application
           path: build/libs/*.jar

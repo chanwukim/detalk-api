@@ -10,7 +10,7 @@ jobs:
 
     steps:
       - name: Download JAR from CI workflow
-        uses: dawidd6/action-download-artifact@v2
+        uses: dawidd6/action-download-artifact@v4
         with:
           workflow: "Java CI with Gradle"
           name: application
