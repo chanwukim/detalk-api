@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
  * 캐시된 가격 정책
  * CaffeineCache 사용하기 때문에 더이상 사용하지 않는다.
  */
-@Deprecated()
+@Deprecated
 @Slf4j
 @Component
 @RequiredArgsConstructor
