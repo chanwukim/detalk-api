@@ -2,6 +2,10 @@ package net.detalk.api.support.cache;
 
 import java.util.Map;
 
+/**
+ * CaffeineCache 사용하기 때문에 더이상 사용하지 않는다.
+ */
+@Deprecated
 public interface DetalkCache<K, V> {
 
     /**
