@@ -15,8 +15,9 @@ import org.springframework.stereotype.Component;
 
 /**
  * 캐시된 가격 정책
- * TODO : 추가, 삭제 기능 및 캐시 만료 정책, 캐시 갱신
+ * CaffeineCache 사용하기 때문에 더이상 사용하지 않는다.
  */
+@Deprecated
 @Slf4j
 @Component
 @RequiredArgsConstructor

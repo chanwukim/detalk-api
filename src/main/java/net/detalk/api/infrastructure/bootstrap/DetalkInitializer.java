@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.detalk.api.alarm.service.AlarmSender;
 import net.detalk.api.role.domain.Role;
-import net.detalk.api.plan.service.PricingPlanCache;
 import net.detalk.api.role.repository.RoleRepository;
 import net.detalk.api.support.util.EnvironmentHolder;
 import net.detalk.api.support.security.SecurityRole;
@@ -23,8 +22,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class DetalkInitializer implements ApplicationRunner {
 
-    private final PricingPlanCache pricingPlanCache;
-
     private final AlarmSender alarmSender;
 
     private final RoleRepository roleRepository;
@@ -34,8 +31,6 @@ public class DetalkInitializer implements ApplicationRunner {
     @Transactional
     @Override
     public void run(ApplicationArguments args){
-        // 가격 정책 캐싱
-        pricingPlanCache.loadPricingPlans();
 
         // 트랜잭션과 무관한 알람 시스템 초기화
         initializeDiscord();
