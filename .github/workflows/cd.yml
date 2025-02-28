@@ -36,15 +36,12 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Set up SSH key
-        uses: webfactory/ssh-agent@v0.7.0
-        with:
-          ssh-private-key: ${{ secrets.SSH_KEY }}
-
-      - name: Add host key to known hosts
         run: |
           mkdir -p ~/.ssh
-          ssh-keyscan ${{ secrets.HOST }} >> ~/.ssh/known_hosts
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/lightsail_key
+          chmod 600 ~/.ssh/lightsail_key
 
-      - name: Test SSH connection and run ls -l
+      - name: Copy JAR file to Lightsail instance
         run: |
-          ssh -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.HOST }} 'ls -l'
+          JAR_FILE=$(ls build/libs/*.jar)
+          scp -i ~/.ssh/lightsail_key -P ${{ secrets.SSH_PORT }} "$JAR_FILE" ${{ secrets.SSH_USER }}@${{ secrets.HOST }}:~/
