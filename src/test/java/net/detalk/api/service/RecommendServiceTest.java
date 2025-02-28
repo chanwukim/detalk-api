@@ -13,16 +13,19 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import net.detalk.api.controller.v1.request.CreateRecommendRequest;
-import net.detalk.api.domain.Recommend;
-import net.detalk.api.domain.exception.DuplicateRecommendationException;
-import net.detalk.api.domain.exception.ProductPostNotFoundException;
+import net.detalk.api.post.controller.v1.request.CreateRecommendRequest;
+import net.detalk.api.post.domain.Recommend;
+import net.detalk.api.post.domain.exception.DuplicateRecommendationException;
+import net.detalk.api.post.domain.exception.ProductPostNotFoundException;
 import net.detalk.api.mock.FakeTimeHolder;
-import net.detalk.api.repository.RecommendProductRepository;
-import net.detalk.api.repository.RecommendRepository;
-import net.detalk.api.support.TimeHolder;
+import net.detalk.api.post.repository.RecommendProductRepository;
+import net.detalk.api.post.repository.RecommendRepository;
+import net.detalk.api.post.service.ProductPostService;
+import net.detalk.api.post.service.RecommendService;
+import net.detalk.api.support.util.TimeHolder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -44,9 +47,12 @@ class RecommendServiceTest {
 
     private RecommendService recommendService;
 
+    private final LocalDateTime fixedLocalDateTime = LocalDateTime.of(2025, 1, 1, 12, 0, 0);
+    private final Instant fixedInstant = Instant.parse("2025-01-01T12:00:00Z");
+
     @BeforeEach
     void setUp() {
-        timeHolder = new FakeTimeHolder(Instant.parse("2025-01-01T12:00:00Z"));
+        timeHolder = new FakeTimeHolder(fixedInstant, fixedLocalDateTime);
         recommendService = new RecommendService(
             recommendRepository,
             recommendProductRepository,

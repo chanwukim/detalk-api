@@ -1,6 +1,11 @@
 package net.detalk.api.support.security;
 
+import java.util.Arrays;
+import java.util.Objects;
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
+import net.detalk.api.auth.domain.exception.AccessDeniedException;
+import net.detalk.api.auth.domain.exception.SessionUserNotFoundException;
 import org.springframework.core.MethodParameter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -20,6 +25,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  * 필요한 경우 해당 {@link SecurityUser}를 반환한다.
  * </p>
  */
+@Slf4j
 @Component
 public class HasRoleArgumentResolver implements HandlerMethodArgumentResolver {
 
@@ -44,23 +50,30 @@ public class HasRoleArgumentResolver implements HandlerMethodArgumentResolver {
          */
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        // authentication 없거나 Principal이 SecurityUser 아닐경우 null 리턴
+        // authentication 없거나 Principal이 SecurityUser 아닐경우
         if (authentication == null || !(authentication.getPrincipal() instanceof SecurityUser securityUser)) {
-            return null;
+            log.debug("Authentication failed for method: {}. authentication: {}", Objects.requireNonNull(
+                parameter.getMethod()).getName(), authentication);
+            throw new SessionUserNotFoundException();
         }
 
-        // @HasRole 어노테이션이 요구하는 ROLE 가져오기
+        // 컨트롤러 @HasRole 어노테이션이 요구하는 ROLE 가져오기
         HasRole hasRoleAnnotation = parameter.getParameterAnnotation(HasRole.class);
         assert hasRoleAnnotation != null;
-        String requiredRole = hasRoleAnnotation.value().getName();
+        SecurityRole[] requiredRoles = hasRoleAnnotation.value();
+
+        boolean hasAnyRole = Arrays.stream(requiredRoles)
+            .map(SecurityRole::getName)
+            .anyMatch(role -> hasRole(securityUser, role));
 
         // 사용자가 필요한 역할을 가지고 있는지 확인
-        if (hasRole(securityUser, requiredRole)) {
+        if (hasAnyRole) {
             return securityUser;
         }
 
-        // 권한이 없으면 null 반환
-        return null;
+        // 사용자는 인증되었지만 요청된 권한이 없거나 부족한 경우 접근 거부
+        // 예: ADMIN 역할이 필요한 엔드포인트에 USER 역할로 접근 시도
+        throw new AccessDeniedException();
     }
 
     private boolean hasRole(SecurityUser securityUser, String requiredRole) {

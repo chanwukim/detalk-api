@@ -6,23 +6,25 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
-import net.detalk.api.controller.v1.request.UpdateProfileRequest;
-import net.detalk.api.domain.LoginType;
-import net.detalk.api.domain.Member;
-import net.detalk.api.domain.MemberDetail;
-import net.detalk.api.domain.MemberProfile;
-import net.detalk.api.domain.MemberStatus;
-import net.detalk.api.domain.exception.MemberNotFoundException;
-import net.detalk.api.domain.exception.MemberProfileNotFoundException;
-import net.detalk.api.domain.exception.UserHandleDuplicatedException;
+import net.detalk.api.member.controller.v1.request.UpdateMemberProfileRequest;
+import net.detalk.api.member.domain.LoginType;
+import net.detalk.api.member.domain.Member;
+import net.detalk.api.member.controller.v1.response.GetMemberProfileResponse;
+import net.detalk.api.member.domain.MemberProfile;
+import net.detalk.api.member.domain.MemberStatus;
+import net.detalk.api.member.domain.exception.MemberNotFoundException;
+import net.detalk.api.member.domain.exception.MemberProfileNotFoundException;
+import net.detalk.api.member.domain.exception.UserHandleDuplicatedException;
+import net.detalk.api.member.service.MemberService;
 import net.detalk.api.mock.FakeTimeHolder;
 import net.detalk.api.mock.FakeUUIDGenerator;
-import net.detalk.api.repository.MemberProfileRepository;
-import net.detalk.api.repository.MemberRepository;
-import net.detalk.api.support.TimeHolder;
-import net.detalk.api.support.UUIDGenerator;
+import net.detalk.api.member.repository.MemberProfileRepository;
+import net.detalk.api.member.repository.MemberRepository;
+import net.detalk.api.support.util.TimeHolder;
+import net.detalk.api.support.util.UUIDGenerator;
 import net.detalk.api.support.error.ApiException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -59,7 +61,7 @@ class MemberServiceTest {
      * objects
      */
     private Member member;
-    private MemberDetail memberDetail;
+    private GetMemberProfileResponse getMemberProfileResponse;
     private final Long memberId = 1L;
     private final Long memberProfileId = 1L;
     private String userHandle = "hello_handle";
@@ -67,9 +69,12 @@ class MemberServiceTest {
     private String description = "hello_description";
     private String avatarUrl = "hello_avatar_url";
 
+    private final LocalDateTime fixedLocalDateTime = LocalDateTime.of(2025, 1, 1, 12, 0, 0);
+    private final Instant fixedInstant = Instant.parse("2025-01-01T12:00:00Z");
+
     @BeforeEach
     void init() {
-        timeHolder = new FakeTimeHolder(Instant.parse("2025-01-01T12:00:00Z"));
+        timeHolder = new FakeTimeHolder(fixedInstant, fixedLocalDateTime);
         uuidGenerator = new FakeUUIDGenerator(
             UUID.fromString("123e4567-e89b-12d3-a456-426614174000"));
 
@@ -89,7 +94,7 @@ class MemberServiceTest {
             .deletedAt(null)
             .build();
 
-        memberDetail = MemberDetail.builder()
+        getMemberProfileResponse = GetMemberProfileResponse.builder()
             .id(memberProfileId)
             .userhandle(userHandle)
             .nickname(nickname)
@@ -106,17 +111,17 @@ class MemberServiceTest {
         when(memberRepository.findById(memberId)).thenReturn(Optional.of(member));
 
         when(memberProfileRepository.findWithAvatarByMemberId(memberId)).thenReturn(
-            Optional.of(memberDetail));
+            Optional.of(getMemberProfileResponse));
 
         // when
-        MemberDetail result = memberService.me(1L);
+        GetMemberProfileResponse result = memberService.me(1L);
 
         // then
-        assertThat(result.getId()).isEqualTo(memberProfileId);
-        assertThat(result.getAvatarUrl()).isEqualTo(avatarUrl);
-        assertThat(result.getDescription()).isEqualTo(description);
-        assertThat(result.getUserhandle()).isEqualTo(userHandle);
-        assertThat(result.getNickname()).isEqualTo(nickname);
+        assertThat(result.id()).isEqualTo(memberProfileId);
+        assertThat(result.avatarUrl()).isEqualTo(avatarUrl);
+        assertThat(result.description()).isEqualTo(description);
+        assertThat(result.userhandle()).isEqualTo(userHandle);
+        assertThat(result.nickname()).isEqualTo(nickname);
     }
 
     @DisplayName("실패[me] - 존재하지 않는 회원 조회")
@@ -209,12 +214,12 @@ class MemberServiceTest {
         when(memberProfileRepository.update(any(MemberProfile.class))).thenReturn(updatedProfile);
 
         // when
-        MemberDetail result = memberService.registerProfile(memberId, userHandle, nickname);
+        GetMemberProfileResponse result = memberService.registerProfile(memberId, userHandle, nickname);
 
         // then
-        assertThat(result.getId()).isEqualTo(memberId);
-        assertThat(result.getUserhandle()).isEqualTo(userHandle);
-        assertThat(result.getNickname()).isEqualTo(nickname);
+        assertThat(result.id()).isEqualTo(memberId);
+        assertThat(result.userhandle()).isEqualTo(userHandle);
+        assertThat(result.nickname()).isEqualTo(nickname);
     }
 
     @DisplayName("실패[registerProfile] - userHandle 중복")
@@ -298,7 +303,7 @@ class MemberServiceTest {
 
         UUID newAvatarId = newUUIDgenerator.generateV7();
 
-        UpdateProfileRequest updateRequest = UpdateProfileRequest.builder()
+        UpdateMemberProfileRequest updateRequest = UpdateMemberProfileRequest.builder()
             .userhandle("newUserHandle")
             .avatarId(String.valueOf(newAvatarId))
             .nickname("newNickname")
@@ -318,7 +323,7 @@ class MemberServiceTest {
 
         // given
         var notExistsMemberId = 9999L;
-        var updateRequest = UpdateProfileRequest.builder()
+        var updateRequest = UpdateMemberProfileRequest.builder()
             .userhandle("newUserHandle")
             .avatarId("asdfasdf")
             .nickname("newNickname")
@@ -342,7 +347,7 @@ class MemberServiceTest {
 
         // given
         var memberId = 9999L;
-        var updateRequest = UpdateProfileRequest.builder()
+        var updateRequest = UpdateMemberProfileRequest.builder()
             .userhandle("newUserHandle")
             .avatarId("asdfasdf")
             .nickname("newNickname")

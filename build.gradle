@@ -33,7 +33,10 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-jooq'
-	
+	implementation 'org.springframework.boot:spring-boot-starter-cache'
+	implementation 'com.github.ben-manes.caffeine:caffeine'
+
+
 	implementation 'org.flywaydb:flyway-core'
 	implementation 'org.flywaydb:flyway-database-postgresql'
 	runtimeOnly 'org.postgresql:postgresql'
@@ -58,6 +61,7 @@ dependencies {
 
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0'
 
+	implementation 'com.maxmind.geoip2:geoip2:2.15.0'
 
 	implementation ('net.dv8tion:JDA:5.2.2'){
 		exclude module: 'opus-java'
@@ -98,24 +102,24 @@ jooq {
 				forcedTypes {
 					forcedType {
 						userType = 'java.time.Instant'
-						converter = 'net.detalk.api.support.InstantConverter'
+						converter = 'net.detalk.api.support.util.InstantConverter'
 						includeExpression = '.*(_AT)$'
 						includeTypes = 'BIGINT'
 					}
 					forcedType {
-						userType = 'net.detalk.api.domain.LoginType'
+						userType = 'net.detalk.api.member.domain.LoginType'
 						enumConverter = true
 						name = 'varchar'
 						includeExpression = 'member\\.login_type'
 					}
 					forcedType {
-						userType = 'net.detalk.api.domain.MemberStatus'
+						userType = 'net.detalk.api.member.domain.MemberStatus'
 						enumConverter = true
 						name = 'varchar'
 						includeExpression = 'member\\.status'
 					}
 					forcedType {
-						userType = 'net.detalk.api.support.security.OAuthProvider'
+						userType = 'net.detalk.api.support.security.oauth.OAuthProvider'
 						enumConverter = true
 						name = 'varchar'
 						includeExpression = 'member_external\\.type'

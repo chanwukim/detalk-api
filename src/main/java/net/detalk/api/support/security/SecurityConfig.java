@@ -3,7 +3,7 @@ package net.detalk.api.support.security;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import net.detalk.api.service.SessionAuthService;
+import net.detalk.api.auth.service.SessionOAuth2Service;
 import net.detalk.api.support.error.ErrorCode;
 import net.detalk.api.support.error.ErrorMessage;
 import net.detalk.api.support.filter.MDCFilter;
@@ -13,24 +13,32 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.session.SessionRegistry;
+import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.io.PrintWriter;
+import org.springframework.security.web.session.HttpSessionEventPublisher;
+
+import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity // 메서드 별 권한 설정 활성화
 @RequiredArgsConstructor
 public class SecurityConfig {
+
     private final OAuthFailHandler oAuthFailHandler;
     private final MDCFilter mdcFilter;
-    private final SessionAuthService authService;
+    private final SessionOAuth2Service authService;
     private final SessionOAuthSuccessHandler oAuthSuccessHandler;
     private final SessionLogoutSuccessHandler logoutSuccessHandler;
 
@@ -44,6 +52,18 @@ public class SecurityConfig {
             writer.write(new ObjectMapper().writeValueAsString(new ErrorMessage(ErrorCode.UNAUTHORIZED)));
             writer.flush();
         };
+    }
+
+    // 실시간 세션 조회
+    @Bean
+    public SessionRegistry sessionRegistry() {
+        return new SessionRegistryImpl();
+    }
+
+    // 세션 생명주기 이벤트 캡처
+    @Bean
+    public HttpSessionEventPublisher httpSessionEventPublisher() {
+        return new HttpSessionEventPublisher();
     }
 
     @Bean
@@ -61,9 +81,15 @@ public class SecurityConfig {
     @Bean
     protected SecurityFilterChain securityFilterChain(HttpSecurity http, TokenProvider tokenProvider) throws Exception {
         http
+            // https://docs.spring.io/spring-security/reference/servlet/integrations/cors.html
+            // WebConfig CORS 설정을 사용
+            .cors(withDefaults())
             .csrf(AbstractHttpConfigurer::disable)
             .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                .maximumSessions(3)
+                .sessionRegistry(sessionRegistry())
+            )
             .httpBasic(AbstractHttpConfigurer::disable)
             .formLogin(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth
@@ -72,16 +98,18 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/v1/products/posts/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/products/posts").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/products/posts/filter/by-tags").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/v1/products/posts/{id}/recommend").hasRole("MEMBER")
-                .requestMatchers(HttpMethod.GET, "/api/v1/members/me").hasRole("MEMBER")
-                .requestMatchers(HttpMethod.GET, "/api/v1/members/me/posts").hasRole("MEMBER")
-                .requestMatchers(HttpMethod.PUT, "/api/v1/members/me/profile").hasRole("MEMBER")
-                .requestMatchers(HttpMethod.POST, "/api/v1/members/me/profile").hasRole("MEMBER")
+                .requestMatchers(HttpMethod.POST, "/api/v1/products/posts/{id}/recommend").hasAnyRole("MEMBER","ADMIN")
+                .requestMatchers(HttpMethod.GET, "/api/v1/members/me").hasAnyRole("MEMBER","ADMIN")
+                .requestMatchers(HttpMethod.GET, "/api/v1/members/me/posts").hasAnyRole("MEMBER","ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/v1/members/me/profile").hasAnyRole("MEMBER","ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/v1/members/me/profile").hasAnyRole("MEMBER","ADMIN")
                 .requestMatchers(HttpMethod.GET, "/api/v1/members/{userhandle}/posts").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/members/{userhandle}/recommended-posts").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/members/{userhandle}").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/tags").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/v1/images/upload-url").hasRole("MEMBER")
+                .requestMatchers(HttpMethod.GET, "/api/v1/auth/session").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/v1/images/upload-url").hasAnyRole("MEMBER","ADMIN")
+                .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated())
             /**
              * sign-in: /oauth2/authorization/{registrationId}

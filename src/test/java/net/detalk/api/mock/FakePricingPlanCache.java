@@ -3,9 +3,9 @@ package net.detalk.api.mock;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import net.detalk.api.domain.PricingPlan;
-import net.detalk.api.domain.exception.PricingPlanNotFoundException;
-import net.detalk.api.service.DetalkCache;
+import net.detalk.api.plan.domain.PricingPlan;
+import net.detalk.api.plan.domain.exception.PricingPlanNotFoundException;
+import net.detalk.api.support.cache.DetalkCache;
 
 public class FakePricingPlanCache implements DetalkCache<String, PricingPlan> {
 

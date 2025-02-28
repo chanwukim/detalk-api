@@ -65,3 +65,8 @@ discord:
   bot:
     token: your_discord_api_token
     channel-id: your_discord_channel_id
+
+
+geo:
+  database:
+    path: geolocate/GeoLite2-City.mmdb

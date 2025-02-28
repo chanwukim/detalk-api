@@ -2,7 +2,7 @@ package net.detalk.api.support.image;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import net.detalk.api.support.AppProperties;
+import net.detalk.api.support.config.AppProperties;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;

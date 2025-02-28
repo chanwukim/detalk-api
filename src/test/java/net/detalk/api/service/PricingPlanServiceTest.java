@@ -2,23 +2,34 @@ package net.detalk.api.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
-import net.detalk.api.domain.PricingPlan;
-import net.detalk.api.domain.exception.PricingPlanNotFoundException;
+import java.util.Optional;
+import net.detalk.api.plan.domain.PricingPlan;
+import net.detalk.api.plan.domain.exception.PricingPlanNotFoundException;
 import net.detalk.api.mock.FakePricingPlanCache;
+import net.detalk.api.plan.repository.PricingPlanRepository;
+import net.detalk.api.plan.service.PricingPlanService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+@ExtendWith(MockitoExtension.class)
 class PricingPlanServiceTest {
 
     private FakePricingPlanCache fakeCache;
     private PricingPlanService pricingPlanService;
 
+    @Mock
+    private PricingPlanRepository pricingPlanRepository;
+
     @BeforeEach
     public void setUp() {
         fakeCache = new FakePricingPlanCache();
-        pricingPlanService = new PricingPlanService(fakeCache);
+        pricingPlanService = new PricingPlanService(pricingPlanRepository);
     }
 
     @DisplayName("성공[findByName] 캐시 조회 성공")
@@ -27,6 +38,9 @@ class PricingPlanServiceTest {
         // given : 캐시에 미리 등록된 가격 정책
         PricingPlan dummyPlan = new PricingPlan(1L, "FREE");
         fakeCache.put(dummyPlan.getName(), dummyPlan);
+
+        when(pricingPlanRepository.findByName(dummyPlan.getName())).thenReturn(
+            Optional.of(dummyPlan));
 
         // when
         PricingPlan cachedPlan = pricingPlanService.findByName(dummyPlan.getName());

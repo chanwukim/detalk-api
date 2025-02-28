@@ -1,6 +1,6 @@
 package net.detalk.api.support.s3;
 
-import net.detalk.api.service.ImageService;
+import net.detalk.api.image.service.ImageService;
 
 /**
  * @deprecated
