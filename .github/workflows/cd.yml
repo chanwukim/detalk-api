@@ -43,5 +43,9 @@ jobs:
 
       - name: Copy JAR file to Lightsail instance
         run: |
-          JAR_FILE=$(ls build/libs/*.jar)
+          JAR_FILE=build/libs/api-0.0.1-SNAPSHOT.jar
+          if [ ! -f "$JAR_FILE" ]; then
+            echo "Error: JAR file $JAR_FILE not found"
+            exit 1
+          fi
           scp -i ~/.ssh/lightsail_key -P ${{ secrets.SSH_PORT }} "$JAR_FILE" ${{ secrets.SSH_USER }}@${{ secrets.HOST }}:~/
