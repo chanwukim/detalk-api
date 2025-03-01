@@ -43,15 +43,15 @@ jobs:
 
       - name: Deploy to Lightsail
         env:
-          PROD_YAML: ${{ secrets.PROD_YAML }}
+          PROD_YAML_BASE64: ${{ secrets.PROD_YAML_BASE64 }}
         run: |
           JAR_FILE=build/libs/api-0.0.1-SNAPSHOT.jar
           if [ ! -f "$JAR_FILE" ]; then
             echo "Error: JAR file $JAR_FILE not found"
             exit 1
           fi
-          # PROD_YAML을 파일로 저장
-          echo "$PROD_YAML" > application-prod.yaml
+          # Base64 디코딩해서 YAML 파일 생성
+          echo "$PROD_YAML_BASE64" | base64 -d > application-prod.yaml
           # YAML 파일 전송
           scp -i ~/.ssh/lightsail_key -P ${{ secrets.SSH_PORT }} -o StrictHostKeyChecking=no application-prod.yaml ${{ secrets.SSH_USER }}@${{ secrets.HOST }}:/home/${{ secrets.SSH_USER }}/application-prod.yaml
           # JAR 파일 전송
