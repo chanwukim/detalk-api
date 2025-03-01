@@ -42,12 +42,18 @@ jobs:
           chmod 600 ~/.ssh/lightsail_key
 
       - name: Deploy to Lightsail
+        env:
+          PROD_YAML: ${{ secrets.PROD_YAML }}
         run: |
           JAR_FILE=build/libs/api-0.0.1-SNAPSHOT.jar
           if [ ! -f "$JAR_FILE" ]; then
             echo "Error: JAR file $JAR_FILE not found"
             exit 1
           fi
+          # PROD_YAML을 파일로 저장
+          echo "$PROD_YAML" > application-prod.yaml
+          # YAML 파일 전송
+          scp -i ~/.ssh/lightsail_key -P ${{ secrets.SSH_PORT }} -o StrictHostKeyChecking=no application-prod.yaml ${{ secrets.SSH_USER }}@${{ secrets.HOST }}:/home/${{ secrets.SSH_USER }}/application-prod.yaml
           # JAR 파일 전송
           scp -i ~/.ssh/lightsail_key -P ${{ secrets.SSH_PORT }} -o StrictHostKeyChecking=no "$JAR_FILE" ${{ secrets.SSH_USER }}@${{ secrets.HOST }}:/home/${{ secrets.SSH_USER }}/api-0.0.1-SNAPSHOT.jar
           # 배포 스크립트 전송
