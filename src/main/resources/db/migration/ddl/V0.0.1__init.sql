@@ -32,6 +32,8 @@ CREATE TABLE "member_profile" (
         FOREIGN KEY ("avatar_id") REFERENCES "attachment_file" ("id") ON DELETE SET NULL ON UPDATE CASCADE,
         CONSTRAINT "member_profile_userhandle_key" UNIQUE ("userhandle")
 );
+CREATE INDEX "idx_member_profile_member_id" ON "member_profile" ("member_id");
+
 
 -- 이메일은 확장성을 고려해 분리
 -- 하나만 필요하면 하나의 row로 저장
@@ -122,6 +124,8 @@ CREATE TABLE "product_post" (
         FOREIGN KEY ("writer_id") REFERENCES "member" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY ("product_id") REFERENCES "product" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
+CREATE INDEX "idx_product_post_id_created_at_desc" ON "product_post" ("id" DESC, "created_at" DESC);
+
 
 CREATE TABLE "product_post_snapshot" (
         "id" BIGINT GENERATED ALWAYS AS IDENTITY,
@@ -180,11 +184,55 @@ CREATE TABLE "recommend_product" (
         "recommend_id" BIGINT NOT NULL,
         "product_post_id" BIGINT NOT NULL,
         "member_id" BIGINT NOT NULL,
+        "content" VARCHAR(255),
         "created_at" BIGINT NOT NULL,
         CONSTRAINT "recommend_product_pkey" PRIMARY KEY ("id"),
         FOREIGN KEY ("recommend_id") REFERENCES "recommend" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY ("product_post_id") REFERENCES "product_post" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY ("member_id") REFERENCES "member" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
+
+CREATE TABLE "role" (
+    "code" VARCHAR(32) PRIMARY KEY,
+    "description" VARCHAR(255)
+);
+
+CREATE TABLE "member_role" (
+    "member_id" BIGINT NOT NULL,
+    "role_code" VARCHAR(32) NOT NULL,
+    PRIMARY KEY ("member_id", "role_code"),
+    FOREIGN KEY ("member_id") REFERENCES "member" ("id") ON DELETE CASCADE,
+    FOREIGN KEY ("role_code") REFERENCES "role" ("code") ON DELETE CASCADE
+);
+
+-- 각 게시글이 어떤 링크를 사용했는지 연관관계 맺는 테이블
+CREATE TABLE "product_post_link" (
+    "post_id" BIGINT NOT NULL,
+    "link_id" BIGINT NOT NULL,
+    CONSTRAINT "product_post_link_pkey" PRIMARY KEY ("post_id", "link_id"),
+    CONSTRAINT "product_post_link_post_fk" FOREIGN KEY ("post_id") REFERENCES "product_post"("id") ON DELETE CASCADE,
+    CONSTRAINT "product_post_link_link_fk" FOREIGN KEY ("link_id") REFERENCES "product_link"("id") ON DELETE CASCADE
+);
+
+-- idempotent_key: 클라이언트가 생성한 UUID를 저장. UNIQUE 제약을 통해 중복 삽입 시 에러가 발생하게 함
+CREATE TABLE product_post_idempotent_requests (
+    "id" BIGINT GENERATED ALWAYS AS IDENTITY,
+    "idempotent_key" UUID NOT NULL,
+    "created_at" BIGINT NOT NULL,
+    CONSTRAINT "ux_idempotent_key" UNIQUE ("idempotent_key")
+);
+
+-- 방문자 로그 테이블 생성: 사용자 위치 및 방문 정보를 저장
+CREATE TABLE "visitor_log" (
+    "id" BIGSERIAL PRIMARY KEY,
+    "session_id" VARCHAR(255) NOT NULL, -- 방문자의 세션 ID
+    "continent_code" CHAR(2) NOT NULL, -- 방문자의 대륙 코드 (예: 'NA', 'AS')
+    "country_iso" CHAR(2) NOT NULL, -- 방문자의 국가 ISO 코드 (예: 'US', 'KR')
+    "country_name" VARCHAR(64) NOT NULL, -- 방문자의 국가명 (예: 'United States', 'South Korea')
+    "visited_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, -- 방문 시각
+    "user_agent" VARCHAR(512) NULL, -- 방문자의 브라우저 정보
+    "referer" VARCHAR(512) NULL -- 이전 페이지 정보
+);
+
 
 
