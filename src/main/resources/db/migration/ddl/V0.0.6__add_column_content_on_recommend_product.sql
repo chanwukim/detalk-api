@@ -1,1 +1,0 @@
-ALTER TABLE "recommend_product" ADD COLUMN "content" VARCHAR(255);
