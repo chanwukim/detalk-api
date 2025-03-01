@@ -2,13 +2,17 @@ package net.detalk.api.infrastructure.bootstrap;
 
 
 import jakarta.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.detalk.api.alarm.service.AlarmSender;
+import net.detalk.api.plan.domain.PricingPlan;
+import net.detalk.api.plan.repository.PricingPlanRepository;
 import net.detalk.api.role.domain.Role;
 import net.detalk.api.role.repository.RoleRepository;
 import net.detalk.api.support.util.EnvironmentHolder;
@@ -26,6 +30,8 @@ public class DetalkInitializer implements ApplicationRunner {
 
     private final RoleRepository roleRepository;
 
+    private final PricingPlanRepository pricingPlanRepository;
+
     private final EnvironmentHolder env;
 
     @Transactional
@@ -38,6 +44,8 @@ public class DetalkInitializer implements ApplicationRunner {
         // 초기 권한
         initMemberRoles();
 
+        // 초기 가격 정책
+        initPricingPlans();
         if ("prod".equals(env.getActiveProfile())) {
             log.info("운영 서버 톰캣 실행 완료");
             alarmSender.sendMessage("운영 서버 톰캣 실행 완료");
@@ -74,6 +82,39 @@ public class DetalkInitializer implements ApplicationRunner {
                     new Role(securityRole.getName(), securityRole.getDescription()));
                 log.info("새 권한 생성 : {}", securityRole.getName());
             }
+        }
+
+    }
+
+    private void initPricingPlans() {
+
+        // TODO : 추후 enum 으로 관리
+        // 초기화할 Pricing Plan
+        List<String> planNames = List.of(
+            "Free",
+            "Paid",
+            "Paid with free trial or plan"
+        );
+
+        // DB에 존재하는 모든 Pricing Plan 이름 조회
+        List<String> existingNames = pricingPlanRepository.findAllNames();
+
+        // 중복 체크
+        Set<String> existingNameSet = new HashSet<>(existingNames);
+
+        // 존재하지 않는 플랜만 추가
+        List<PricingPlan> plansToSave = new ArrayList<>();
+        for (String planName : planNames) {
+            if (!existingNameSet.contains(planName)) {
+                plansToSave.add(PricingPlan.builder()
+                    .name(planName)
+                    .build());
+            }
+        }
+
+        if (!plansToSave.isEmpty()) {
+            pricingPlanRepository.saveAll(plansToSave);
+            log.info("Pricing Plans 일괄 저장 완료: {}건, 목록: {}", plansToSave.size(), plansToSave);
         }
 
     }
