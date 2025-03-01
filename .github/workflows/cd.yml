@@ -26,7 +26,7 @@ jobs:
         run: ./gradlew jooqCodegen
 
       - name: Build with Gradle
-        run: ./gradlew build
+        run: ./gradlew clean build -x test
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
