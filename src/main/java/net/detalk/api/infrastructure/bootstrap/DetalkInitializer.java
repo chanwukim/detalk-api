@@ -44,6 +44,8 @@ public class DetalkInitializer implements ApplicationRunner {
         // 초기 권한
         initMemberRoles();
 
+        // 초기 가격 정책
+        initPricingPlans();
         if ("prod".equals(env.getActiveProfile())) {
             log.info("운영 서버 톰캣 실행 완료");
             alarmSender.sendMessage("운영 서버 톰캣 실행 완료");
