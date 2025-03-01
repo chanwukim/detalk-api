@@ -41,6 +41,11 @@ jobs:
           echo "${{ secrets.SSH_KEY }}" > ~/.ssh/lightsail_key
           chmod 600 ~/.ssh/lightsail_key
 
+      - name: Debug SSH connection
+        run: |
+          echo "Attempting to connect to ${{ secrets.SSH_USER }}@${{ secrets.HOST }} on port ${{ secrets.SSH_PORT }}"
+          ssh -i ~/.ssh/lightsail_key -p ${{ secrets.SSH_PORT }} -v ${{ secrets.SSH_USER }}@${{ secrets.HOST }} "echo Connected successfully" || echo "SSH connection failed"
+
       - name: Copy JAR file to Lightsail instance
         run: |
           JAR_FILE=build/libs/api-0.0.1-SNAPSHOT.jar
