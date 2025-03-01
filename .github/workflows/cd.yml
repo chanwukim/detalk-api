@@ -44,7 +44,7 @@ jobs:
       - name: Debug SSH connection
         run: |
           echo "Attempting to connect to ${{ secrets.SSH_USER }}@${{ secrets.HOST }} on port ${{ secrets.SSH_PORT }}"
-          ssh -i ~/.ssh/lightsail_key -p ${{ secrets.SSH_PORT }} -v ${{ secrets.SSH_USER }}@${{ secrets.HOST }} "echo Connected successfully" || echo "SSH connection failed"
+          ssh -i ~/.ssh/lightsail_key -p ${{ secrets.SSH_PORT }} -o StrictHostKeyChecking=no -v ${{ secrets.SSH_USER }}@${{ secrets.HOST }} "echo Connected successfully" || echo "SSH connection failed"
 
       - name: Copy JAR file to Lightsail instance
         run: |
@@ -53,4 +53,4 @@ jobs:
             echo "Error: JAR file $JAR_FILE not found"
             exit 1
           fi
-          scp -i ~/.ssh/lightsail_key -P ${{ secrets.SSH_PORT }} "$JAR_FILE" ${{ secrets.SSH_USER }}@${{ secrets.HOST }}:~/
+          scp -i ~/.ssh/lightsail_key -P ${{ secrets.SSH_PORT }} -o StrictHostKeyChecking=no "$JAR_FILE" ${{ secrets.SSH_USER }}@${{ secrets.HOST }}:~/
