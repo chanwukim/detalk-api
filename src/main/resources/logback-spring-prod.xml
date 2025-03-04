@@ -7,6 +7,10 @@
   <property name="consolePattern" value="%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr([MDC=%X{correlationId}]){blue} %clr([%thread]){magenta} %clr(%-5level) %clr(%logger{36}){cyan} - %msg%n"/>
   <property name="filePattern" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [corr=%X{correlationId}] [%thread] %-5level %logger{36} - %msg%n"/>
 
+  <!-- yaml -->
+  <springProperty scope="context" name="logStashHost" source="logStash.host" />
+  <springProperty scope="context" name="logStashPort" source="logStash.port" />
+
   <!-- Logstash로 전송할 Appender -->
   <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
     <destination>${logStashHost}:${logStashPort}</destination>
