@@ -44,6 +44,8 @@ jobs:
       - name: Deploy to Lightsail
         env:
           PROD_YAML_BASE64: ${{ secrets.PROD_YAML_BASE64 }}
+          LOGSTASH_HOST: ${{ secrets.LOGSTASH_HOST }}
+          LOGSTASH_PORT: ${{ secrets.LOGSTASH_PORT }}
         run: |
           # JAR 파일 검증
           JAR_FILE=build/libs/api-0.0.1-SNAPSHOT.jar
