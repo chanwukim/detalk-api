@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# 전달받은 LOGSTASH 서버 ip, port 변수 할당
+LOGSTASH_HOST=$1
+LOGSTASH_PORT=$2
+
 # 현재 포트 파일 경로
 PORT_FILE="/home/ubuntu/current_port.txt"
 # nginx 설정 파일 경로
@@ -24,7 +28,9 @@ echo "Current port: $CURRENT_PORT, New port: $NEW_PORT"
 # 새 JAR 파일 실행
 nohup java -jar /home/ubuntu/api-0.0.1-SNAPSHOT.jar \
   --server.port=$NEW_PORT \
-  --spring.config.location=/home/ubuntu/application-prod.yaml > /home/ubuntu/app-$NEW_PORT.log 2>&1 &
+  --spring.config.location=/home/ubuntu/application-prod.yaml \
+  -DLOGSTASH_HOST=$LOGSTASH_HOST -DLOGSTASH_PORT=$LOGSTASH_PORT > /home/ubuntu/app-$NEW_PORT.log 2>&1 &
+
 
 # 헬스 체크 (5초 대기 후 최대 10번 시도)
 sleep 5
