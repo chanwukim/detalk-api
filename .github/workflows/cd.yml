@@ -44,8 +44,6 @@ jobs:
       - name: Deploy to Lightsail
         env:
           PROD_YAML_BASE64: ${{ secrets.PROD_YAML_BASE64 }}
-          LOGSTASH_HOST: ${{ secrets.LOGSTASH_HOST }}
-          LOGSTASH_PORT: ${{ secrets.LOGSTASH_PORT }}
         run: |
           # JAR 파일 검증
           JAR_FILE=build/libs/api-0.0.1-SNAPSHOT.jar
@@ -80,4 +78,4 @@ jobs:
           scp -i ~/.ssh/lightsail_key -P ${{ secrets.SSH_PORT }} -o StrictHostKeyChecking=no deploy.sh ${{ secrets.SSH_USER }}@${{ secrets.HOST }}:/home/${{ secrets.SSH_USER }}/deploy.sh
           # 스크립트 실행
           ssh -i ~/.ssh/lightsail_key -p ${{ secrets.SSH_PORT }} -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.HOST }} \
-            "chmod +x /home/${{ secrets.SSH_USER }}/deploy.sh && /home/${{ secrets.SSH_USER }}/deploy.sh ${{ secrets.LOGSTASH_HOST }} ${{ secrets.LOGSTASH_PORT }}"
+            "chmod +x /home/${{ secrets.SSH_USER }}/deploy.sh && /home/${{ secrets.SSH_USER }}/deploy.sh"
