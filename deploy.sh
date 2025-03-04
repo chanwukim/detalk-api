@@ -25,7 +25,7 @@ echo "Current port: $CURRENT_PORT, New port: $NEW_PORT"
 nohup java -jar /home/ubuntu/api-0.0.1-SNAPSHOT.jar \
   --spring.profiles.active=prod \
   --server.port=$NEW_PORT \
-  --spring.config.location=/home/ubuntu/application-prod.yaml > home/ubuntu/app-$NEW_PORT.log 2>&1 &
+  --spring.config.location=/home/ubuntu/application-prod.yaml > /home/ubuntu/app-$NEW_PORT.log 2>&1 &
 
 
 # 헬스 체크 (5초 대기 후 최대 10번 시도)
