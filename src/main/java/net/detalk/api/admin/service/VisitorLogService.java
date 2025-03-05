@@ -66,6 +66,10 @@ public class VisitorLogService {
                 countryName = cityResponse.getRegisteredCountry().getName();
             }
 
+            log.info("continentCode={}, countryIso={}, countryName={}, clientIp={}, userAgent={}",
+                continentCode, countryIso, countryName, clientIp, userAgent);
+
+
             VisitorLog visitorLog = VisitorLog.builder()
                 .sessionId(sessionId)
                 .continentCode(continentCode)
