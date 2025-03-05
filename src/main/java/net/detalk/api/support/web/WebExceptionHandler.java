@@ -35,10 +35,11 @@ public class WebExceptionHandler {
     }
 
     @ExceptionHandler(ApiException.class)
-    public ResponseEntity<ErrorMessage> handleApiException(ApiException e) {
-        if (e.isNecessaryToLog()) {
-            log.error("API exception. {}", e.getMessage());
-        }
+    public ResponseEntity<ErrorMessage> handleApiException(ApiException e,
+        HttpServletRequest request) {
+        printNecessaryLog(e, request);
+
+
         ErrorMessage errorMessage = new ErrorMessage(e.getErrorCode(), e.getMessage());
         return ResponseEntity
             .status(e.getHttpStatus())
@@ -46,8 +47,9 @@ public class WebExceptionHandler {
     }
 
     @ExceptionHandler(InvalidStateException.class)
-    public ResponseEntity<ErrorMessage> handleInvalidStateException(InvalidStateException e) {
-        log.error("InvalidStateException. {}", e.getMessage());
+    public ResponseEntity<ErrorMessage> handleInvalidStateException(InvalidStateException e,
+        HttpServletRequest request) {
+        printNecessaryLog(e, request);
         return ResponseEntity
             .status(HttpStatus.INTERNAL_SERVER_ERROR)
             .body(new ErrorMessage(ErrorCode.INTERNAL_SERVER_ERROR));
@@ -55,8 +57,8 @@ public class WebExceptionHandler {
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ErrorMessage> handleMethodArgumentTypeMismatchException(
-        MethodArgumentTypeMismatchException e) {
-        log.info("METHOD_NOT_ALLOWED. {}", e.getMessage());
+        MethodArgumentTypeMismatchException e, HttpServletRequest request) {
+        printNecessaryLog(e, request);
         return ResponseEntity
             .status(HttpStatus.METHOD_NOT_ALLOWED)
             .body(new ErrorMessage(ErrorCode.METHOD_NOT_ALLOWED));
@@ -65,7 +67,6 @@ public class WebExceptionHandler {
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<ErrorMessage> handleHttpRequestMethodNotSupportedException(
         HttpRequestMethodNotSupportedException e) {
-        log.info("HttpRequestMethodNotSupportedException. {}", e.getMessage());
         return ResponseEntity
             .status(HttpStatus.METHOD_NOT_ALLOWED)
             .body(new ErrorMessage(ErrorCode.METHOD_NOT_ALLOWED));
@@ -91,14 +92,18 @@ public class WebExceptionHandler {
 
     // HTTP 요청의 바디(body)를 읽을 수 없을 때. 요청이 잘못된 형식이거나, 요청 바디의 내용을 매핑할 수 없는 경우 처리
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ErrorMessage> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
+    public ResponseEntity<ErrorMessage> handleHttpMessageNotReadableException(
+        HttpMessageNotReadableException e, HttpServletRequest request) {
+        printNecessaryLog(e, request);
         return ResponseEntity
             .status(HttpStatus.BAD_REQUEST)
             .body(new ErrorMessage(ErrorCode.BAD_REQUEST));
     }
 
     @ExceptionHandler(MethodNotAllowedException.class)
-    public ResponseEntity<ErrorMessage> handleMethodNotAllowedException(MethodNotAllowedException e) {
+    public ResponseEntity<ErrorMessage> handleMethodNotAllowedException(
+        MethodNotAllowedException e, HttpServletRequest request) {
+        printNecessaryLog(e, request);
         return ResponseEntity
             .status(HttpStatus.METHOD_NOT_ALLOWED)
             .body(new ErrorMessage(ErrorCode.METHOD_NOT_ALLOWED));
@@ -128,6 +133,31 @@ public class WebExceptionHandler {
             .body(new ErrorMessage(ErrorCode.INTERNAL_SERVER_ERROR));
     }
 
+    private void printNecessaryLog(RuntimeException e, HttpServletRequest request) {
+        String userAgent = request.getHeader("User-Agent");
+
+        boolean isNotNodeRequest = userAgent != null && !userAgent.toLowerCase().contains("node");
+
+        if (isNotNodeRequest) {
+            if (e instanceof ApiException) {
+                if (((ApiException) e).isNecessaryToLog()) {
+
+                    AlarmErrorMessage alarmErrorMessage = new AlarmErrorMessage(
+                        request.getRequestURI(),
+                        e.getClass().getSimpleName(),
+                        getAllMessage(e),
+                        getStackTrace(e)
+                    );
+
+                    alarmSender.sendError(alarmErrorMessage);
+                    log.error("API exception. {}", e.getMessage());
+                }
+            }else{
+                log.error("Runtime exception: {}", e.getMessage());
+            }
+        }
+    }
+
     private String getAllMessage(Throwable e) {
         Throwable cause = e;
         StringBuilder strBuilder = new StringBuilder();
@@ -146,4 +176,6 @@ public class WebExceptionHandler {
             .map(StackTraceElement::toString)
             .collect(Collectors.joining("\n"));
     }
+
+
 }
