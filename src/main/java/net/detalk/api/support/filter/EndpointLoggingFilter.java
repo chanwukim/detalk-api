@@ -42,16 +42,10 @@ public class EndpointLoggingFilter extends OncePerRequestFilter {
         } finally {
             int statusCode = response.getStatus();
 
-            /**
-             * Next.js 요청이 아니고
-             * 세션 엔드포인트 요청이 아닐 경우
-             * 로그 출력
-             */
-            if ((!isNextJsRequest || isSessionRequest)
-                && !((isSessionRequest))
-            ) {
-                MDC.put(STATUS_CODE_KEY, String.valueOf(statusCode));
-                log.info("EndPoint={} : StatusCode={}", endpoint, statusCode);
+            // Next.js 요청이 아니고 세션 엔드포인트 요청이 아닌 경우에만 로깅
+            if (!isNextJsRequest && !isSessionRequest) {
+                    MDC.put(STATUS_CODE_KEY, String.valueOf(statusCode));
+                    log.info("EndPoint={} : StatusCode={}", endpoint, statusCode);
             }
 
             MDC.remove(ENDPOINT_KEY);
