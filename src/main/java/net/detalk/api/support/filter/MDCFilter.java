@@ -34,7 +34,8 @@ public class MDCFilter implements Filter {
         String correlationId = httpRequest.getHeader(CORRELATION_ID_HEADER);
 
         if (correlationId == null || correlationId.isEmpty()) {
-            correlationId = String.valueOf(uuidGenerator.generateV7());
+            String substringUUID = uuidGenerator.generateV4().toString().substring(0, 8);
+            correlationId = substringUUID;
         }
 
         MDC.put(CORRELATION_ID_KEY, correlationId);
