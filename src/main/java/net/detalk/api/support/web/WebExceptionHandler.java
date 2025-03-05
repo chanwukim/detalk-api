@@ -66,14 +66,18 @@ public class WebExceptionHandler {
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<ErrorMessage> handleHttpRequestMethodNotSupportedException(
-        HttpRequestMethodNotSupportedException e) {
+        HttpRequestMethodNotSupportedException e, HttpServletRequest request) {
+        printNecessaryLog(e, request);
         return ResponseEntity
             .status(HttpStatus.METHOD_NOT_ALLOWED)
             .body(new ErrorMessage(ErrorCode.METHOD_NOT_ALLOWED));
     }
+
     // Validation
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorMessage> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+    public ResponseEntity<ErrorMessage> handleMethodArgumentNotValidException(
+        MethodArgumentNotValidException e, HttpServletRequest request) {
+        printNecessaryLog(e, request);
         return ResponseEntity
             .status(HttpStatus.BAD_REQUEST)
             .body(
@@ -110,7 +114,9 @@ public class WebExceptionHandler {
     }
 
     @ExceptionHandler(NoResourceFoundException.class)
-    public ResponseEntity<ErrorMessage> handleNoResourceFoundException(NoResourceFoundException e) {
+    public ResponseEntity<ErrorMessage> handleNoResourceFoundException(NoResourceFoundException e,
+        HttpServletRequest request) {
+        printNecessaryLog(e, request);
         return ResponseEntity
             .status(HttpStatus.NOT_FOUND)
             .body(new ErrorMessage(ErrorCode.NOT_FOUND));
@@ -133,12 +139,13 @@ public class WebExceptionHandler {
             .body(new ErrorMessage(ErrorCode.INTERNAL_SERVER_ERROR));
     }
 
-    private void printNecessaryLog(RuntimeException e, HttpServletRequest request) {
+    private void printNecessaryLog(Exception e, HttpServletRequest request) {
         String userAgent = request.getHeader("User-Agent");
 
-        boolean isNotNodeRequest = userAgent != null && !userAgent.toLowerCase().contains("node");
+        // Next.js 요청은 로그 제외
+        boolean shouldLog = userAgent != null && !userAgent.toLowerCase().contains("node");
 
-        if (isNotNodeRequest) {
+        if (shouldLog) {
             if (e instanceof ApiException) {
                 if (((ApiException) e).isNecessaryToLog()) {
 
@@ -150,10 +157,19 @@ public class WebExceptionHandler {
                     );
 
                     alarmSender.sendError(alarmErrorMessage);
-                    log.error("API exception. {}", e.getMessage());
+                    log.error("API exception. URI: {}, Method: {}, Message: {}",
+                        request.getRequestURI(),
+                        request.getMethod(),
+                        e.getMessage()
+                    );
                 }
-            }else{
-                log.error("Runtime exception: {}", e.getMessage());
+            } else {
+                log.error("Runtime exception: URI: {}, Method: {}, Type: {}, Message: {}",
+                    request.getRequestURI(),
+                    request.getMethod(),
+                    e.getClass().getSimpleName(),
+                    e.getMessage()
+                );
             }
         }
     }
@@ -176,6 +192,4 @@ public class WebExceptionHandler {
             .map(StackTraceElement::toString)
             .collect(Collectors.joining("\n"));
     }
-
-
 }
