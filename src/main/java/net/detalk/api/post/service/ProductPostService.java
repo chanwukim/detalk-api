@@ -199,10 +199,8 @@ public class ProductPostService {
      */
     @Transactional(readOnly = true)
     public GetProductPostResponse getProductPostDetailsById(Long id) {
-        return productPostRepository.findDetailsById(id).orElseThrow(() -> {
-            log.info("[getProductPostDetailsById] 제품 게시글 없음 ID: {}", id);
-            return new ProductPostNotFoundException(id);
-        });
+        return productPostRepository.findDetailsById(id)
+            .orElseThrow(() -> new ProductPostNotFoundException(id));
     }
 
 
