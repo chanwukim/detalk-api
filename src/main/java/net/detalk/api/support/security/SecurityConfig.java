@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import net.detalk.api.auth.service.SessionOAuth2Service;
 import net.detalk.api.support.error.ErrorCode;
 import net.detalk.api.support.error.ErrorMessage;
+import net.detalk.api.support.filter.EndpointLoggingFilter;
 import net.detalk.api.support.filter.MDCFilter;
 import net.detalk.api.support.security.oauth.OAuthFailHandler;
 import net.detalk.api.support.security.oauth.SessionOAuthSuccessHandler;
@@ -38,6 +39,7 @@ public class SecurityConfig {
 
     private final OAuthFailHandler oAuthFailHandler;
     private final MDCFilter mdcFilter;
+    private final EndpointLoggingFilter endpointLoggingFilter;
     private final SessionOAuth2Service authService;
     private final SessionOAuthSuccessHandler oAuthSuccessHandler;
     private final SessionLogoutSuccessHandler logoutSuccessHandler;
@@ -125,6 +127,7 @@ public class SecurityConfig {
               .logoutSuccessHandler(logoutSuccessHandler)
             )
             .addFilterBefore(mdcFilter,UsernamePasswordAuthenticationFilter.class)
+            .addFilterAfter(endpointLoggingFilter, mdcFilter.getClass())
             .exceptionHandling(config -> config
                 .authenticationEntryPoint(unauthorizedHandler())
                 .accessDeniedHandler(accessDeniedHandler()));
