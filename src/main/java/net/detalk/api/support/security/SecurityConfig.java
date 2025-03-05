@@ -127,7 +127,7 @@ public class SecurityConfig {
               .logoutSuccessHandler(logoutSuccessHandler)
             )
             .addFilterBefore(mdcFilter,UsernamePasswordAuthenticationFilter.class)
-            .addFilterAfter(endpointLoggingFilter,mdcFilter.getClass())
+            .addFilterAfter(endpointLoggingFilter, mdcFilter.getClass())
             .exceptionHandling(config -> config
                 .authenticationEntryPoint(unauthorizedHandler())
                 .accessDeniedHandler(accessDeniedHandler()));
