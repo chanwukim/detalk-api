@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.detalk.api.admin.service.VisitorLogService;
 import net.detalk.api.support.util.CookieUtil;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -21,6 +22,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * - 수집된 정보를 비동기적으로 데이터베이스에 저장
  * - 세션 또는 쿠키를 통한 중복 로깅 방지
  */
+@Order(10)
 @Component
 @Slf4j
 @RequiredArgsConstructor

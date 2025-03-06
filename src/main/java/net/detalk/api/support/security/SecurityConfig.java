@@ -6,8 +6,6 @@ import lombok.RequiredArgsConstructor;
 import net.detalk.api.auth.service.SessionOAuth2Service;
 import net.detalk.api.support.error.ErrorCode;
 import net.detalk.api.support.error.ErrorMessage;
-import net.detalk.api.support.filter.EndpointLoggingFilter;
-import net.detalk.api.support.filter.MDCFilter;
 import net.detalk.api.support.security.oauth.OAuthFailHandler;
 import net.detalk.api.support.security.oauth.SessionOAuthSuccessHandler;
 import org.springframework.context.annotation.Bean;
@@ -24,7 +22,6 @@ import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.io.PrintWriter;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
@@ -38,8 +35,6 @@ import static org.springframework.security.config.Customizer.withDefaults;
 public class SecurityConfig {
 
     private final OAuthFailHandler oAuthFailHandler;
-    private final MDCFilter mdcFilter;
-    private final EndpointLoggingFilter endpointLoggingFilter;
     private final SessionOAuth2Service authService;
     private final SessionOAuthSuccessHandler oAuthSuccessHandler;
     private final SessionLogoutSuccessHandler logoutSuccessHandler;
@@ -81,7 +76,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    protected SecurityFilterChain securityFilterChain(HttpSecurity http, TokenProvider tokenProvider) throws Exception {
+    protected SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             // https://docs.spring.io/spring-security/reference/servlet/integrations/cors.html
             // WebConfig CORS 설정을 사용
@@ -123,11 +118,9 @@ public class SecurityConfig {
                 .successHandler(oAuthSuccessHandler)
                 .failureHandler(oAuthFailHandler))
             .logout(logout -> logout
-              .logoutUrl("/api/v1/auth/sign-out")
-              .logoutSuccessHandler(logoutSuccessHandler)
+                .logoutUrl("/api/v1/auth/sign-out")
+                .logoutSuccessHandler(logoutSuccessHandler)
             )
-            .addFilterBefore(mdcFilter,UsernamePasswordAuthenticationFilter.class)
-            .addFilterAfter(endpointLoggingFilter, mdcFilter.getClass())
             .exceptionHandling(config -> config
                 .authenticationEntryPoint(unauthorizedHandler())
                 .accessDeniedHandler(accessDeniedHandler()));
