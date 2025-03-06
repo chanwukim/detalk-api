@@ -15,6 +15,7 @@ import net.detalk.api.admin.repository.VisitorLogRepository;
 import net.detalk.api.support.util.EnvironmentHolder;
 import net.detalk.api.support.paging.PagingData;
 import net.detalk.api.support.util.TimeHolder;
+import org.slf4j.MDC;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
@@ -66,9 +67,13 @@ public class VisitorLogService {
                 countryName = cityResponse.getRegisteredCountry().getName();
             }
 
-            log.info("continentCode={}, countryIso={}, countryName={}, clientIp={}, userAgent={}",
-                continentCode, countryIso, countryName, clientIp, userAgent);
+            MDC.put("continentCode", continentCode);
+            MDC.put("countryIso", countryIso);
+            MDC.put("countryName", countryName);
+            MDC.put("clientIp", clientIp);
+            MDC.put("userAgent", userAgent);
 
+            log.info("Visitor location information logged");
 
             VisitorLog visitorLog = VisitorLog.builder()
                 .sessionId(sessionId)
@@ -91,6 +96,8 @@ public class VisitorLogService {
             log.warn("사용자 위치 정보 저장 중 에러 발생 (sessionId: {})", sessionId);
             log.debug("사용자 위치 정보 에러={}", e.getMessage());
             throw new VisitorLocationSaveException("사용자 위치 정보 저장 중 IOE 에러 발생");
+        }finally {
+            MDC.clear(); // 비동기 스레드에서 독립적으로 실행되므로 MDC 정리 해야함
         }
     }
 
