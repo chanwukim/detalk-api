@@ -21,6 +21,6 @@ public class UserHandleDuplicatedException extends ApiException {
 
     @Override
     public boolean isNecessaryToLog() {
-        return true;
+        return false;
     }
 }

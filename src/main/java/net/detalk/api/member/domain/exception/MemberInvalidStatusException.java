@@ -7,8 +7,8 @@ import org.springframework.http.HttpStatus;
 public class MemberInvalidStatusException extends ApiException {
 
 
-    public MemberInvalidStatusException(Long memberId, MemberStatus memberStatus) {
-        super(String.format("유효하지 않은 회원 상태입니다. memberId=%d, memberStatus=%s", memberId, memberStatus.name()));
+    public MemberInvalidStatusException(MemberStatus memberStatus) {
+        super(String.format("유효하지 않은 회원 상태입니다. memberStatus=%s", memberStatus.name()));
     }
 
     @Override
