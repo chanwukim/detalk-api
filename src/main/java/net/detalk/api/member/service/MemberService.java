@@ -36,8 +36,7 @@ public class MemberService {
 
         if (member.isPendingExternalMember()) {
             log.debug("[me] 회원가입이 필요한 외부 회원");
-            throw new MemberNeedSignUpException(memberId, member.getLoginType(),
-                member.getStatus());
+            throw new MemberNeedSignUpException(member.getStatus());
         }
 
         return getMemberDetailByMemberId(member.getId());
@@ -57,7 +56,7 @@ public class MemberService {
         Member member = getMemberById(memberId);
 
         if (!member.isPendingExternalMember()) {
-            throw new MemberInvalidStatusException(memberId, member.getStatus());
+            throw new MemberInvalidStatusException(member.getStatus());
         }
 
         member.active(timeHolder);

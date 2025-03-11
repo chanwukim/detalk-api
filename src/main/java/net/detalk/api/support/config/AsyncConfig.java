@@ -15,7 +15,8 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 @EnableAsync
 public class AsyncConfig {
 
-    @Bean(name = "visitorLogTaskExecutor")
+    // 스프링 애플리케이션 컨텍스트 종료 될 때, shutdown 메서드 호출
+    @Bean(destroyMethod = "shutdown", name = "visitorLogTaskExecutor")
     public Executor visitorLogTaskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(1); // 최소 스레드 수
