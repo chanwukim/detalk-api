@@ -8,10 +8,8 @@ import org.springframework.http.HttpStatus;
 public class MemberNeedSignUpException extends ApiException {
 
 
-    public MemberNeedSignUpException(Long memberId, LoginType loginType,
-        MemberStatus memberStatus) {
-        super(String.format("회원가입이 필요한 외부 회원입니다. memberId=%d, loginType=%s, memberStatus=%s",
-            memberId, loginType.toString(), memberStatus.name()));
+    public MemberNeedSignUpException(MemberStatus memberStatus) {
+        super(String.format("회원가입이 필요한 외부 회원입니다. memberStatus=%s", memberStatus.name()));
     }
 
     @Override
