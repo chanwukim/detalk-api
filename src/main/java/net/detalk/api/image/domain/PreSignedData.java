@@ -12,6 +12,7 @@ import java.util.UUID;
  * @see <a href="https://github.com/chanwukim/detalk-api/issues/90">https://github.com/chanwukim/detalk-api/issues/90</a>
  */
 @Getter
+@Deprecated
 public class PreSignedData {
     private UUID id;
     private String path;
