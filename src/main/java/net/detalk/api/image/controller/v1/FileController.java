@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * @deprecated
  */
+@Deprecated
 @RestController
 @RequestMapping("/api/v1/files")
 @RequiredArgsConstructor
