@@ -15,9 +15,9 @@ import org.springframework.stereotype.Component;
 
 /**
  * @deprecated 이 클래스는 더 이상 사용되지 않으며 향후 제거될 예정
- * 카페인 캐시를 이용하세요
+ * 카페인 캐시를 이용합니다
  */
-@Deprecated(since = "0.4", forRemoval = true)
+@Deprecated(since = "0.2", forRemoval = true)
 @Slf4j
 @Component
 @RequiredArgsConstructor
