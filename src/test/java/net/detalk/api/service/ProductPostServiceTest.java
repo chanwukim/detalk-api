@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
@@ -84,7 +85,7 @@ class ProductPostServiceTest {
     @Mock
     private PricingPlanService planService;
     @Mock
-    private ProductPostIdempotentService IdempotentService;
+    private ProductPostIdempotentService idempotentService;
 
     /**
      * fake random classes
@@ -136,7 +137,7 @@ class ProductPostServiceTest {
             postSnapshotTagRepository,
             postSnapshotRepository,
             productPostLinkRepository,
-            IdempotentService,
+            idempotentService,
             planService,
             tagService,
             timeHolder,
@@ -214,7 +215,7 @@ class ProductPostServiceTest {
             .idempotentKey(String.valueOf(idempotentKey))
             .build();
 
-        when(IdempotentService.insertIdempotentKey(request.idempotentKey(),
+        when(idempotentService.insertIdempotentKey(request.idempotentKey(),
             timeHolder.now())).thenReturn(true);
         when(productService.getOrCreateProduct(productName, fixedInstant)).thenReturn(product);
         when(postRepository.save(memberId, productPostId, fixedInstant)).thenReturn(productPost);
@@ -340,8 +341,9 @@ class ProductPostServiceTest {
     @DisplayName("성공[getProductPostsByMemberId] - pageSize=5, 데이터가 6개일 때(hasNext=true)")
     @Test
     void getProductPostsByMemberId_success_hasNext() {
-        // Given
-        Long memberId = 1L;
+
+        // given
+        Long testMemberId = 1L;
         int pageSize = 5;
         Long nextId = null;
         int numOfData = 6;
@@ -368,12 +370,12 @@ class ProductPostServiceTest {
             responses.add(response);
         }
 
-        when(postRepository.findProductPostsByMemberId(memberId, pageSize + 1, nextId)).thenReturn(
+        when(postRepository.findProductPostsByMemberId(testMemberId, pageSize + 1, nextId)).thenReturn(
             responses);
 
         // When
         CursorPageData<GetProductPostResponse> result = productPostService.getProductPostsByMemberId(
-            memberId, pageSize, nextId);
+            testMemberId, pageSize, nextId);
 
         // Then
         assertThat(result.getItems()).hasSize(pageSize);
@@ -387,13 +389,13 @@ class ProductPostServiceTest {
     void getProductPostsByMemberId_fail_invalidPageSize() {
 
         // given
-        Long memberId = 1L;
+        Long testMemberId = 1L;
         int pageSize = 0;
         Long nextId = null;
 
         // when
         ApiException exception = assertThrows(ApiException.class,
-            () -> productPostService.getProductPostsByMemberId(memberId, pageSize, nextId));
+            () -> productPostService.getProductPostsByMemberId(testMemberId, pageSize, nextId));
 
         // then
         assertThat(exception.getMessage()).isEqualTo("잘못된 페이지 크기입니다: 0 (허용 범위: 1-20)");
@@ -527,20 +529,27 @@ class ProductPostServiceTest {
     @DisplayName("[incrementRecommendCount] 성공적으로 counts 만큼 추천 되어야 한다")
     @Test
     void incrementRecommendCount() {
-        var productPostId = 1L;
+
+        // given
+        var testPostId = 1L;
         int recommendCounts = 999;
 
-        productPostService.incrementRecommendCount(productPostId, recommendCounts);
+        // when
+        productPostService.incrementRecommendCount(testPostId, recommendCounts);
+
+        // then
+        verify(postRepository).incrementRecommendCount(testPostId, recommendCounts);
+
     }
 
     @DisplayName("[incrementRecommendCount] 음수 추천 수 입력 시 예외가 발생해야 한다")
     @Test
     void incrementRecommendCount_throwsException_whenCountIsNegative() {
-        var productPostId = 1L;
+        var testPostId = 1L;
         int recommendCounts = -999;
 
         InvalidRecommendCountRequest exception = assertThrows(InvalidRecommendCountRequest.class,
-            () -> productPostService.incrementRecommendCount(productPostId, recommendCounts));
+            () -> productPostService.incrementRecommendCount(testPostId, recommendCounts));
 
         assertThat(exception.getMessage()).isEqualTo("추천 수는 양수여야 합니다. count=-999");
         assertThat(exception.getErrorCode()).isEqualTo("invalid_recommend_count");
