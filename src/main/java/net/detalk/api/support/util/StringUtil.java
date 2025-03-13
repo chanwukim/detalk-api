@@ -3,10 +3,13 @@ package net.detalk.api.support.util;
 import java.security.SecureRandom;
 
 public class StringUtil {
+
     private static final String CHAR_LOWER = "abcdefghijklmnopqrstuvwxyz";
     private static final String CHAR_UPPER = CHAR_LOWER.toUpperCase();
     private static final String NUMBER = "0123456789";
     private static final SecureRandom random = new SecureRandom();
+
+    private StringUtil() {}
 
     public static String generateUpperAndNumber(int length) {
         if (length < 1) {
