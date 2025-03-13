@@ -89,7 +89,7 @@ public class WebExceptionHandler {
                             "field", fieldError.getField(),
                             "message", fieldError.getDefaultMessage()
                         ))
-                        .collect(Collectors.toList())
+                        .toList()
                 )
             );
     }
@@ -146,8 +146,8 @@ public class WebExceptionHandler {
         boolean shouldLog = userAgent != null && !userAgent.toLowerCase().contains("node");
 
         if (shouldLog) {
-            if (e instanceof ApiException) {
-                if (((ApiException) e).isNecessaryToLog()) {
+            if (e instanceof ApiException apiException) {
+                if (apiException.isNecessaryToLog()) {
 
                     AlarmErrorMessage alarmErrorMessage = new AlarmErrorMessage(
                         request.getRequestURI(),
