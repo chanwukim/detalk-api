@@ -5,11 +5,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.detalk.api.auth.controller.v1.response.GetSessionInfoResponse;
+import net.detalk.api.member.controller.v1.response.GetMemberProfileResponse;
 import net.detalk.api.member.domain.LoginType;
 import net.detalk.api.member.domain.Member;
 import net.detalk.api.member.domain.MemberExternal;
 import net.detalk.api.member.domain.MemberProfile;
 import net.detalk.api.member.domain.MemberStatus;
+import net.detalk.api.member.domain.exception.MemberNotFoundException;
 import net.detalk.api.role.domain.Role;
 import net.detalk.api.member.domain.exception.MemberProfileNotFoundException;
 import net.detalk.api.member.repository.MemberExternalRepository;
@@ -28,6 +31,7 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -71,6 +75,34 @@ public class SessionOAuth2Service extends DefaultOAuth2UserService {
             .username(memberProfile.getUserhandle())
             .authorities(securityRoles)
             .attributes(oAuth2User.getAttributes())
+            .build();
+    }
+
+    @Transactional(readOnly = true)
+    public GetSessionInfoResponse getSessionInfo(Long memberId) {
+
+        Member member =  memberRepository.findById(memberId).orElseThrow(() -> {
+            log.info("[getSessionInfo] 회원 ID {}는 존재하지 않습니다", memberId);
+            return new MemberNotFoundException();
+        });
+
+        GetMemberProfileResponse memberProfileDto = memberProfileRepository.findWithAvatarByMemberId(memberId)
+            .orElseThrow(() -> {
+                log.info("[GetMemberPublicProfileResponse] 존재하지 않는 회원 프로필 입니다. memberId={}",
+                    memberId);
+                return new MemberProfileNotFoundException();
+            });
+
+
+        List<String> roles = member.isPendingExternalMember() ? List.of() : List.of("member");
+
+        return GetSessionInfoResponse.builder()
+            .id(memberId)
+            .userhandle(memberProfileDto.userhandle())
+            .nickname(memberProfileDto.nickname())
+            .description(memberProfileDto.description())
+            .avatarUrl(memberProfileDto.avatarUrl())
+            .roles(roles)
             .build();
     }
 

@@ -15,9 +15,7 @@ public class JooqConfig {
 
     @Bean
     public DefaultConfigurationCustomizer jooqDefaultConfigurationCustomizer() {
-        return conf -> {
-            conf.set(performanceListener());  // 슬로우 쿼리 탐지를 위한 내 커스텀 리스너 추가
-        };
+        return conf -> conf.set(performanceListener());  // 슬로우 쿼리 탐지를 위한 내 커스텀 리스너 추가
     }
 
     @Bean

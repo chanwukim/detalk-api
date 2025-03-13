@@ -8,6 +8,9 @@ import java.util.Arrays;
 import java.util.Optional;
 
 public class CookieUtil {
+
+    private CookieUtil() {}
+
     public static Optional<Cookie> getCookie(String name, HttpServletRequest request) {
         if (request.getCookies() == null) {
             return Optional.empty();

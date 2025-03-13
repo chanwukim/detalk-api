@@ -15,9 +15,12 @@ import org.springframework.util.StopWatch;
 @Component
 public class PerformanceListener implements ExecuteListener {
 
-    private final AlarmSender alarmSender;
+    // 직렬화 제외
+    // 직렬화가 불가능한 Thread, Network 관련 코드가 있음 -> NotSerializableException 발생 가능성
+    private transient final AlarmSender alarmSender;
+    private transient final ThreadLocal<StopWatch> watch = ThreadLocal.withInitial(() -> null);
+
     private static final Logger log = LoggerFactory.getLogger(PerformanceListener.class);
-    private final ThreadLocal<StopWatch> watch = ThreadLocal.withInitial(() -> null);
     private static final Duration SLOW_QUERY_LIMIT= Duration.ofSeconds(5);
     private static final int MAX_MESSAGE_LENGTH = 500;
 
@@ -54,7 +57,7 @@ public class PerformanceListener implements ExecuteListener {
 
                 String slowQueryMessage = String.format(
                     """
-                            \n### Slow SQL 탐지
+                            ### Slow SQL 탐지
                             경고: jOOQ로 실행된 쿼리 중 %d초 이상 실행된 쿼리가 있습니다.
                             실행시간: %s초
                             실행쿼리: %s

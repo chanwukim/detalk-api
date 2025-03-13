@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 
 class FileServiceTest {
 
+    @Deprecated
     private FileService fileService;
     private FakeAttachmentFileRepository fakeRepo;
     private FakeStorageClient fakeStorageClient;
@@ -27,7 +28,7 @@ class FileServiceTest {
     private final UUID fixedUUID = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         fakeRepo = new FakeAttachmentFileRepository();
         fakeStorageClient = new FakeStorageClient();
         fakeTimeHolder = new FakeTimeHolder(fixedInstant, fixedLocalDateTime);
@@ -37,7 +38,7 @@ class FileServiceTest {
     }
 
     @Test
-    public void testCreatePreSignedUrl_WithExtension() {
+    void testCreatePreSignedUrl_WithExtension() {
 
         // given
         var uploaderId = 1L;

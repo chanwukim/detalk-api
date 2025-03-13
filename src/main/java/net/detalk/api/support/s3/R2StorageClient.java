@@ -19,6 +19,7 @@ import java.time.Duration;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@Deprecated(since ="0.2", forRemoval = true)
 public class R2StorageClient implements StorageClient {
     private final AppProperties appProperties;
     private final S3Presigner s3Presigner;
