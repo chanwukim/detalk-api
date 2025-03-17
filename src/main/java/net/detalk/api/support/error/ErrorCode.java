@@ -17,8 +17,10 @@ public enum ErrorCode {
     //
     VALIDATION_FAILED(HttpStatus.BAD_REQUEST, "validation_failed", "Validation failed."),
 
-    TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "token_expired", "Token expired."),
-    TOKEN_INVALID(HttpStatus.UNAUTHORIZED, "token_invalid", "Token Invalid."),
+    ACCESS_TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "access_token_expired", "AccessToken expired."),
+    ACCESS_TOKEN_INVALID(HttpStatus.UNAUTHORIZED, "access_token_invalid", "AccessToken invalid."),
+    REFRESH_TOKEN_INVALID(HttpStatus.UNAUTHORIZED, "refresh_token_invalid", "RefreshToken invalid."),
+    REFRESH_TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "refresh_token_expired", "RefreshToken expired."),
 
     PROVIDER_UNSUPPORTED(HttpStatus.BAD_REQUEST, "provider_unsupported", "Unsupported provider."),
 
