@@ -3,6 +3,7 @@ package net.detalk.api.support.security;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
+import lombok.RequiredArgsConstructor;
 import net.detalk.api.support.error.ErrorCode;
 import net.detalk.api.support.error.ErrorMessage;
 import org.springframework.context.annotation.Bean;
@@ -23,8 +24,11 @@ import org.springframework.security.web.access.AccessDeniedHandler;
  * </p>
  * 각각의 예외 상황에 대해 JSON 형식의 에러 메시지를 응답으로 반환합니다.
  */
+@RequiredArgsConstructor
 @Configuration
 public class SecurityExceptionHandlerConfig {
+
+    private final ObjectMapper objectMapper;
 
     @Bean
     public AuthenticationEntryPoint unauthorizedHandler() {
@@ -33,7 +37,7 @@ public class SecurityExceptionHandlerConfig {
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             response.setCharacterEncoding("UTF-8");
             PrintWriter writer = response.getWriter();
-            writer.write(new ObjectMapper().writeValueAsString(new ErrorMessage(ErrorCode.UNAUTHORIZED)));
+            writer.write(objectMapper.writeValueAsString(new ErrorMessage(ErrorCode.UNAUTHORIZED)));
             writer.flush();
         };
     }
@@ -45,7 +49,7 @@ public class SecurityExceptionHandlerConfig {
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             response.setCharacterEncoding("UTF-8");
             PrintWriter writer = response.getWriter();
-            writer.write(new ObjectMapper().writeValueAsString(new ErrorMessage(ErrorCode.FORBIDDEN)));
+            writer.write(objectMapper.writeValueAsString(new ErrorMessage(ErrorCode.FORBIDDEN)));
             writer.flush();
         };
     }
