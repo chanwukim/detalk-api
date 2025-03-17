@@ -3,3 +3,6 @@ spring:
         name: api
     profiles:
         active: prod
+security:
+        auth:
+            type: jwt

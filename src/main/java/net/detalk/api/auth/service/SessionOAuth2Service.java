@@ -21,9 +21,10 @@ import net.detalk.api.member.repository.MemberRepository;
 import net.detalk.api.role.repository.RoleRepository;
 import net.detalk.api.support.util.TimeHolder;
 import net.detalk.api.support.security.oauth.OAuthProvider;
-import net.detalk.api.support.security.oauth.OAuthUser;
+import net.detalk.api.support.security.oauth.CustomOAuth2User;
 import net.detalk.api.support.security.SecurityRole;
 import net.detalk.api.support.util.StringUtil;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -36,6 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@ConditionalOnProperty(name = "security.auth.type", havingValue = "session")
 public class SessionOAuth2Service extends DefaultOAuth2UserService {
 
     private final MemberRepository memberRepository;
@@ -70,7 +72,7 @@ public class SessionOAuth2Service extends DefaultOAuth2UserService {
                 memberExternal.getMemberId())
             .orElseThrow(MemberProfileNotFoundException::new);
 
-        return OAuthUser.builder()
+        return CustomOAuth2User.builder()
             .id(memberExternal.getMemberId())
             .username(memberProfile.getUserhandle())
             .authorities(securityRoles)

@@ -1,4 +1,4 @@
-package net.detalk.api.support.security.oauth;
+package net.detalk.api.support.security.session;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.detalk.api.support.config.AppProperties;
 import net.detalk.api.support.security.SecurityUser;
+import net.detalk.api.support.security.oauth.CustomOAuth2User;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,6 +21,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@ConditionalOnProperty(name = "security.auth.type", havingValue = "session")
 public class SessionOAuthSuccessHandler implements AuthenticationSuccessHandler {
 
     private final AppProperties appProperties;
@@ -29,10 +32,10 @@ public class SessionOAuthSuccessHandler implements AuthenticationSuccessHandler 
         Authentication authentication) throws IOException, ServletException {
 
         // oauth2 -> security user
-        if (authentication.getPrincipal() instanceof OAuthUser oAuthUser) {
+        if (authentication.getPrincipal() instanceof CustomOAuth2User customOAuth2User) {
 
-            SecurityUser securityUser = new SecurityUser(oAuthUser.getId(),
-                oAuthUser.getAuthorities());
+            SecurityUser securityUser = new SecurityUser(customOAuth2User.getId(),
+                customOAuth2User.getAuthorities());
 
             UsernamePasswordAuthenticationToken securityAuthentication =
                 new UsernamePasswordAuthenticationToken(securityUser, null,

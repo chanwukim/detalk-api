@@ -10,7 +10,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 @Getter
-public class OAuthUser implements OAuth2User {
+public class CustomOAuth2User implements OAuth2User {
     private final Long id;
     private final String accessToken;
     private final String refreshToken;
@@ -20,7 +20,7 @@ public class OAuthUser implements OAuth2User {
     private final Map<String, Object> attributes;
 
     @Builder
-    public OAuthUser(Long id, String accessToken, String refreshToken, String username,
+    public CustomOAuth2User(Long id, String accessToken, String refreshToken, String username,
         boolean isNew, List<GrantedAuthority> authorities, Map<String, Object> attributes) {
         this.id = id;
         this.accessToken = accessToken;

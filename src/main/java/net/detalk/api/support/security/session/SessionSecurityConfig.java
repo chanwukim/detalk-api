@@ -1,20 +1,14 @@
-package net.detalk.api.support.security;
+package net.detalk.api.support.security.session;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import net.detalk.api.auth.service.SessionOAuth2Service;
-import net.detalk.api.support.error.ErrorCode;
-import net.detalk.api.support.error.ErrorMessage;
 import net.detalk.api.support.security.oauth.OAuthFailHandler;
-import net.detalk.api.support.security.oauth.SessionOAuthSuccessHandler;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.session.SessionRegistry;
@@ -23,33 +17,22 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
 
-import java.io.PrintWriter;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
-@EnableWebSecurity
 @EnableMethodSecurity // 메서드 별 권한 설정 활성화
 @RequiredArgsConstructor
-public class SecurityConfig {
+@ConditionalOnProperty(name = "security.auth.type", havingValue = "session")
+public class SessionSecurityConfig {
 
     private final OAuthFailHandler oAuthFailHandler;
     private final SessionOAuth2Service authService;
     private final SessionOAuthSuccessHandler oAuthSuccessHandler;
     private final SessionLogoutSuccessHandler logoutSuccessHandler;
-
-    @Bean
-    protected AuthenticationEntryPoint unauthorizedHandler() {
-        return (request, response, authException) -> {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-            response.setCharacterEncoding("UTF-8");
-            PrintWriter writer = response.getWriter();
-            writer.write(new ObjectMapper().writeValueAsString(new ErrorMessage(ErrorCode.UNAUTHORIZED)));
-            writer.flush();
-        };
-    }
+    private final AuthenticationEntryPoint unauthorizedHandler;
+    private final AccessDeniedHandler accessDeniedHandler;
 
     // 실시간 세션 조회
     @Bean
@@ -61,18 +44,6 @@ public class SecurityConfig {
     @Bean
     public HttpSessionEventPublisher httpSessionEventPublisher() {
         return new HttpSessionEventPublisher();
-    }
-
-    @Bean
-    protected AccessDeniedHandler accessDeniedHandler() {
-        return (request, response, accessDeniedException) -> {
-            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-            response.setCharacterEncoding("UTF-8");
-            PrintWriter writer = response.getWriter();
-            writer.write(new ObjectMapper().writeValueAsString(new ErrorMessage(ErrorCode.FORBIDDEN)));
-            writer.flush();
-        };
     }
 
     @Bean
@@ -122,8 +93,8 @@ public class SecurityConfig {
                 .logoutSuccessHandler(logoutSuccessHandler)
             )
             .exceptionHandling(config -> config
-                .authenticationEntryPoint(unauthorizedHandler())
-                .accessDeniedHandler(accessDeniedHandler()));
+                .authenticationEntryPoint(unauthorizedHandler)
+                .accessDeniedHandler(accessDeniedHandler));
 
         return http.build();
     }
