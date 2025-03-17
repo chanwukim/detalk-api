@@ -13,6 +13,7 @@ import net.detalk.api.auth.domain.exception.JwtTokenException;
 import net.detalk.api.support.error.ErrorCode;
 import net.detalk.api.support.security.SecurityUser;
 import net.detalk.api.support.util.TimeHolder;
+import net.detalk.api.support.util.UUIDGenerator;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -32,6 +33,7 @@ public class JwtTokenProvider {
     private final JwtConstants jwtConstants;
     private final JwtParser jwtParser;
     private final TimeHolder timeHolder;
+    private final UUIDGenerator uuidGenerator;
 
     /**
      * AccessToken 생성
@@ -93,7 +95,10 @@ public class JwtTokenProvider {
 
         Instant validity = now.plusSeconds(jwtConstants.getRefreshTokenValidity());
 
+        String randomId = uuidGenerator.generateV4().toString();
+
         return Jwts.builder()
+            .id(randomId)
             .subject(String.valueOf(memberId))
             .issuedAt(Date.from(now))
             .expiration(Date.from(validity))
