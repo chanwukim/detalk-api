@@ -10,6 +10,7 @@ import net.detalk.api.admin.controller.v1.response.GetVisitorLogResponse;
 import net.detalk.api.admin.service.SessionTrackingService;
 import net.detalk.api.admin.service.VisitorLogService;
 import net.detalk.api.support.paging.PagingData;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +24,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/admin")
 @RestController
 @RequiredArgsConstructor
-public class AdminController {
+@ConditionalOnProperty(name = "security.auth.type", havingValue = "session")
+public class SessionAdminController {
 
     private final SessionTrackingService sessionTrackingService;
     private final VisitorLogService visitorLogService;
