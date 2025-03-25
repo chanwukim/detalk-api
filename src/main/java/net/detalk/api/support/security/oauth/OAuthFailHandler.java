@@ -34,6 +34,6 @@ public class OAuthFailHandler implements AuthenticationFailureHandler {
             .map(cookie -> URLDecoder.decode(cookie.getValue(), StandardCharsets.UTF_8))
             .orElse(appProperties.getBaseUrl());
 
-        redirectStrategy.sendRedirect(request, response, redirectUrl + "?ok=false");
+        redirectStrategy.sendRedirect(request, response, redirectUrl + "/sign-in/callback?auth=fail");
     }
 }
