@@ -58,11 +58,21 @@ public class JwtOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandl
             .httpOnly(true)
             .build();
 
+        ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken)
+            .maxAge(jwtConstants.getAccessTokenValidity())
+            .path(jwtConstants.getAccessPath())
+            .secure(secure)
+            .sameSite("Lax")
+            .httpOnly(true)
+            .build();
+
         response.addHeader("Set-Cookie", refreshCookie.toString());
+        response.addHeader("Set-Cookie", accessCookie.toString());
 
         String url = appProperties.getBaseUrl();
 
         var targetUrl = UriComponentsBuilder.fromUriString(url)
+            .path("/sign-in/callback")
             .queryParam("auth", "success")
             .queryParam("token", accessToken)
             .build()

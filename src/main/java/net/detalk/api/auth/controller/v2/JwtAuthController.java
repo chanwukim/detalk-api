@@ -60,10 +60,21 @@ public class JwtAuthController {
             .path(jwtConstants.getRefreshPath())
             .build();
 
+        ResponseCookie newAccessTokenCookie = ResponseCookie
+            .from("accessToken", tokenResponse.accessToken())
+            .maxAge(jwtConstants.getAccessTokenValidity())
+            .httpOnly(true)
+            .secure(secure)
+            .sameSite("Lax")
+            .path(jwtConstants.getAccessPath())
+            .build();
+
         response.addHeader("Set-Cookie", newRefreshTokenCookie.toString());
+        response.addHeader("Set-Cookie", newAccessTokenCookie.toString());
 
         Map<String, String> tokenBearerResponse = new HashMap<>();
         tokenBearerResponse.put("accessToken", tokenResponse.accessToken());
+        tokenBearerResponse.put("refreshToken", tokenResponse.refreshToken());
 
         return ResponseEntity.ok(tokenBearerResponse);
     }
