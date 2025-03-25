@@ -18,7 +18,7 @@ public class SystemJwtParser implements JwtParserHolder {
 
     @Override
     public String getSubject(String token) {
-        return jwtParser.parseSignedClaims(token).getPayload().getSubject();
+        return parseSignedClaims(token).getSubject();
     }
 
 }

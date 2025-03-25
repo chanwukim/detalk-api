@@ -38,8 +38,13 @@ class RefreshTokenServiceTest {
         refreshTokenRepository = new FakeRefreshTokenRepository();
         memberRoleRepository = new FakeMemberRoleRepository();
         jwtTokenProvider = new FakeJwtTokenProvider(
-            createFakeJwtConstants()
-        );
+            new FakeJwtConstants(
+                "testsecretkeytestsecretkeytestsecretkey", //secretKey
+                3600, // accessTokenValidity
+                86400, // refreshTokenValidity
+                "/refresh"  // refreshPath
+            ));
+
         timeHolder = new FakeTimeHolder(Instant.now(), LocalDateTime.now());
         uuidGenerator = new FakeUUIDGenerator(UUID.randomUUID());
 
@@ -52,16 +57,6 @@ class RefreshTokenServiceTest {
         );
 
     }
-
-    private JwtConstants createFakeJwtConstants() {
-        return this.jwtConstants = new FakeJwtConstants(
-            "testsecretkeytestsecretkeytestsecretkey", //secretKey
-            3600, // accessTokenValidity
-            86400, // refreshTokenValidity
-            "/refresh"  // refreshPath
-        );
-    }
-
 
     @DisplayName("새로운 AccessToken과 RefreshToken 발급 성공")
     @Test

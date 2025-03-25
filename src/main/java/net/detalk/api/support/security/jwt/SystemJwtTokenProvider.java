@@ -29,7 +29,7 @@ import org.springframework.stereotype.Component;
 @ConditionalOnProperty(name = "security.auth.type", havingValue = "jwt")
 public class SystemJwtTokenProvider implements JwtTokenProvider{
 
-    private final JwtConstants JwtConstants;
+    private final JwtConstants jwtConstants;
     private final JwtParserHolder jwtParserHolder;
     private final TimeHolder timeHolder;
     private final UUIDGenerator uuidGenerator;
@@ -41,14 +41,14 @@ public class SystemJwtTokenProvider implements JwtTokenProvider{
     public String generateAccessToken(Long memberId, String authorities) {
 
         Instant now = timeHolder.now();
-        Instant validity = now.plusSeconds(JwtConstants.getAccessTokenValidity());
+        Instant validity = now.plusSeconds(jwtConstants.getAccessTokenValidity());
 
         return Jwts.builder()
             .subject(String.valueOf(memberId))
             .claim("auth", authorities)
             .issuedAt(Date.from(now))
             .expiration(Date.from(validity))
-            .signWith(JwtConstants.jwtSecretKey())
+            .signWith(jwtConstants.jwtSecretKey())
             .compact();
     }
 
@@ -92,7 +92,7 @@ public class SystemJwtTokenProvider implements JwtTokenProvider{
 
     public String generateRefreshToken(Long memberId, Instant now) {
 
-        Instant validity = now.plusSeconds(JwtConstants.getRefreshTokenValidity());
+        Instant validity = now.plusSeconds(jwtConstants.getRefreshTokenValidity());
 
         String randomId = uuidGenerator.generateV4().toString();
 
@@ -101,7 +101,7 @@ public class SystemJwtTokenProvider implements JwtTokenProvider{
             .subject(String.valueOf(memberId))
             .issuedAt(Date.from(now))
             .expiration(Date.from(validity))
-            .signWith(JwtConstants.jwtSecretKey())
+            .signWith(jwtConstants.jwtSecretKey())
             .compact();
     }
 
