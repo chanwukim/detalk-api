@@ -17,8 +17,9 @@ public class RefreshToken {
     private Instant revokedAt;
 
     @Builder
-    public RefreshToken(Long memberId, String token, Instant createdAt, Instant expiresAt,
+    public RefreshToken(Long id, Long memberId, String token, Instant createdAt, Instant expiresAt,
         Instant revokedAt) {
+        this.id = id;
         this.memberId = memberId;
         this.token = token;
         this.createdAt = createdAt;
