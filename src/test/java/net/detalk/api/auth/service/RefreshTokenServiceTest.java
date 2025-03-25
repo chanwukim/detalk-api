@@ -42,8 +42,10 @@ class RefreshTokenServiceTest {
                 "testsecretkeytestsecretkeytestsecretkey", //secretKey
                 3600, // accessTokenValidity
                 86400, // refreshTokenValidity
-                "/refresh"  // refreshPath
+                "/refresh",  // refreshPath
+                "/access"
             ));
+
 
         timeHolder = new FakeTimeHolder(Instant.now(), LocalDateTime.now());
         uuidGenerator = new FakeUUIDGenerator(UUID.randomUUID());

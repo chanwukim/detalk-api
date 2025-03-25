@@ -10,13 +10,16 @@ public class FakeJwtConstants implements JwtConstants {
     private final long accessTokenValidity;
     private final long refreshTokenValidity;
     private final String refreshPath;
+    private final String accessPath;
 
-    public FakeJwtConstants(String secretKey, long accessTokenValidity, long refreshTokenValidity, String refreshPath) {
+    public FakeJwtConstants(String secretKey, long accessTokenValidity, long refreshTokenValidity,
+        String refreshPath, String accessPath) {
         byte[] keyBytes = secretKey.getBytes();
         this.secretKey = Keys.hmacShaKeyFor(keyBytes);
         this.accessTokenValidity = accessTokenValidity;
         this.refreshTokenValidity = refreshTokenValidity;
         this.refreshPath = refreshPath;
+        this.accessPath= accessPath;
     }
 
     @Override
@@ -37,5 +40,10 @@ public class FakeJwtConstants implements JwtConstants {
     @Override
     public String getRefreshPath() {
         return refreshPath;
+    }
+
+    @Override
+    public String getAccessPath() {
+        return accessPath;
     }
 }

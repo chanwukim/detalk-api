@@ -39,7 +39,7 @@ class SystemJwtTokenProviderTest {
     @BeforeEach
     void setup() {
         // Fake 구현체 초기화
-        jwtConstants = new FakeJwtConstants(TEST_SECRET_KEY, 3600, 86400, "/api/v2/auth/refresh");
+        jwtConstants = new FakeJwtConstants(TEST_SECRET_KEY, 3600, 86400, "/api/v2/auth/refresh","/");
         jwtParser = new FakeJwtParser();
         timeHolder = new FakeTimeHolder(FIXED_TIME, FIXED_LOCAL_DATE_TIME);
         uuidGenerator = new FakeUUIDGenerator(FIXED_UUID);

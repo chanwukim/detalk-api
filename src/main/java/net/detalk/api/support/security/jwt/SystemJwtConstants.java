@@ -31,6 +31,10 @@ public class SystemJwtConstants implements JwtConstants {
     @Value("${jwt.refresh-path}")
     private String refreshPath;
 
+    @Getter
+    @Value("${jwt.access-path}")
+    private String accessPath;
+
     @Bean
     public Key jwtSecretKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);

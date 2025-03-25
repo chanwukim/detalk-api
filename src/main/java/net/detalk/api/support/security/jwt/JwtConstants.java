@@ -12,4 +12,6 @@ public interface JwtConstants {
 
     String getRefreshPath();
 
+    String getAccessPath();
+
 }
