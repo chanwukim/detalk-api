@@ -37,16 +37,14 @@ class RefreshTokenServiceTest {
     void setup() {
         refreshTokenRepository = new FakeRefreshTokenRepository();
         memberRoleRepository = new FakeMemberRoleRepository();
-        jwtTokenProvider = new FakeJwtTokenProvider(
-            new FakeJwtConstants(
-                "testsecretkeytestsecretkeytestsecretkey", //secretKey
-                3600, // accessTokenValidity
-                86400, // refreshTokenValidity
-                "/refresh",  // refreshPath
-                "/access"
-            ));
-
-
+        jwtConstants = new FakeJwtConstants(
+            "testsecretkeytestsecretkeytestsecretkey", //secretKey
+            3600, // accessTokenValidity
+            86400, // refreshTokenValidity
+            "/refresh",  // refreshPath
+            "/access"
+        );
+        jwtTokenProvider = new FakeJwtTokenProvider(jwtConstants);
         timeHolder = new FakeTimeHolder(Instant.now(), LocalDateTime.now());
         uuidGenerator = new FakeUUIDGenerator(UUID.randomUUID());
 
