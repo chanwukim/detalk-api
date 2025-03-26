@@ -3,6 +3,7 @@ package net.detalk.api.infrastructure.alarm.discord;
 import jakarta.annotation.PreDestroy;
 import java.util.EnumSet;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +34,7 @@ public class DiscordAlarmSender extends ListenerAdapter implements AlarmSender {
     private JDA jda;
     private TextChannel defaultChannel;
     private String activeProfile;
+    private final AtomicBoolean jdaReady = new AtomicBoolean(false);
 
     @Override
     public void initialize() {
@@ -53,8 +55,7 @@ public class DiscordAlarmSender extends ListenerAdapter implements AlarmSender {
             log.error("Failed to build JDA: Invalid Discord Bot Token! current token={}, error={}",
                 config.getToken(), e.getMessage());
         } catch (Exception e) {
-            Thread.currentThread().interrupt();
-            log.error("JDA awaitReady was interrupted. error={}", e.getMessage());
+            log.error("Failed to build JDA instance during initialization. error={}", e.getMessage());
         }
 
     }
@@ -62,22 +63,33 @@ public class DiscordAlarmSender extends ListenerAdapter implements AlarmSender {
     @Override
     public void onReady(@NonNull ReadyEvent event) {
         log.info("JDA is ready! Setting up channel and profile info...");
-
-        // JDA 준비 후 실행되어야 할 로직
+        boolean setupSuccess = false;
         try {
-            // Profile 따라 동적으로 channelId 할당
+
             defaultChannel = jda.getTextChannelById(config.getChannelId());
-
-            if (defaultChannel == null) {
-                log.warn("디스코드 채널을 찾지 못했습니다. channelId={}", config.getChannelId());
-            } else {
-                log.info("Default Discord channel found: {}", defaultChannel.getName());
-            }
-
             activeProfile = env.getActiveProfile();
 
-            log.info("Discord JDA initialized successfully in '{}' profile. (Channel ID: {})",
-                activeProfile, config.getChannelId());
+            // 채널 찾기 성공 시 플래그 설정
+            if (defaultChannel != null) {
+                log.info("Default Discord channel found: {}. Profile: {}", defaultChannel.getName(), activeProfile);
+                setupSuccess = true;
+            } else {
+                log.warn("디스코드 채널을 찾지 못했습니다. channelId={}", config.getChannelId());
+            }
+
+            // 디스코드 채널 찾았을 경우
+            if (setupSuccess) {
+                jdaReady.set(true);
+                log.info("DiscordAlarmSender is now ready.");
+                if ("prod".equals(activeProfile)) {
+                    sendMessage(String.format("✅ [%s] Discord 알람 봇이 성공적으로 시작 및 준비되었습니다. (채널: %s)",
+                        activeProfile.toUpperCase(), defaultChannel.getName()));
+                }
+                log.info("Discord 알람 봇이 성공적으로 시작 되었습니다. (채널: {}), Profile: {}",
+                    defaultChannel.getName(), activeProfile);
+            }else{
+                log.error("Discord JDA initialization failed: Could not find the specified channel (ID: {}). Message sending will be disabled.", config.getChannelId());
+            }
 
         } catch (Exception e) {
             log.error("JDA initialization failed in '{}' profile. error={}", activeProfile, e.getMessage());
@@ -88,20 +100,22 @@ public class DiscordAlarmSender extends ListenerAdapter implements AlarmSender {
     public void shutdown() {
         if(jda != null) {
             log.info("Shutting down JDA...");
+            jdaReady.set(false);
             jda.shutdown();
 
             try {
-                // 5초 이상 종료 안될 시, 강제로 jda 종료
-                if (jda.awaitShutdown(5, TimeUnit.SECONDS)) {
-                    log.warn("JDA shutdown timed out after 10 seconds. Forcing shutdownNow...");
+                // 5초 동안 종료 대기
+                if (!jda.awaitShutdown(5, TimeUnit.SECONDS)) {
+                    log.warn("JDA shutdown timed out after 5 seconds. Forcing shutdownNow...");
                     jda.shutdownNow();
+                } else {
+                    log.info("JDA has been shut down successfully within the timeout.");
                 }
-                log.info("JDA has been shut down successfully.");
             } catch (InterruptedException e) {
-                // 대기 중 인터럽트 발생 시 처리
+                // 5초 지났는데도 종료 안되면 강제 종료
                 Thread.currentThread().interrupt();
                 log.error("Interrupted while waiting for JDA shutdown. Forcing shutdownNow... error={}", e.getMessage());
-                jda.shutdownNow(); // 인터럽트 시에도 강제 종료 시도
+                jda.shutdownNow();
             }
         }else {
             log.info("JDA instance was null, no shutdown required.");
@@ -126,12 +140,11 @@ public class DiscordAlarmSender extends ListenerAdapter implements AlarmSender {
             return;
         }
         String formattedMessage = message.toString();
-
         sendToChannel(formattedMessage);
     }
 
     private boolean isReady() {
-        return (jda != null && defaultChannel != null);
+        return jda != null && jdaReady.get() && defaultChannel != null;
     }
 
     private void sendToChannel(String message) {
