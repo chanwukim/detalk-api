@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.exceptions.InvalidTokenException;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
@@ -30,6 +31,7 @@ public class DiscordAlarmSender implements AlarmSender {
 
     @Override
     public void initialize() {
+        log.info("Initializing Discord JDA (async)...");
         try {
             jda = JDABuilder.createLight(config.getToken())   // 최소한 기능만 사용
                 .disableCache(EnumSet.allOf(CacheFlag.class)) // 디스코드 채널 메세지 관련 모든 캐시 비활성화
@@ -37,9 +39,6 @@ public class DiscordAlarmSender implements AlarmSender {
                 .enableIntents(EnumSet.noneOf(GatewayIntent.class)) // 디스코드 이벤트 수신 비활성화 (에러 메세지 전송만 할거임)
                 .setActivity(Activity.playing("알람봇"))
                 .build();
-
-            // JDA가 완전히 초기화될 때까지 대기
-            jda.awaitReady();
 
             // Profile 따라 동적으로 channelId 할당
             defaultChannel = jda.getTextChannelById(config.getChannelId());
@@ -57,7 +56,10 @@ public class DiscordAlarmSender implements AlarmSender {
                 sendMessage("프로덕션 환경으로 Discord봇이 성공적으로 실행되었습니다.");
             }
 
-        } catch (InterruptedException e) {
+        } catch (InvalidTokenException e) {
+            log.error("Failed to build JDA: Invalid Discord Bot Token! current token={}, error={}",
+                config.getToken(), e.getMessage());
+        } catch (Exception e) {
             Thread.currentThread().interrupt();
             log.error("JDA awaitReady was interrupted.", e);
         }
@@ -96,6 +98,5 @@ public class DiscordAlarmSender implements AlarmSender {
             failure -> log.error("디스코드 알림 전송 실패", failure)
         );
     }
-
 
 }
