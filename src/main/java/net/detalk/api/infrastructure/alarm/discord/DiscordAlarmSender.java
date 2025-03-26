@@ -13,6 +13,7 @@ import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -30,18 +31,11 @@ public class DiscordAlarmSender implements AlarmSender {
     @Override
     public void initialize() {
         try {
-            jda = JDABuilder.createDefault(config.getToken())
+            jda = JDABuilder.createLight(config.getToken())   // 최소한 기능만 사용
+                .disableCache(EnumSet.allOf(CacheFlag.class)) // 디스코드 채널 메세지 관련 모든 캐시 비활성화
+                .setMemberCachePolicy(MemberCachePolicy.NONE) // 디스코드 채널 멤버 정보 캐시 비활성화
+                .enableIntents(EnumSet.noneOf(GatewayIntent.class)) // 디스코드 이벤트 수신 비활성화 (에러 메세지 전송만 할거임)
                 .setActivity(Activity.playing("알람봇"))
-                .disableCache(
-                    EnumSet.of(
-                        CacheFlag.ACTIVITY,
-                        CacheFlag.EMOJI,
-                        CacheFlag.CLIENT_STATUS,
-                        CacheFlag.MEMBER_OVERRIDES,
-                        CacheFlag.STICKER
-                    ))
-                .setMemberCachePolicy(MemberCachePolicy.NONE)
-                .enableIntents(GatewayIntent.MESSAGE_CONTENT)
                 .build();
 
             // JDA가 완전히 초기화될 때까지 대기
@@ -70,6 +64,7 @@ public class DiscordAlarmSender implements AlarmSender {
 
     }
 
+    @Async("discordAlarmExecutor")
     @Override
     public void sendMessage(String message) {
         if (!isReady()) {
@@ -79,6 +74,7 @@ public class DiscordAlarmSender implements AlarmSender {
         sendToChannel(message);
     }
 
+    @Async("discordAlarmExecutor")
     @Override
     public void sendError(AlarmErrorMessage message) {
         if (!isReady()) {
