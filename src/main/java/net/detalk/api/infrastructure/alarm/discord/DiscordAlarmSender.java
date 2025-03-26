@@ -1,6 +1,7 @@
 package net.detalk.api.infrastructure.alarm.discord;
 
 import java.util.EnumSet;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.detalk.api.alarm.domain.AlarmErrorMessage;
@@ -10,7 +11,9 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.exceptions.InvalidTokenException;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
@@ -20,7 +23,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @RequiredArgsConstructor
 @Service
-public class DiscordAlarmSender implements AlarmSender {
+public class DiscordAlarmSender extends ListenerAdapter implements AlarmSender {
 
     private final DiscordConfig config;
     private final EnvironmentHolder env;
@@ -31,6 +34,7 @@ public class DiscordAlarmSender implements AlarmSender {
 
     @Override
     public void initialize() {
+
         log.info("Initializing Discord JDA (async)...");
         try {
             jda = JDABuilder.createLight(config.getToken())   // 최소한 기능만 사용
@@ -38,13 +42,34 @@ public class DiscordAlarmSender implements AlarmSender {
                 .setMemberCachePolicy(MemberCachePolicy.NONE) // 디스코드 채널 멤버 정보 캐시 비활성화
                 .enableIntents(EnumSet.noneOf(GatewayIntent.class)) // 디스코드 이벤트 수신 비활성화 (에러 메세지 전송만 할거임)
                 .setActivity(Activity.playing("알람봇"))
+                .addEventListeners(this)
                 .build();
 
+            log.info("JDA build initiated. Waiting for ReadyEvent...");
+
+        } catch (InvalidTokenException e) {
+            log.error("Failed to build JDA: Invalid Discord Bot Token! current token={}, error={}",
+                config.getToken(), e.getMessage());
+        } catch (Exception e) {
+            Thread.currentThread().interrupt();
+            log.error("JDA awaitReady was interrupted. error={}", e.getMessage());
+        }
+
+    }
+
+    @Override
+    public void onReady(@NonNull ReadyEvent event) {
+        log.info("JDA is ready! Setting up channel and profile info...");
+
+        // JDA 준비 후 실행되어야 할 로직
+        try {
             // Profile 따라 동적으로 channelId 할당
             defaultChannel = jda.getTextChannelById(config.getChannelId());
 
             if (defaultChannel == null) {
                 log.warn("디스코드 채널을 찾지 못했습니다. channelId={}", config.getChannelId());
+            } else {
+                log.info("Default Discord channel found: {}", defaultChannel.getName());
             }
 
             activeProfile = env.getActiveProfile();
@@ -52,18 +77,9 @@ public class DiscordAlarmSender implements AlarmSender {
             log.info("Discord JDA initialized successfully in '{}' profile. (Channel ID: {})",
                 activeProfile, config.getChannelId());
 
-            if ("prod".equals(activeProfile)) {
-                sendMessage("프로덕션 환경으로 Discord봇이 성공적으로 실행되었습니다.");
-            }
-
-        } catch (InvalidTokenException e) {
-            log.error("Failed to build JDA: Invalid Discord Bot Token! current token={}, error={}",
-                config.getToken(), e.getMessage());
         } catch (Exception e) {
-            Thread.currentThread().interrupt();
-            log.error("JDA awaitReady was interrupted.", e);
+            log.error("JDA initialization failed in '{}' profile. error={}", activeProfile, e.getMessage());
         }
-
     }
 
     @Async("discordAlarmExecutor")
