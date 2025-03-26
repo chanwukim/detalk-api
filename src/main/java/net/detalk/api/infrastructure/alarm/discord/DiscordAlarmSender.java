@@ -1,6 +1,8 @@
 package net.detalk.api.infrastructure.alarm.discord;
 
+import jakarta.annotation.PreDestroy;
 import java.util.EnumSet;
+import java.util.concurrent.TimeUnit;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -79,6 +81,30 @@ public class DiscordAlarmSender extends ListenerAdapter implements AlarmSender {
 
         } catch (Exception e) {
             log.error("JDA initialization failed in '{}' profile. error={}", activeProfile, e.getMessage());
+        }
+    }
+
+    @PreDestroy
+    public void shutdown() {
+        if(jda != null) {
+            log.info("Shutting down JDA...");
+            jda.shutdown();
+
+            try {
+                // 5초 이상 종료 안될 시, 강제로 jda 종료
+                if (jda.awaitShutdown(5, TimeUnit.SECONDS)) {
+                    log.warn("JDA shutdown timed out after 10 seconds. Forcing shutdownNow...");
+                    jda.shutdownNow();
+                }
+                log.info("JDA has been shut down successfully.");
+            } catch (InterruptedException e) {
+                // 대기 중 인터럽트 발생 시 처리
+                Thread.currentThread().interrupt();
+                log.error("Interrupted while waiting for JDA shutdown. Forcing shutdownNow... error={}", e.getMessage());
+                jda.shutdownNow(); // 인터럽트 시에도 강제 종료 시도
+            }
+        }else {
+            log.info("JDA instance was null, no shutdown required.");
         }
     }
 
