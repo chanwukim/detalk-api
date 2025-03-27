@@ -72,14 +72,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         for(Cookie cookie : cookies) {
-            if (ACCESS_TOKEN.equals(cookie.getName())) {
-                String token = cookie.getValue();
-                if (StringUtils.hasText(token)) {
-                    return token;
-                }
-                // 토큰은 있지만 토큰이 빈값일경우
-                return null;
-            }
+            return StringUtils.hasText(cookie.getValue()) ? cookie.getValue() : null;
         }
         return null;
     }
