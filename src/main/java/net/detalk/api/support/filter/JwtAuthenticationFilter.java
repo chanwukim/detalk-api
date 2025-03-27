@@ -2,6 +2,7 @@ package net.detalk.api.support.filter;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -30,6 +31,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final JwtConstants jwtConstants;
+    private final static String ACCESS_TOKEN = "accessToken";
 
     @Override
     protected void doFilterInternal(
@@ -62,9 +64,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private String resolveToken(HttpServletRequest request) {
-        String bearerToken = request.getHeader("Authorization");
-        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7);
+        Cookie[] cookies = request.getCookies();
+
+        // 쿠키 자체가 빈 값
+        if (cookies == null) {
+            return null;
+        }
+
+        for(Cookie cookie : cookies) {
+            if (ACCESS_TOKEN.equals(cookie.getName())) {
+                String token = cookie.getValue();
+                if (StringUtils.hasText(token)) {
+                    return token;
+                }
+                // 토큰은 있지만 토큰이 빈값일경우
+                return null;
+            }
         }
         return null;
     }
