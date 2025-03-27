@@ -29,4 +29,15 @@ public class AsyncConfig {
         executor.initialize();
         return executor;
     }
+
+    @Bean(destroyMethod = "shutdown", name = "discordAlarmExecutor")
+    public Executor discordAlarmExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(1); // 기본 스레드 1개
+        executor.setMaxPoolSize(2); // 최대 스레드 2개
+        executor.setQueueCapacity(10); // 대기 큐 10개
+        executor.setThreadNamePrefix("DiscordAlarm-");
+        executor.initialize();
+        return executor;
+    }
 }
