@@ -49,15 +49,12 @@ public class DiscordAlarmSender extends ListenerAdapter implements AlarmSender {
                 .addEventListeners(this)
                 .build();
 
-            log.info("JDA build initiated. Waiting for ReadyEvent...");
-
         } catch (InvalidTokenException e) {
             log.error("Failed to build JDA: Invalid Discord Bot Token! current token={}, error={}",
                 config.getToken(), e.getMessage());
         } catch (Exception e) {
             log.error("Failed to build JDA instance during initialization. error={}", e.getMessage());
         }
-
     }
 
     @Override
@@ -71,7 +68,6 @@ public class DiscordAlarmSender extends ListenerAdapter implements AlarmSender {
 
             // 채널 찾기 성공 시 플래그 설정
             if (defaultChannel != null) {
-                log.info("Default Discord channel found: {}. Profile: {}", defaultChannel.getName(), activeProfile);
                 setupSuccess = true;
             } else {
                 log.warn("디스코드 채널을 찾지 못했습니다. channelId={}", config.getChannelId());
@@ -80,7 +76,6 @@ public class DiscordAlarmSender extends ListenerAdapter implements AlarmSender {
             // 디스코드 채널 찾았을 경우
             if (setupSuccess) {
                 jdaReady.set(true);
-                log.info("DiscordAlarmSender is now ready.");
                 if ("prod".equals(activeProfile)) {
                     sendMessage(String.format("✅ [%s] Discord 알람 봇이 성공적으로 시작 및 준비되었습니다. (채널: %s)",
                         activeProfile.toUpperCase(), defaultChannel.getName()));
