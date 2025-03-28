@@ -5,7 +5,9 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
+
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,19 +36,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final static String ACCESS_TOKEN = "accessToken";
 
     @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getServletPath();
+
+        if (jwtConstants.getRefreshPath().equals(path) || path.equals("/api/health")) {
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
     protected void doFilterInternal(
         @NonNull HttpServletRequest request,
         @NonNull HttpServletResponse response,
         @NonNull FilterChain filterChain) throws ServletException, IOException {
 
-        if (jwtConstants.getRefreshPath().equals(request.getServletPath())) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
         String token = resolveToken(request);
 
-        if (StringUtils.hasText(token)){
+        if (StringUtils.hasText(token)) {
             try {
                 jwtTokenProvider.validateAccessToken(token);
                 Authentication authentication = jwtTokenProvider.getAuthentication(token);
@@ -71,7 +79,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return null;
         }
 
-        for(Cookie cookie : cookies) {
+        for (Cookie cookie : cookies) {
             return StringUtils.hasText(cookie.getValue()) ? cookie.getValue() : null;
         }
         return null;
