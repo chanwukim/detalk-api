@@ -91,4 +91,9 @@ public class RefreshTokenService {
         return tokenValue;
     }
 
+    public void revokeRefreshToken(String refreshToken) {
+        Claims claims = tokenProvider.getClaimsByToken(refreshToken);
+        Long memberId = Long.valueOf(claims.getSubject());
+        refreshTokenRepository.revokeByMemberId(memberId, timeHolder.now());
+    }
 }
