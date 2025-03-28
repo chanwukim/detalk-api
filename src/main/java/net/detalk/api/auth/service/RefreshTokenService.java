@@ -92,6 +92,7 @@ public class RefreshTokenService {
     }
 
     public void revokeRefreshToken(String refreshToken) {
+        tokenProvider.validateRefreshToken(refreshToken);
         Claims claims = tokenProvider.getClaimsByToken(refreshToken);
         Long memberId = Long.valueOf(claims.getSubject());
         refreshTokenRepository.revokeByMemberId(memberId, timeHolder.now());
