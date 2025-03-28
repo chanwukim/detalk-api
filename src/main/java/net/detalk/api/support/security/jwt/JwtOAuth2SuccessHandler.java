@@ -59,7 +59,7 @@ public class JwtOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandl
             .build();
 
         ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken)
-            .maxAge(jwtConstants.getAccessTokenValidity())
+            .maxAge(Integer.MAX_VALUE)
             .path(jwtConstants.getAccessPath())
             .secure(secure)
             .sameSite("Lax")

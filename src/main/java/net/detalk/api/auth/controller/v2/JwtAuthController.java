@@ -64,7 +64,7 @@ public class JwtAuthController {
 
         ResponseCookie newAccessTokenCookie = ResponseCookie
             .from("accessToken", tokenResponse.accessToken())
-            .maxAge(jwtConstants.getAccessTokenValidity())
+            .maxAge(Integer.MAX_VALUE)
             .httpOnly(true)
             .secure(secure)
             .sameSite("Lax")
@@ -83,7 +83,6 @@ public class JwtAuthController {
 
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(HttpServletRequest request, HttpServletResponse response) {
-        log.info("Logout request received.");
         Optional<Cookie> refreshTokenCookie = CookieUtil.getCookie("refreshToken", request);
 
         refreshTokenCookie.ifPresent(cookie -> {
