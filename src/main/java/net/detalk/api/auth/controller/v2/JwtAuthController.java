@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.detalk.api.support.error.ErrorCode;
@@ -12,6 +13,7 @@ import net.detalk.api.support.security.jwt.JwtConstants;
 import net.detalk.api.auth.domain.exception.JwtTokenException;
 import net.detalk.api.auth.controller.v2.response.JwtTokenResponse;
 import net.detalk.api.auth.service.RefreshTokenService;
+import net.detalk.api.support.util.CookieUtil;
 import net.detalk.api.support.util.EnvironmentHolder;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.ResponseCookie;
@@ -62,7 +64,7 @@ public class JwtAuthController {
 
         ResponseCookie newAccessTokenCookie = ResponseCookie
             .from("accessToken", tokenResponse.accessToken())
-            .maxAge(jwtConstants.getAccessTokenValidity())
+            .maxAge(Integer.MAX_VALUE)
             .httpOnly(true)
             .secure(secure)
             .sameSite("Lax")
@@ -79,4 +81,22 @@ public class JwtAuthController {
         return ResponseEntity.ok(tokenBearerResponse);
     }
 
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(HttpServletRequest request, HttpServletResponse response) {
+        Optional<Cookie> refreshTokenCookie = CookieUtil.getCookie("refreshToken", request);
+
+        refreshTokenCookie.ifPresent(cookie -> {
+            String refreshToken = cookie.getValue();
+            refreshTokenService.revokeRefreshToken(refreshToken);
+        });
+
+        boolean secure = "prod".equals(env.getActiveProfile());
+
+        CookieUtil.deleteCookieWithPath(response, "refreshToken", jwtConstants.getRefreshPath(),
+            secure);
+        CookieUtil.deleteCookieWithPath(response, "accessToken", jwtConstants.getAccessPath(),
+            secure);
+
+        return ResponseEntity.ok().build();
+    }
 }
