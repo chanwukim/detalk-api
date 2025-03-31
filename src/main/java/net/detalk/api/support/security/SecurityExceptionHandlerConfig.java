@@ -6,9 +6,6 @@ import java.io.PrintWriter;
 import lombok.RequiredArgsConstructor;
 import net.detalk.api.support.error.ErrorCode;
 import net.detalk.api.support.error.ErrorMessage;
-import net.detalk.api.support.security.jwt.JwtConstants;
-import net.detalk.api.support.util.CookieUtil;
-import net.detalk.api.support.util.EnvironmentHolder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
@@ -32,8 +29,6 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 public class SecurityExceptionHandlerConfig {
 
     private final ObjectMapper objectMapper;
-    private final JwtConstants jwtConstants;
-    private final EnvironmentHolder env;
 
     @Bean
     public AuthenticationEntryPoint unauthorizedHandler() {
@@ -41,13 +36,6 @@ public class SecurityExceptionHandlerConfig {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             response.setCharacterEncoding("UTF-8");
-
-            boolean secure = "prod".equals(env.getActiveProfile());
-
-            CookieUtil.deleteCookieWithPath(response, "refreshToken", jwtConstants.getRefreshPath(),
-                secure);
-            CookieUtil.deleteCookieWithPath(response, "accessToken", jwtConstants.getAccessPath(),
-                secure);
 
             PrintWriter writer = response.getWriter();
             writer.write(objectMapper.writeValueAsString(new ErrorMessage(ErrorCode.UNAUTHORIZED)));
