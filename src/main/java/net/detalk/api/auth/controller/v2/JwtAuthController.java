@@ -3,9 +3,11 @@ package net.detalk.api.auth.controller.v2;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.detalk.api.support.error.ErrorCode;
@@ -36,7 +38,7 @@ public class JwtAuthController {
 
     @PostMapping("/refresh")
     public ResponseEntity<Map<String, String>> refreshToken(HttpServletRequest request,
-        HttpServletResponse response) {
+                                                            HttpServletResponse response) {
 
         Cookie refreshTokenCookie = WebUtils.getCookie(request, "refreshToken");
 
@@ -47,41 +49,52 @@ public class JwtAuthController {
 
         String refreshToken = refreshTokenCookie.getValue();
 
-        JwtTokenResponse tokenResponse = refreshTokenService.refreshAccessToken(
-            refreshToken
-        );
+        try {
+            JwtTokenResponse tokenResponse = refreshTokenService.refreshAccessToken(
+                refreshToken
+            );
 
-        boolean secure = "prod".equals(env.getActiveProfile());
+            boolean secure = "prod".equals(env.getActiveProfile());
 
-        ResponseCookie newRefreshTokenCookie = ResponseCookie
-            .from("refreshToken", tokenResponse.refreshToken())
-            .maxAge(jwtConstants.getRefreshTokenValidity())
-            .httpOnly(true)
-            .secure(secure)
-            .sameSite("Lax")
-            .path(jwtConstants.getRefreshPath())
-            .build();
+            ResponseCookie newRefreshTokenCookie = ResponseCookie
+                .from("refreshToken", tokenResponse.refreshToken())
+                .maxAge(jwtConstants.getRefreshTokenValidity())
+                .httpOnly(true)
+                .secure(secure)
+                .sameSite("Lax")
+                .path(jwtConstants.getRefreshPath())
+                .build();
 
-        ResponseCookie newAccessTokenCookie = ResponseCookie
-            .from("accessToken", tokenResponse.accessToken())
-            .maxAge(Integer.MAX_VALUE)
-            .httpOnly(true)
-            .secure(secure)
-            .sameSite("Lax")
-            .path(jwtConstants.getAccessPath())
-            .build();
+            ResponseCookie newAccessTokenCookie = ResponseCookie
+                .from("accessToken", tokenResponse.accessToken())
+                .maxAge(Integer.MAX_VALUE)
+                .httpOnly(true)
+                .secure(secure)
+                .sameSite("Lax")
+                .path(jwtConstants.getAccessPath())
+                .build();
 
-        response.addHeader("Set-Cookie", newRefreshTokenCookie.toString());
-        response.addHeader("Set-Cookie", newAccessTokenCookie.toString());
+            response.addHeader("Set-Cookie", newRefreshTokenCookie.toString());
+            response.addHeader("Set-Cookie", newAccessTokenCookie.toString());
 
-        Map<String, String> tokenBearerResponse = new HashMap<>();
-        tokenBearerResponse.put("accessToken", tokenResponse.accessToken());
-        tokenBearerResponse.put("refreshToken", tokenResponse.refreshToken());
+            Map<String, String> tokenBearerResponse = new HashMap<>();
+            tokenBearerResponse.put("accessToken", tokenResponse.accessToken());
+            tokenBearerResponse.put("refreshToken", tokenResponse.refreshToken());
 
-        return ResponseEntity.ok(tokenBearerResponse);
+            return ResponseEntity.ok(tokenBearerResponse);
+        } catch (Exception e) {
+            boolean secure = "prod".equals(env.getActiveProfile());
+
+            CookieUtil.deleteCookieWithPath(response, "refreshToken", jwtConstants.getRefreshPath(),
+                secure);
+            CookieUtil.deleteCookieWithPath(response, "accessToken", jwtConstants.getAccessPath(),
+                secure);
+
+            throw e;
+        }
     }
 
-    @PostMapping("/logout")
+    @PostMapping("/sign-out")
     public ResponseEntity<Void> logout(HttpServletRequest request, HttpServletResponse response) {
         Optional<Cookie> refreshTokenCookie = CookieUtil.getCookie("refreshToken", request);
 

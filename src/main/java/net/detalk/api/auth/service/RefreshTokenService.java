@@ -1,8 +1,10 @@
 package net.detalk.api.auth.service;
 
 import io.jsonwebtoken.Claims;
+
 import java.time.Instant;
 import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.detalk.api.auth.controller.v2.response.JwtTokenResponse;
@@ -58,13 +60,13 @@ public class RefreshTokenService {
         String newAccessToken = tokenProvider.generateAccessToken(memberId,
             String.join(",", memberRoles));
 
-
         return new JwtTokenResponse(newAccessToken, newRefreshToken);
     }
 
 
     /**
      * 기존 리프레시 토큰 비활성화 후 새로 생성
+     *
      * @param memberId 사용자 ID
      * @return 생성된 리프레시 토큰
      */
