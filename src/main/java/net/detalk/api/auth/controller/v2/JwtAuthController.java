@@ -6,7 +6,6 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -94,22 +93,4 @@ public class JwtAuthController {
         }
     }
 
-    @PostMapping("/sign-out")
-    public ResponseEntity<Void> logout(HttpServletRequest request, HttpServletResponse response) {
-        Optional<Cookie> refreshTokenCookie = CookieUtil.getCookie("refreshToken", request);
-
-        refreshTokenCookie.ifPresent(cookie -> {
-            String refreshToken = cookie.getValue();
-            refreshTokenService.revokeRefreshToken(refreshToken);
-        });
-
-        boolean secure = "prod".equals(env.getActiveProfile());
-
-        CookieUtil.deleteCookieWithPath(response, "refreshToken", jwtConstants.getRefreshPath(),
-            secure);
-        CookieUtil.deleteCookieWithPath(response, "accessToken", jwtConstants.getAccessPath(),
-            secure);
-
-        return ResponseEntity.ok().build();
-    }
 }
