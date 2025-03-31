@@ -10,6 +10,7 @@ import net.detalk.api.support.security.oauth.OAuthFailHandler;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -18,6 +19,7 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -33,6 +35,7 @@ public class JwtSecurityConfig {
     private final JwtExceptionFilter jwtExceptionFilter;
     private final AuthenticationEntryPoint unauthorizedHandler;
     private final AccessDeniedHandler accessDeniedHandler;
+    private final JwtLogoutHandler jwtLogoutHandler;
 
     @Bean
     protected SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -75,6 +78,11 @@ public class JwtSecurityConfig {
             .exceptionHandling(exceptionConfig -> exceptionConfig
                 .authenticationEntryPoint(unauthorizedHandler)
                 .accessDeniedHandler(accessDeniedHandler)
+            )
+            .logout(logout -> logout
+                .logoutUrl("/api/v2/auth/sign-out")
+                .addLogoutHandler(jwtLogoutHandler)
+                .logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler(HttpStatus.OK))
             )
             .addFilterBefore(jwtExceptionFilter, UsernamePasswordAuthenticationFilter.class)
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
