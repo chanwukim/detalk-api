@@ -39,7 +39,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getServletPath();
 
-        if (jwtConstants.getRefreshPath().equals(path) || path.equals("/api/health")) {
+        String healthCheckPath = "/api/health";
+        String refreshPath = jwtConstants.getRefreshPath() + "/refresh";
+
+        if (refreshPath.equals(path) || healthCheckPath.equals(path)) {
             return true;
         }
 
