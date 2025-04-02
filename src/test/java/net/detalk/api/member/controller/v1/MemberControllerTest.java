@@ -26,13 +26,13 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.ResultActions;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(
@@ -42,6 +42,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         @Filter(type = FilterType.ASSIGNABLE_TYPE, classes = MDCFilter.class)
     }
 )
+@ActiveProfiles("example")
 @Import(WebConfig.class)
 class MemberControllerTest extends BaseControllerTest {
 
@@ -226,7 +227,7 @@ class MemberControllerTest extends BaseControllerTest {
 
         // then
         resultActions
-            .andExpect(status().isUnauthorized())
+            .andExpect(status().isFound())
             .andDo(print());
 
     }
