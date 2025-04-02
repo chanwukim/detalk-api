@@ -4,6 +4,9 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
 import net.detalk.api.member.controller.v1.response.GetMemberProfileResponse;
+import net.detalk.api.member.domain.MemberStatus;
+import net.detalk.api.member.domain.exception.MemberNeedSignUpException;
+import net.detalk.api.member.domain.exception.MemberNotFoundException;
 import net.detalk.api.member.service.MemberService;
 import net.detalk.api.post.service.ProductPostService;
 import net.detalk.api.support.BaseControllerTest;
@@ -21,6 +24,7 @@ import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.web.servlet.ResultActions;
 
@@ -28,6 +32,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(
@@ -55,7 +60,7 @@ class MemberControllerTest extends BaseControllerTest {
         public ProductPostService productPostService() { return mock(ProductPostService.class); }
     }
 
-    @DisplayName("GET /api/v1/members/me")
+    @DisplayName("[성공] GET /api/v1/members/me - 회원 내 정보 조회")
     @Test
     void me() throws Exception {
 
@@ -103,6 +108,133 @@ class MemberControllerTest extends BaseControllerTest {
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(content().json(expectedJson))
             .andDo(print());
+    }
+
+    @DisplayName("[실패] GET /api/v1/members/me - 존재하지 않는 회원 ID")
+    @Test
+    void me_fail_memberNotFound_withTextBlock() throws Exception {
+        // given
+        Long memberId = 999L;
+        SecurityRole memberRole = SecurityRole.MEMBER;
+        Authentication testAuthentication = createTestAuthentication(memberId, memberRole);
+
+        // MemberNotFoundException 발생 가정
+        MemberNotFoundException exception = new MemberNotFoundException();
+        given(memberService.me(memberId)).willThrow(exception);
+
+        var expectedErrorJson =
+        """
+            {
+              "code":"member_not_found",
+              "message":"해당 회원을 찾을 수 없습니다.",
+              "details":null
+            }
+        """;
+
+        // when
+        ResultActions resultActions = mockMvc.perform(
+            get("/api/v1/members/me")
+                .with(authentication(testAuthentication))
+                .accept(MediaType.APPLICATION_JSON)
+        );
+
+        // then
+        resultActions
+            .andExpect(status().isNotFound())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(content().json(expectedErrorJson))
+            .andDo(print());
+
+    }
+
+    @DisplayName("[실패] GET /api/v1/members/me - 가입 대기 상태 회원")
+    @Test
+    void me_fail_pendingMember_withTextBlock() throws Exception {
+
+        // given
+        Long pendingMemberId = 2L;
+        SecurityRole memberRole = SecurityRole.MEMBER;
+        Authentication testAuthentication = createTestAuthentication(pendingMemberId, memberRole);
+        MemberStatus pendingStatus = MemberStatus.PENDING;
+
+
+        // MemberNeedSignUpException 발생 가정 (실제 메시지에 맞게 수정 필요)
+        MemberNeedSignUpException exception = new MemberNeedSignUpException(pendingStatus);
+        given(memberService.me(pendingMemberId)).willThrow(exception);
+
+        var expectedErrorJson =
+        """
+        {
+            "code": "need_sign_up",
+            "message": "회원가입이 필요한 외부 회원입니다. memberStatus=PENDING",
+            "details": null
+        }
+        """;
+
+        // when
+        ResultActions resultActions = mockMvc.perform(
+            get("/api/v1/members/me")
+                .with(authentication(testAuthentication))
+                .accept(MediaType.APPLICATION_JSON)
+        );
+
+        // then
+        resultActions
+            .andExpect(status().isForbidden())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(content().json(expectedErrorJson))
+            .andDo(print());
+    }
+
+    @DisplayName("[실패] GET /api/v1/members/me - 잘못된 Principal 타입")
+    @Test
+    void me_fail_wrongPrincipalType_withTextBlock() throws Exception {
+
+        // given
+        Authentication wrongPrincipalAuth = new TestingAuthenticationToken("user-principal-string", null, "ROLE_MEMBER");
+
+        // 예상되는 에러 JSON 응답 (SessionUserNotFoundException 메시지 기반, 여기만 var 사용)
+        var expectedErrorJson = """
+        {
+            "code": "session_user_not_found",
+            "message": "User session not found. Please log in",
+            "details" : null
+        }
+        """;
+
+        // when
+        ResultActions resultActions = mockMvc.perform(
+            get("/api/v1/members/me")
+                .with(authentication(wrongPrincipalAuth))
+                .accept(MediaType.APPLICATION_JSON)
+        );
+
+        // then
+        resultActions
+            .andExpect(status().isUnauthorized())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(content().json(expectedErrorJson))
+            .andDo(print());
+
+    }
+
+    @DisplayName("[실패] GET /api/v1/members/me - 인증되지 않은 사용자 (OAuth2 리다이렉트 확인)")
+    @Test
+    void me_fail_unauthenticated_redirectsToOAuth() throws Exception {
+        // given (인증 정보 없음)
+
+        // when
+        ResultActions resultActions = mockMvc.perform(
+            get("/api/v1/members/me")
+                .accept(MediaType.APPLICATION_JSON)
+        );
+
+        // then
+        resultActions
+            .andExpect(status().isFound())
+            .andExpect(redirectedUrl("http://localhost/oauth2/authorization/google"))
+            .andDo(print());
+
     }
 
 }
