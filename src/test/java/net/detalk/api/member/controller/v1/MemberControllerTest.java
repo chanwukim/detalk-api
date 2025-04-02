@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.context.annotation.FilterType;
@@ -26,7 +27,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.ResultActions;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
@@ -42,24 +43,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         @Filter(type = FilterType.ASSIGNABLE_TYPE, classes = MDCFilter.class)
     }
 )
-@ActiveProfiles("example")
-@Import(WebConfig.class)
 class MemberControllerTest extends BaseControllerTest {
 
-    @Autowired
+    @MockitoBean
     private MemberService memberService;
 
-    @Autowired
+    @MockitoBean
     private ProductPostService productPostService;
-
-    // MemberController 가 의존하는 클래스 Mock Bean 등록
-    @TestConfiguration
-    static class ControllerTestConfig {
-        @Bean
-        public MemberService memberService() { return mock(MemberService.class); }
-        @Bean
-        public ProductPostService productPostService() { return mock(ProductPostService.class); }
-    }
 
     @DisplayName("[성공] GET /api/v1/members/me - 회원 내 정보 조회")
     @Test
