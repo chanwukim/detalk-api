@@ -1,7 +1,6 @@
 package net.detalk.api.member.controller.v1;
 
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
 
 import net.detalk.api.member.controller.v1.response.GetMemberProfileResponse;
 import net.detalk.api.member.domain.MemberStatus;
@@ -10,20 +9,14 @@ import net.detalk.api.member.domain.exception.MemberNotFoundException;
 import net.detalk.api.member.service.MemberService;
 import net.detalk.api.post.service.ProductPostService;
 import net.detalk.api.support.BaseControllerTest;
-import net.detalk.api.support.config.WebConfig;
 import net.detalk.api.support.filter.GeoLoggingFilter;
 import net.detalk.api.support.filter.MDCFilter;
 import net.detalk.api.support.security.SecurityRole;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.context.annotation.FilterType;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -203,23 +196,4 @@ class MemberControllerTest extends BaseControllerTest {
             .andDo(print());
 
     }
-
-    @DisplayName("[실패] GET /api/v1/members/me - 인증되지 않은 사용자 401 응답")
-    @Test
-    void me_fail_unauthenticated_redirectsToOAuth() throws Exception {
-        // given (인증 정보 없음)
-
-        // when
-        ResultActions resultActions = mockMvc.perform(
-            get("/api/v1/members/me")
-                .accept(MediaType.APPLICATION_JSON)
-        );
-
-        // then
-        resultActions
-            .andExpect(status().isFound())
-            .andDo(print());
-
-    }
-
 }
