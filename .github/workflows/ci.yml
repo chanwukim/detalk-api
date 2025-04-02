@@ -27,4 +27,4 @@ jobs:
         run: ./gradlew jooqCodegen
 
       - name: Build with Gradle Wrapper
-        run: ./gradlew build
+        run: ./gradlew build --stacktrace
