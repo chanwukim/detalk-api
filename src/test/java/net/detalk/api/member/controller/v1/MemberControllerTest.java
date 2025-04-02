@@ -94,7 +94,6 @@ class MemberControllerTest extends BaseControllerTest {
 
         Authentication testAuthentication = createTestAuthentication(memberId, memberRole);
 
-
         // when
         ResultActions resultActions = mockMvc.perform(
             get("/api/v1/members/me")
@@ -150,15 +149,12 @@ class MemberControllerTest extends BaseControllerTest {
     @DisplayName("[실패] GET /api/v1/members/me - 가입 대기 상태 회원")
     @Test
     void me_fail_pendingMember_withTextBlock() throws Exception {
-
         // given
         Long pendingMemberId = 2L;
         SecurityRole memberRole = SecurityRole.MEMBER;
         Authentication testAuthentication = createTestAuthentication(pendingMemberId, memberRole);
         MemberStatus pendingStatus = MemberStatus.PENDING;
 
-
-        // MemberNeedSignUpException 발생 가정 (실제 메시지에 맞게 수정 필요)
         MemberNeedSignUpException exception = new MemberNeedSignUpException(pendingStatus);
         given(memberService.me(pendingMemberId)).willThrow(exception);
 
@@ -189,7 +185,6 @@ class MemberControllerTest extends BaseControllerTest {
     @DisplayName("[실패] GET /api/v1/members/me - 잘못된 Principal 타입")
     @Test
     void me_fail_wrongPrincipalType_withTextBlock() throws Exception {
-
         // given
         Authentication wrongPrincipalAuth = new TestingAuthenticationToken("user-principal-string", null, "ROLE_MEMBER");
 
@@ -218,7 +213,7 @@ class MemberControllerTest extends BaseControllerTest {
 
     }
 
-    @DisplayName("[실패] GET /api/v1/members/me - 인증되지 않은 사용자 (OAuth2 리다이렉트 확인)")
+    @DisplayName("[실패] GET /api/v1/members/me - 인증되지 않은 사용자 401 응답")
     @Test
     void me_fail_unauthenticated_redirectsToOAuth() throws Exception {
         // given (인증 정보 없음)
@@ -231,8 +226,7 @@ class MemberControllerTest extends BaseControllerTest {
 
         // then
         resultActions
-            .andExpect(status().isFound())
-            .andExpect(redirectedUrl("http://localhost/oauth2/authorization/google"))
+            .andExpect(status().isUnauthorized())
             .andDo(print());
 
     }
