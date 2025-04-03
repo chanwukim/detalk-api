@@ -24,6 +24,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.ResultActions;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -195,5 +196,69 @@ class MemberControllerTest extends BaseControllerTest {
             .andExpect(content().json(expectedErrorJson))
             .andDo(print());
 
+    }
+
+    @DisplayName("[성공] POST /api/v1/members/profile - 프로필 생성")
+    @Test
+    void registerProfile() throws Exception {
+
+        // given
+        var userHandle = "testHandle";
+        var nickname = "testNickname";
+        var memberId = 1L;
+        var memberRole = SecurityRole.MEMBER;
+
+        var requestJson = """
+            {
+                "userhandle": "%s",
+                "nickname": "%s"
+            }
+            """.formatted(userHandle, nickname);
+
+        Authentication testAuthentication = createTestAuthentication(memberId, memberRole);
+
+        GetMemberProfileResponse expectedResult = GetMemberProfileResponse.builder()
+            .id(memberId)
+            .userhandle(userHandle)
+            .nickname(nickname)
+            .avatarUrl("default_avatar.jpg")
+            .description("자기소개가 없습니다.")
+            .build();
+
+        given(memberService.registerProfile(memberId, userHandle, nickname)).willReturn(
+            expectedResult);
+
+        var expectedResponseJson = """
+        {
+            "id": %d,
+            "userhandle": "%s",
+            "nickname": "%s",
+            "avatarUrl": "%s",
+            "description": "%s"
+        }
+        """.formatted(
+            expectedResult.id(),
+            expectedResult.userhandle(),
+            expectedResult.nickname(),
+            expectedResult.avatarUrl(),
+            expectedResult.description()
+        );
+
+        // when
+        ResultActions resultActions = mockMvc.perform(
+            post("/api/v1/members/profile")
+                .with(authentication(testAuthentication))
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestJson)
+                .accept(MediaType.APPLICATION_JSON)
+        );
+
+        // then
+        resultActions
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(content().json(expectedResponseJson))
+            .andDo(print());
     }
 }
