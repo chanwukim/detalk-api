@@ -472,4 +472,59 @@ class MemberControllerTest extends BaseControllerTest {
             .andDo(print());
     }
 
+    @DisplayName("[성공] GET /api/v1/members/{userhandle} - 특정 사용자 프로필 조회")
+    @Test
+    void getMemberProfile_success() throws Exception {
+        // given
+        var userhandle = "targetUser";
+        var expectedMemberId = 123L;
+        var expectedNickname = "조회된닉네임";
+        var expectedAvatarUrl = "http://avatar.url/target.png";
+        var expectedDescription = "조회된 사용자의 자기소개";
+        var memberId = 1L;
+        var memberRole = SecurityRole.MEMBER;
+        var testAuthentication = createTestAuthentication(memberId, memberRole);
+
+        var expectedServiceResponse = GetMemberProfileResponse.builder()
+            .id(expectedMemberId)
+            .userhandle(userhandle)
+            .nickname(expectedNickname)
+            .avatarUrl(expectedAvatarUrl)
+            .description(expectedDescription)
+            .build();
+
+        given(memberService.getMemberDetailByUserhandle(userhandle)).willReturn(
+            expectedServiceResponse);
+
+        var expectedResponseJson = """
+        {
+            "id": %d,
+            "userhandle": "%s",
+            "nickname": "%s",
+            "avatarUrl": "%s",
+            "description": "%s"
+        }
+        """.formatted(
+            expectedServiceResponse.id(),
+            expectedServiceResponse.userhandle(),
+            expectedServiceResponse.nickname(),
+            expectedServiceResponse.avatarUrl(),
+            expectedServiceResponse.description()
+        );
+
+        // when
+        ResultActions resultActions = mockMvc.perform(
+            get("/api/v1/members/{userhandle}", userhandle)
+                .with(authentication(testAuthentication))
+                .accept(MediaType.APPLICATION_JSON)
+        );
+
+        // then
+        resultActions
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(content().json(expectedResponseJson))
+            .andDo(print());
+    }
+
 }
