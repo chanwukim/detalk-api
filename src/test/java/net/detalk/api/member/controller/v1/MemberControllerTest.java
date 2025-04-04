@@ -6,6 +6,7 @@ import net.detalk.api.member.controller.v1.response.GetMemberProfileResponse;
 import net.detalk.api.member.domain.MemberStatus;
 import net.detalk.api.member.domain.exception.MemberNeedSignUpException;
 import net.detalk.api.member.domain.exception.MemberNotFoundException;
+import net.detalk.api.member.domain.exception.UserHandleDuplicatedException;
 import net.detalk.api.member.service.MemberService;
 import net.detalk.api.post.service.ProductPostService;
 import net.detalk.api.support.BaseControllerTest;
@@ -25,6 +26,7 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -261,4 +263,54 @@ class MemberControllerTest extends BaseControllerTest {
             .andExpect(content().json(expectedResponseJson))
             .andDo(print());
     }
+
+    @DisplayName("[실패] POST /api/v1/members/profile - 중복 userhandle로 프로필 생성")
+    @Test
+    void registerProfile_fail_duplicated_userHandle() throws Exception {
+        // given
+        var userHandle = "duplicated_userHandle";
+        var nickname = "testNickname";
+        var memberId = 1L;
+        var memberRole = SecurityRole.MEMBER;
+
+        var requestJson = """
+            {
+                "userhandle": "%s",
+                "nickname": "%s"
+            }
+            """.formatted(userHandle, nickname);
+
+        Authentication testAuthentication = createTestAuthentication(memberId, memberRole);
+        UserHandleDuplicatedException exception = new UserHandleDuplicatedException(userHandle);
+
+        given(memberService.registerProfile(memberId, userHandle, nickname)).willThrow(exception);
+
+        var expectedErrorJson =
+            """
+            {
+                "code": "user_handle_conflict",
+                "message": "이미 존재하는 userhandle입니다: duplicated_userHandle",
+                "details": null
+            }
+            """;
+
+        // when
+        ResultActions resultActions = mockMvc.perform(
+            post("/api/v1/members/profile")
+                .with(authentication(testAuthentication))
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestJson)
+                .accept(MediaType.APPLICATION_JSON)
+        );
+
+        // then
+        resultActions
+            .andExpect(status().isConflict())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(content().json(expectedErrorJson))
+            .andDo(print());
+    }
+
+
 }
