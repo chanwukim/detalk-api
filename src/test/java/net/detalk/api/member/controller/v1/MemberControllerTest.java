@@ -415,4 +415,61 @@ class MemberControllerTest extends BaseControllerTest {
             .andDo(print());
     }
 
+    @DisplayName("[성공] GET /api/v1/members/{userhandle}/posts - 특정 사용자 게시글 목록 조회")
+    @Test
+    void getPostsByUserHandle_success_firstPage() throws Exception {
+        // given
+        var userhandle = "testuser";
+        var memberId = 100L;
+        var pageSize = 3;
+        SecurityRole memberRole = SecurityRole.MEMBER;
+        var testAuthentication = createTestAuthentication(memberId, memberRole);
+
+        given(memberService.getMemberIdByUserHandle(userhandle)).willReturn(memberId);
+
+        var mediaList = List.of(new GetProductPostResponse.Media("http://image.url/1.jpg", 1));
+
+        var firstPost = GetProductPostResponse.builder()
+            .id(50L)
+            .nickname("user1")
+            .title("첫번째 글")
+            .createdAt(Instant.parse("2025-04-04T10:00:00Z"))
+            .media(mediaList)
+            .build();
+
+        var secondPost = GetProductPostResponse.builder()
+            .id(45L)
+            .nickname("user1")
+            .title("두번째 글")
+            .createdAt(Instant.parse("2025-04-04T09:59:00Z"))
+            .media(mediaList)
+            .build();
+
+        var postList = List.of(firstPost, secondPost);
+
+        var expectedNextId = 45L;
+        var hasNext = false; // 마지막 페이지라고 가정
+
+        var expectedServiceResponse = new CursorPageData<>(postList, expectedNextId, hasNext);
+
+        given(productPostService.getProductPostsByMemberId(memberId, pageSize, null))
+            .willReturn(expectedServiceResponse);
+
+        String expectedResponseJson = objectMapper.writeValueAsString(expectedServiceResponse);
+
+        // when
+        ResultActions resultActions = mockMvc.perform(
+            get("/api/v1/members/{userhandle}/posts", userhandle)
+                .param("size", String.valueOf(pageSize))
+                .with(authentication(testAuthentication))
+                .accept(MediaType.APPLICATION_JSON)
+        );
+
+        resultActions
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(content().json(expectedResponseJson))
+            .andDo(print());
+    }
+
 }
