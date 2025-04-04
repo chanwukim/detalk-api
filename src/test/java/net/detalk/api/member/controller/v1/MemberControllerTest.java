@@ -312,5 +312,41 @@ class MemberControllerTest extends BaseControllerTest {
             .andDo(print());
     }
 
+    @DisplayName("[성공] PUT /api/v1/members/profile - 프로필 수정")
+    @Test
+    void updateProfile_success() throws Exception {
+        // given
+        var memberId = 1L;
+        var memberRole = SecurityRole.MEMBER;
+        var newUserHandle = "updatedHandle";
+        var newNickname = "업데이트닉네임";
+        var newAvatarId = "updated-avatar-uuid";
+        var newDescription = "수정된 자기소개입니다.";
+
+        var requestJson = """
+        {
+            "userhandle": "%s",
+            "avatarId": "%s",
+            "nickname": "%s",
+            "description": "%s"
+        }
+        """.formatted(newUserHandle, newAvatarId, newNickname, newDescription);
+
+        Authentication testAuthentication = createTestAuthentication(memberId, memberRole);
+
+        ResultActions resultActions = mockMvc.perform(
+            put("/api/v1/members/profile")
+                .with(authentication(testAuthentication))
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestJson)
+                .accept(MediaType.APPLICATION_JSON)
+        );
+
+        resultActions
+            .andExpect(status().isNoContent())
+            .andDo(print());
+
+    }
 
 }
