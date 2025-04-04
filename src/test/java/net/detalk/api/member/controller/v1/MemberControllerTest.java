@@ -2,19 +2,26 @@ package net.detalk.api.member.controller.v1;
 
 import static org.mockito.BDDMockito.given;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.Instant;
+import java.util.List;
 import net.detalk.api.member.controller.v1.response.GetMemberProfileResponse;
 import net.detalk.api.member.domain.MemberStatus;
 import net.detalk.api.member.domain.exception.MemberNeedSignUpException;
 import net.detalk.api.member.domain.exception.MemberNotFoundException;
 import net.detalk.api.member.domain.exception.UserHandleDuplicatedException;
 import net.detalk.api.member.service.MemberService;
+import net.detalk.api.post.controller.v1.response.GetProductPostResponse;
+import net.detalk.api.post.controller.v1.response.GetProductPostResponse.Media;
 import net.detalk.api.post.service.ProductPostService;
 import net.detalk.api.support.BaseControllerTest;
 import net.detalk.api.support.filter.GeoLoggingFilter;
 import net.detalk.api.support.filter.MDCFilter;
+import net.detalk.api.support.paging.CursorPageData;
 import net.detalk.api.support.security.SecurityRole;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.context.annotation.FilterType;
@@ -46,6 +53,9 @@ class MemberControllerTest extends BaseControllerTest {
 
     @MockitoBean
     private ProductPostService productPostService;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @DisplayName("[성공] GET /api/v1/members/me - 회원 내 정보 조회")
     @Test
@@ -347,6 +357,62 @@ class MemberControllerTest extends BaseControllerTest {
             .andExpect(status().isNoContent())
             .andDo(print());
 
+    }
+
+    @DisplayName("[성공] GET /api/v1/members/me/posts - 내 게시글 목록 조회")
+    @Test
+    void getMyPosts_success_firstPage() throws Exception {
+        // given
+        var memberId = 1L;
+        var memberRole = SecurityRole.MEMBER;
+        var pageSize = 5;
+
+        var testAuthentication = createTestAuthentication(memberId, memberRole);
+
+        var mediaList = List.of(new GetProductPostResponse.Media("http://image.url/1.jpg", 1));
+
+        var firstPost = GetProductPostResponse.builder()
+            .id(10L)
+            .nickname("user1")
+            .title("첫번째 글")
+            .createdAt(Instant.parse("2025-04-04T10:00:00Z"))
+            .media(mediaList)
+            .build();
+
+        var secondPost = GetProductPostResponse.builder()
+            .id(9L)
+            .nickname("user1")
+            .title("두번째 글")
+            .createdAt(Instant.parse("2025-04-04T09:59:00Z"))
+            .media(mediaList)
+            .build();
+
+        var postList = List.of(firstPost, secondPost);
+
+        var expectedNextId = 9L;
+        boolean hasNext = true;
+
+        var expectedResponse = new CursorPageData<>(postList, expectedNextId, hasNext);
+
+        given(productPostService.getProductPostsByMemberId(memberId, pageSize, null))
+            .willReturn(expectedResponse);
+
+        String expectedResponseJson = objectMapper.writeValueAsString(expectedResponse);
+
+        // when
+        ResultActions resultActions = mockMvc.perform(
+            get("/api/v1/members/me/posts")
+                .param("size", String.valueOf(pageSize))
+                .with(authentication(testAuthentication))
+                .accept(MediaType.APPLICATION_JSON)
+        );
+
+        // then
+        resultActions
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(content().json(expectedResponseJson))
+            .andDo(print());
     }
 
 }
