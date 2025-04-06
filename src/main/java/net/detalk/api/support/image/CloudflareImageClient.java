@@ -58,7 +58,7 @@ public class CloudflareImageClient implements ImageClient {
 
             if (!response.success() || response.result() == null) {
                 log.error("[createUploadUrl] Failed to create upload URL. Response: {}", response);
-                throw new ImageUploadException("Failed to create upload URL");
+                throw new ImageUploadException();
             }
 
             CloudflareResult result = response.result();
@@ -75,7 +75,7 @@ public class CloudflareImageClient implements ImageClient {
                 .build();
         } catch (Exception e) {
             log.error("Failed to create upload URL", e);
-            throw new ImageUploadException("Failed to create upload URL");
+            throw new ImageUploadException();
         }
     }
 

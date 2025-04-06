@@ -39,20 +39,16 @@ public class DetalkInitializer implements ApplicationRunner {
     public void run(ApplicationArguments args){
 
         // 트랜잭션과 무관한 알람 시스템 초기화
-        initializeDiscord();
+        initializeAlarmSender();
 
         // 초기 권한
         initMemberRoles();
 
         // 초기 가격 정책
         initPricingPlans();
-        if ("prod".equals(env.getActiveProfile())) {
-            log.info("운영 서버 톰캣 실행 완료");
-            alarmSender.sendMessage("운영 서버 톰캣 실행 완료");
-        }
     }
 
-    private void initializeDiscord() {
+    private void initializeAlarmSender() {
         try {
             alarmSender.initialize();
         }catch (RuntimeException e) {

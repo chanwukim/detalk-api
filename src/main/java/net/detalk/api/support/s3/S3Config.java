@@ -21,6 +21,7 @@ import java.net.URI;
  */
 @Configuration
 @RequiredArgsConstructor
+@Deprecated(since ="0.2", forRemoval = true)
 public class S3Config {
     private final AppProperties appProperties;
 

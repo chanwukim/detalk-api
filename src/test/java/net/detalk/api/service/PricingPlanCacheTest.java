@@ -63,7 +63,7 @@ class PricingPlanCacheTest {
             .isNotEmpty()
             .containsKey("FREE");
 
-        assertThat(cache.get("FREE")).isEqualTo(freePlan);
+        assertThat(cache).containsEntry("FREE", freePlan);
     }
 
 }

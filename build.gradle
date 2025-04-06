@@ -3,6 +3,8 @@ plugins {
 	id 'org.springframework.boot' version '3.4.0'
 	id 'io.spring.dependency-management' version '1.1.6'
 	id 'org.jooq.jooq-codegen-gradle' version '3.19.15'
+	id "org.sonarqube" version "6.0.1.5171"
+	id 'jacoco'
 }
 
 group = 'net.detalk'
@@ -39,7 +41,8 @@ dependencies {
 
 	implementation 'org.flywaydb:flyway-core'
 	implementation 'org.flywaydb:flyway-database-postgresql'
-	runtimeOnly 'org.postgresql:postgresql'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    runtimeOnly 'org.postgresql:postgresql'
 	runtimeOnly 'com.h2database:h2'
 	jooqCodegen 'org.jooq:jooq-meta-extensions:3.19.15'
 
@@ -73,6 +76,109 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+// ========== jacoco START ==========
+jacoco {
+	toolVersion = "0.8.12"
+}
+
+jacocoTestReport {
+
+	dependsOn test
+
+	reports {
+		// SonarQube 분석에 필요한 XML 리포트 활성화
+		xml.required = true
+		// 로컬 확인용 HTML 리포트 활성화
+		html.required = true
+	}
+
+	// 커버리지 측정에서 제외할 클래스 설정 (예: 설정 클래스, DTO, jOOQ 생성 코드 등)
+	def excludes = [
+			'net/detalk/api/ApiApplication.*',
+			'**/request/*.*',
+			'**/response/*.*',
+			'**/exception/*.*',
+			'**/config/**',
+			'**/infrastructure/alarm/discord/DiscordConfig.*',
+			'**/support/s3/S3Config.*',
+			'**/support/security/**/*Config.*',
+			'**/filter/**',
+			'**/health/**',
+			'**/support/image/**',
+			'**/support/s3/**',
+			'net/detalk/jooq/**',
+			'**/support/util/**',
+			'**/domain/LoginType.*'
+	]
+
+	// 클래스 파일이 있는 디렉토리 설정 및 위에서 정의한 제외 패턴 적용
+	classDirectories.setFrom(files(classDirectories.files.collect {
+		fileTree(dir: it, exclude: excludes)
+	}))
+
+}
+
+// test 태스크 설정 (finalizedBy jacocoTestReport 추가)
+test {
+	useJUnitPlatform() // JUnit 5 사용 명시
+	finalizedBy jacocoTestReport // test 태스크 종료 후 jacocoTestReport 실행 보장
+}
+
+// ========== jacoco END ==========
+
+// ========== SonarQube START ==========
+sonarqube {
+	properties {
+		// SonarQube 서버에 등록된 프로젝트 키
+		property "sonar.projectKey", "sqp_c3641f23b3e38d00ad181c7941573e59f1232987"
+		// SonarQube 대시보드에 표시될 프로젝트 이름
+		property "sonar.projectName", "detalk-qube-version-2"
+
+		// 소스 코드 인코딩
+		property "sonar.sourceEncoding", "UTF-8"
+		property "sonar.java.source", "21"
+
+		// ** JaCoCo XML 리포트 경로 지정 (매우 중요) **
+		// jacocoTestReport 태스크에서 설정한 XML 리포트 파일 경로와 일치해야 함
+		property "sonar.coverage.jacoco.xmlReportPaths", "${project.buildDir}/reports/jacoco/test/jacocoTestReport.xml"
+
+		// JUnit 테스트 결과 리포트 경로 지정 (SonarQube에서 테스트 결과 분석 시 사용)
+		property "sonar.junit.reportPaths", "${project.buildDir}/test-results/test"
+
+		// 테스트 소스 코드 경로 지정
+		property "sonar.tests", sourceSets.test.java.srcDirs
+
+		// 컴파일된 클래스 파일 경로 지정 (Sonar 분석 정확도 향상)
+		property "sonar.java.binaries", "${project.buildDir}/classes/java/main"
+		property "sonar.java.test.binaries", "${project.buildDir}/classes/java/test"
+
+		// --- 커버리지 및 정적 분석 제외 설정 (JaCoCo excludes와 동기화) ---
+		// jacocoTestReport의 excludes 리스트를 SonarQube 패턴 형식(패키지 구분자 '.')으로 변환하고 쉼표로 구분합니다.
+		def sonarExclusionPatterns = [
+				'net.detalk.api.ApiApplication',                 // ApiApplication 클래스
+				'**/request/**',                                 // request 패키지 하위 전체
+				'**/response/**',                                // response 패키지 하위 전체
+				'**/exception/**',                               // exception 패키지 하위 전체
+				'**/config/**',                                  // config 패키지 하위 전체
+				'**/infrastructure/alarm/discord/DiscordConfig.java', // 특정 Config 클래스
+				'**/support/security/**/*Config.java',           // Security 관련 Config 클래스들
+				'**/filter/**',                                  // filter 패키지 하위 전체
+				'**/health/**',                                  // health 패키지 하위 전체
+				'**/support/image/**',                           // support/image 패키지 하위 전체
+				'**/support/s3/**',                              // support/s3 패키지 하위 전체
+				'net.detalk.jooq.**',                             // jOOQ 생성 코드 패키지 하위 전체 ('.**' 사용)
+				'**/support/util/**',                            // support/util 패키지 하위 전체
+				'**/domain/LoginType.java'                       // 특정 Enum 클래스
+		].join(',')
+
+		// 커버리지 측정 제외 설정
+		property "sonar.coverage.exclusions", sonarExclusionPatterns
+		// 정적 분석 제외 설정 (커버리지 제외와 동일하게 가져가는 것이 일반적)
+		property "sonar.exclusions", sonarExclusionPatterns
+	}
+}
+// ========== SonarQube END ==========
 
 // https://www.jooq.org/doc/latest/manual/code-generation/codegen-configuration
 jooq {

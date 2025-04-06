@@ -1,8 +1,10 @@
 package net.detalk.api.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
@@ -30,6 +32,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
@@ -315,6 +318,16 @@ class MemberServiceTest {
 
         // when
         memberService.updateProfile(memberId, updateRequest);
+
+        // then
+        ArgumentCaptor<MemberProfile> profileCaptor = ArgumentCaptor.forClass(MemberProfile.class);
+        verify(memberProfileRepository).update(profileCaptor.capture());
+
+        MemberProfile updatedProfile = profileCaptor.getValue();
+        assertEquals("newUserHandle", updatedProfile.getUserhandle());
+        assertEquals("newNickname", updatedProfile.getNickname());
+        assertEquals("newDescription", updatedProfile.getDescription());
+
     }
 
     @DisplayName("실패[updateProfile] 존재하지 않는 MemberId 요청")
@@ -346,7 +359,7 @@ class MemberServiceTest {
     void updateProfile_WhenNotExistsMemberProfileWithMemberId() {
 
         // given
-        var memberId = 9999L;
+        var testMemberId = 9999L;
         var updateRequest = UpdateMemberProfileRequest.builder()
             .userhandle("newUserHandle")
             .avatarId("asdfasdf")
@@ -354,12 +367,12 @@ class MemberServiceTest {
             .description("newDescription")
             .build();
 
-        when(memberRepository.findById(memberId)).thenReturn(Optional.ofNullable(member));
+        when(memberRepository.findById(testMemberId)).thenReturn(Optional.ofNullable(member));
 
         // when
         MemberProfileNotFoundException exception = assertThrows(
             MemberProfileNotFoundException.class,
-            () -> memberService.updateProfile(memberId, updateRequest));
+            () -> memberService.updateProfile(testMemberId, updateRequest));
 
         assertThat(exception.getMessage()).isEqualTo("회원 프로필을 찾을 수 없습니다.");
         assertThat(exception.getErrorCode()).isEqualTo("member_profile_not_found");
@@ -371,28 +384,30 @@ class MemberServiceTest {
     void getProfileByUserhandle_whenValidUserHandle_shouldReturnProfile() {
 
         // given
+        var testUserHandle = "testUserHandle";
+
         MemberProfile memberProfile = MemberProfile.builder()
             .id(1L)
             .memberId(memberId)
             .avatarId(uuidGenerator.generateV7())
-            .userhandle("userHandle")
+            .userhandle(testUserHandle)
             .nickname("hello")
             .description("desc")
             .updatedAt(timeHolder.now())
             .build();
 
-        var userHandle = "userHandle";
-        when(memberProfileRepository.findByUserHandle(userHandle)).thenReturn(
+
+        when(memberProfileRepository.findByUserHandle(testUserHandle)).thenReturn(
             Optional.ofNullable(memberProfile));
 
         // when
-        MemberProfile result = memberService.getProfileByUserhandle(userHandle);
+        MemberProfile result = memberService.getProfileByUserhandle(testUserHandle);
 
         // then
         assertThat(result.getId()).isEqualTo(1L);
         assertThat(result.getMemberId()).isEqualTo(memberId);
         assertThat(result.getAvatarId()).isEqualTo(uuidGenerator.generateV7());
-        assertThat(result.getUserhandle()).isEqualTo("userHandle");
+        assertThat(result.getUserhandle()).isEqualTo("testUserHandle");
         assertThat(result.getNickname()).isEqualTo("hello");
         assertThat(result.getDescription()).isEqualTo("desc");
     }
@@ -401,11 +416,11 @@ class MemberServiceTest {
     @Test
     void getProfileByUserhandleFailWhenMemberProfileNotExistsWithUserHandle() {
 
-        var userHandle = "notExistsHandle";
+        var testUserHandle = "notExistsHandle";
 
         MemberProfileNotFoundException exception = assertThrows(
             MemberProfileNotFoundException.class,
-            () -> memberService.getProfileByUserhandle(userHandle));
+            () -> memberService.getProfileByUserhandle(testUserHandle));
 
         assertThat(exception.getMessage()).isEqualTo("(userhandle: notExistsHandle)에 해당하는 회원 프로필을 찾을 수 없습니다.");
         assertThat(exception.getErrorCode()).isEqualTo("member_profile_not_found");
@@ -416,22 +431,23 @@ class MemberServiceTest {
     @Test
     void getMemberIdByUserHandle() {
         // given
+        var testUserHandle = "testUserHandle";
+
         MemberProfile memberProfile = MemberProfile.builder()
             .id(1L)
             .memberId(memberId)
             .avatarId(uuidGenerator.generateV7())
-            .userhandle("userHandle")
+            .userhandle(testUserHandle)
             .nickname("hello")
             .description("desc")
             .updatedAt(timeHolder.now())
             .build();
 
-        var userHandle = "userHandle";
-        when(memberProfileRepository.findByUserHandle(userHandle)).thenReturn(
+        when(memberProfileRepository.findByUserHandle(testUserHandle)).thenReturn(
             Optional.ofNullable(memberProfile));
 
         // when
-        Long foundMemberId = memberService.getMemberIdByUserHandle(userHandle);
+        Long foundMemberId = memberService.getMemberIdByUserHandle(testUserHandle);
 
         // then
         assertThat(foundMemberId).isEqualTo(memberId);
@@ -439,15 +455,15 @@ class MemberServiceTest {
 
     @Test
     void checkDuplicateUserHandle_whenHandleExists_shouldThrowException() {
-        var userHandle = "userHandle";
+        var testUserHandle = "testUserHandle";
 
-        when(memberProfileRepository.existsByUserHandle(userHandle)).thenReturn(true);
+        when(memberProfileRepository.existsByUserHandle(testUserHandle)).thenReturn(true);
 
         UserHandleDuplicatedException exception = assertThrows(
             UserHandleDuplicatedException.class,
-            () -> memberService.checkDuplicateUserHandle(userHandle));
+            () -> memberService.checkDuplicateUserHandle(testUserHandle));
 
-        assertThat(exception.getMessage()).isEqualTo(String.format("이미 존재하는 userhandle입니다: %s", userHandle));
+        assertThat(exception.getMessage()).isEqualTo(String.format("이미 존재하는 userhandle입니다: %s", testUserHandle));
         assertThat(exception.getHttpStatus()).isEqualTo(HttpStatus.CONFLICT);
         assertThat(exception.getErrorCode()).isEqualTo("user_handle_conflict");
     }

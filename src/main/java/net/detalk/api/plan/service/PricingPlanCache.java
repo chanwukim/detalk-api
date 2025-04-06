@@ -14,10 +14,10 @@ import net.detalk.api.support.cache.DetalkCache;
 import org.springframework.stereotype.Component;
 
 /**
- * 캐시된 가격 정책
- * CaffeineCache 사용하기 때문에 더이상 사용하지 않는다.
+ * @deprecated 이 클래스는 더 이상 사용되지 않으며 향후 제거될 예정
+ * 카페인 캐시를 이용합니다
  */
-@Deprecated
+@Deprecated(since = "0.2", forRemoval = true)
 @Slf4j
 @Component
 @RequiredArgsConstructor

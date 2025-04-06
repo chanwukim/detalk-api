@@ -3,9 +3,10 @@ package net.detalk.api.support.cache;
 import java.util.Map;
 
 /**
- * CaffeineCache 사용하기 때문에 더이상 사용하지 않는다.
+ * @deprecated 이 클래스는 더 이상 사용되지 않으며 향후 제거될 예정
+ * 카페인 캐시를 이용합니다
  */
-@Deprecated
+@Deprecated(since = "0.2", forRemoval = true)
 public interface DetalkCache<K, V> {
 
     /**

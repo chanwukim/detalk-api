@@ -33,7 +33,7 @@ public class AlarmErrorMessage {
      * @return 포맷된 문자열
      */
     public String toDefaultFormat() {
-        return String.format("[%s]\nEndpoint: %s\nMessage: %s\nStackTrace: %s",
+        return String.format("[%s]%nEndpoint: %s%nMessage: %s%nStackTrace: %s",
             errorClass, endpoint, errorMessage, stackTrace);
     }
 

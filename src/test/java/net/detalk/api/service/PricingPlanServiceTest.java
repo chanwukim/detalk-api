@@ -27,7 +27,7 @@ class PricingPlanServiceTest {
     private PricingPlanRepository pricingPlanRepository;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         fakeCache = new FakePricingPlanCache();
         pricingPlanService = new PricingPlanService(pricingPlanRepository);
     }
@@ -52,7 +52,7 @@ class PricingPlanServiceTest {
 
     @DisplayName("실패[findByName] 조회하려는 캐시가 메모리에 존재하지 않는다.")
     @Test
-    public void testFindByName_NotFound_ThrowsException() {
+    void testFindByName_NotFound_ThrowsException() {
         // given : 캐시에 데이터 없음
 
         // when & then : 존재하지 않는 이름으로 조회 시 예외 발생
