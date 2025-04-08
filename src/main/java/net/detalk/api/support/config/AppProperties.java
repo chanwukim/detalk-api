@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties( prefix = "detalk")
 public class AppProperties {
     private String baseUrl;
+    private String backendUrl;
 
     private String tokenSecret;
     private long accessTokenExpiresInSeconds;
