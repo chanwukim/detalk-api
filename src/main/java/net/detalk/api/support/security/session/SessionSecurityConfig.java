@@ -71,6 +71,8 @@ public class SessionSecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/v1/members/me/posts").hasAnyRole("MEMBER","ADMIN")
                 .requestMatchers(HttpMethod.PUT, "/api/v1/members/me/profile").hasAnyRole("MEMBER","ADMIN")
                 .requestMatchers(HttpMethod.POST, "/api/v1/members/me/profile").hasAnyRole("MEMBER","ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/v1/short-links").hasAnyRole("MEMBER","ADMIN")
+                .requestMatchers(HttpMethod.GET, "/go/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/members/{userhandle}/posts").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/members/{userhandle}/recommended-posts").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/members/{userhandle}").permitAll()
