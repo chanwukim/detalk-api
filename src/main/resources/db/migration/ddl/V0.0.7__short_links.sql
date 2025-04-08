@@ -26,7 +26,7 @@ CREATE TABLE "short_links_logs"
     "id"          BIGINT GENERATED ALWAYS AS IDENTITY,
     "link_id"     BIGINT NOT NULL,                                     -- 참조하는 short_links 테이블의 id
     "clicked_at"  BIGINT NOT NULL,                                     -- 클릭 발생 시각 (Epoch milliseconds)
-    "ip_address"  INET NULL,                                           -- 클릭한 사용자의 IP 주소
+    "ip_address"  VARCHAR(45) NULL,                                        -- 클릭한 사용자의 IP 주소
     "user_agent"  TEXT NULL,                                           -- 클릭한 사용자의 User-Agent 문자열
     "referrer"    TEXT NULL,                                           -- 클릭 유입 경로 URL
     "country"     VARCHAR(100) NULL,                                   -- IP 기반 국가 정보
