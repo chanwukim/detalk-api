@@ -7,8 +7,8 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import net.detalk.api.admin.controller.v1.response.GetActiveSessionResponse;
 import net.detalk.api.admin.controller.v1.response.GetVisitorLogResponse;
+import net.detalk.api.geo.service.GeoIpLookupService;
 import net.detalk.api.admin.service.SessionTrackingService;
-import net.detalk.api.admin.service.VisitorLogService;
 import net.detalk.api.support.paging.PagingData;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.domain.PageRequest;
@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class SessionAdminController {
 
     private final SessionTrackingService sessionTrackingService;
-    private final VisitorLogService visitorLogService;
+    private final GeoIpLookupService geoIpLookupService;
 
     @Operation(summary = "접속중인 세션 목록 조회", description = "현재 접속중인 모든 사용자의 세션 정보를 조회합니다")
     @ApiResponse(responseCode = "200", description = "조회 성공")
@@ -50,7 +50,7 @@ public class SessionAdminController {
         @RequestParam(name = "size", defaultValue = "10") int size
     ) {
         Pageable pageable = PageRequest.of(page, size);
-        PagingData<GetVisitorLogResponse> result = visitorLogService.findAll(pageable);
+        PagingData<GetVisitorLogResponse> result = geoIpLookupService.findAll(pageable);
         return ResponseEntity.ok(result);
     }
 

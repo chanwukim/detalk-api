@@ -7,4 +7,5 @@ import net.detalk.api.link.domain.ShortLink;
 public interface ShortLinkRepository {
     ShortLink save(String shortCode, String originalUrl, Long creatorId, Instant createdAt);
     Optional<String> findOriginalUrlByShortCode(String shortCode);
+    Optional<ShortLink> findByShortCode(String shortCode);
 }

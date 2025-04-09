@@ -1,4 +1,4 @@
-package net.detalk.api.admin.service;
+package net.detalk.api.geo.service;
 
 import com.maxmind.geoip2.DatabaseReader;
 import com.maxmind.geoip2.exception.GeoIp2Exception;
@@ -6,12 +6,14 @@ import com.maxmind.geoip2.model.CityResponse;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.time.LocalDateTime;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.detalk.api.admin.controller.v1.response.GetVisitorLogResponse;
 import net.detalk.api.admin.domain.VisitorLog;
 import net.detalk.api.admin.domain.exception.VisitorLocationSaveException;
 import net.detalk.api.admin.repository.VisitorLogRepository;
+import net.detalk.api.geo.domain.GeoInfo;
 import net.detalk.api.support.util.EnvironmentHolder;
 import net.detalk.api.support.paging.PagingData;
 import net.detalk.api.support.util.TimeHolder;
@@ -21,11 +23,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class VisitorLogService {
+public class GeoIpLookupService {
 
     private final VisitorLogRepository visitorLogRepository;
     private final TimeHolder timeHolder;
@@ -99,6 +102,52 @@ public class VisitorLogService {
         }finally {
             MDC.clear(); // 비동기 스레드에서 독립적으로 실행되므로 MDC 정리 해야함
         }
+    }
+
+    /**
+     * IP 주소를 기반으로 Geo 정보를 조회합니다.
+     *
+     * @param ipAddress 조회할 IP 주소 문자열
+     * @return 국가, 도시 정보가 담긴 GeoInfo 객체 Optional, 조회 실패 시 Optional.empty()
+     */
+    public Optional<GeoInfo> lookupGeoInfo(String ipAddress) {
+        // 유효하지 않은 IP 주소는 처리하지 않음
+        if (!StringUtils.hasText(ipAddress) || "unknown".equalsIgnoreCase(ipAddress)) {
+            return Optional.empty();
+        }
+
+
+        // 개발 환경에서는 고정값 반환
+        if ("dev".equals(env.getActiveProfile())) {
+            ipAddress = "34.21.9.50";
+        }
+
+        try {
+            InetAddress inetAddress = InetAddress.getByName(ipAddress);
+            CityResponse cityResponse = databaseReader.city(inetAddress);
+
+            if (cityResponse != null) {
+
+                String continentCode = cityResponse.getContinent().getCode();
+                String countryIso = cityResponse.getCountry().getIsoCode();
+                String countryName = cityResponse.getRegisteredCountry().getName();
+                String cityName = cityResponse.getCity().getName();
+
+                return Optional.of(
+                    GeoInfo.builder()
+                        .continentCode(continentCode)
+                        .countryIso(countryIso)
+                        .countryName(countryName)
+                        .cityName(cityName)
+                        .build()
+                );
+
+            }
+        } catch (GeoIp2Exception | IOException e) {
+            log.warn("GeoIP lookup failed for IP {}: {}", ipAddress, e.getMessage());
+            log.debug("GeoIP lookup error details", e);
+        }
+        return Optional.empty();
     }
 
     @PreAuthorize("hasRole('ADMIN')")

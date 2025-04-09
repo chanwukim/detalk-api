@@ -33,4 +33,11 @@ public class ShortLinkRepositoryImpl implements ShortLinkRepository{
             .where(SHORT_LINKS.SHORT_CODE.eq(shortCode))
             .fetchOptional(SHORT_LINKS.ORIGINAL_URL);
     }
+
+    @Override
+    public Optional<ShortLink> findByShortCode(String shortCode) {
+        return dsl.selectFrom(SHORT_LINKS)
+            .where(SHORT_LINKS.SHORT_CODE.eq(shortCode))
+            .fetchOptionalInto(ShortLink.class);
+    }
 }

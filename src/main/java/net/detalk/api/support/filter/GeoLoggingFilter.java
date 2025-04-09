@@ -9,7 +9,7 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.detalk.api.admin.service.VisitorLogService;
+import net.detalk.api.geo.service.GeoIpLookupService;
 import net.detalk.api.support.util.CookieUtil;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.core.annotation.Order;
@@ -28,7 +28,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @RequiredArgsConstructor
 public class GeoLoggingFilter extends OncePerRequestFilter {
 
-    private final VisitorLogService visitorLogService;
+    private final GeoIpLookupService geoIpLookupService;
 
     private static final String GEO_LOGGED_KEY = "geoLogged";
     private static final String NEXT_JS_SSR_AGENT = "node";
@@ -68,7 +68,7 @@ public class GeoLoggingFilter extends OncePerRequestFilter {
                 );
 
                 // 위치 정보 DB 저장 (비동기로 처리)
-                visitorLogService.saveVisitorLocation(
+                geoIpLookupService.saveVisitorLocation(
                     clientIp,
                     sessionId,
                     userAgent,

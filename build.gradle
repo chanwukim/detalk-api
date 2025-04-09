@@ -40,6 +40,7 @@ dependencies {
 
 
 	implementation 'com.aventrix.jnanoid:jnanoid:2.0.0'
+	implementation 'com.github.ua-parser:uap-java:1.6.1'
 
 	implementation 'org.flywaydb:flyway-core'
 	implementation 'org.flywaydb:flyway-database-postgresql'
