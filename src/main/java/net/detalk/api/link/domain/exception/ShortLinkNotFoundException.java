@@ -5,8 +5,8 @@ import org.springframework.http.HttpStatus;
 
 public class ShortLinkNotFoundException extends ApiException {
 
-    public ShortLinkNotFoundException(String message) {
-        super(message);
+    public ShortLinkNotFoundException() {
+        super("Short link not found");
     }
 
     @Override

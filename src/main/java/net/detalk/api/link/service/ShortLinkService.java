@@ -4,11 +4,17 @@ import jakarta.transaction.Transactional;
 import java.time.Instant;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.detalk.api.geo.domain.GeoInfo;
+import net.detalk.api.geo.service.GeoIpLookupService;
 import net.detalk.api.alarm.service.AlarmSender;
+import net.detalk.api.link.domain.ShortLink;
+import net.detalk.api.link.domain.ShortLinkLog;
 import net.detalk.api.link.domain.exception.ShortLinkCreationException;
 import net.detalk.api.link.domain.exception.ShortLinkNotFoundException;
+import net.detalk.api.link.repository.ShortLinkLogRepository;
 import net.detalk.api.link.repository.ShortLinkRepository;
 import net.detalk.api.link.util.ShortLinkGenerator;
+import net.detalk.api.support.util.ClientInfoUtils.ClientAgentInfo;
 import net.detalk.api.support.util.TimeHolder;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
@@ -19,9 +25,11 @@ import org.springframework.stereotype.Service;
 public class ShortLinkService {
 
     private final ShortLinkRepository shortLinkRepository;
+    private final ShortLinkLogRepository shortLinkLogRepository;
     private final ShortLinkGenerator shortLinkGenerator;
     private final TimeHolder timeHolder;
     private final AlarmSender alarmSender;
+    private final GeoIpLookupService geoIpLookupService;
     private static final int MAX_CODE_GENERATION_RETRIES = 5;
 
     @Transactional
@@ -51,5 +59,33 @@ public class ShortLinkService {
         }
         log.error("[Link Creation Failed] Unexpected exit from generation loop for URL: {}", originalUrl);
         throw new ShortLinkCreationException("Unexpected error during short code generation.");
+    }
+
+    public String findOriginalUrlAndRecordStats(String shortCode, String ip,
+        ClientAgentInfo clientAgentInfo) {
+
+        ShortLink shortLink = shortLinkRepository.findByShortCode(shortCode)
+            .orElseThrow(ShortLinkNotFoundException::new);
+
+        Instant now = timeHolder.now();
+
+        GeoInfo geoInfo = geoIpLookupService.lookupGeoInfo(ip).orElse(null);
+
+        ShortLinkLog shortLinkLog = ShortLinkLog.builder()
+            .linkId(shortLink.getId())
+            .clickedAt(now)
+            .ipAddress(ip)
+            .country(geoInfo != null ? geoInfo.countryName() : null)
+            .city(geoInfo != null ? geoInfo.cityName() : null)
+            .userAgent(clientAgentInfo.userAgent())
+            .referrer(clientAgentInfo.referrer())
+            .deviceType(clientAgentInfo.deviceType())
+            .os(clientAgentInfo.os())
+            .browser(clientAgentInfo.browser())
+            .build();
+
+        shortLinkLogRepository.save(shortLinkLog);
+
+        return shortLink.getOriginalUrl();
     }
 }
