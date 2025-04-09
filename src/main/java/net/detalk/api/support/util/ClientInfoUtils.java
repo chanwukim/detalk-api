@@ -33,7 +33,6 @@ public class ClientInfoUtils {
 
         String userAgent = request.getHeader("User-Agent");
         String referer = request.getHeader("referer");
-        System.out.println("referer = " + referer);
 
         if (!StringUtils.hasText(userAgent)) {
             return ClientAgentInfo.UNKNOWN_USER_AGENT(referer);

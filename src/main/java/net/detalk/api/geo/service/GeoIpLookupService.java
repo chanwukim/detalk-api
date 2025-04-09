@@ -132,10 +132,6 @@ public class GeoIpLookupService {
                 String countryIso = cityResponse.getCountry().getIsoCode();
                 String countryName = cityResponse.getRegisteredCountry().getName();
                 String cityName = cityResponse.getCity().getName();
-                System.out.println("continentCode = " + continentCode);
-                System.out.println("countryIso = " + countryIso);
-                System.out.println("countryName = " + countryName);
-                System.out.println("cityName = " + cityName);
 
                 return Optional.of(
                     GeoInfo.builder()
