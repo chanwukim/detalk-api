@@ -35,7 +35,8 @@ public record GetProductPostResponse(
     Integer recommendCount,
     List<String> tags,
     List<Media> media,
-    List<String> urls
+    List<String> urls,
+    String shortCode
 ) {
     public record Media(
         String url,
