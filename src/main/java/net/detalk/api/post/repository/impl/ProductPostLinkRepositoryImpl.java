@@ -15,10 +15,11 @@ public class ProductPostLinkRepositoryImpl implements ProductPostLinkRepository 
     private final DSLContext dsl;
 
     @Override
-    public ProductPostLink save(Long postId, Long linkId) {
+    public ProductPostLink save(Long postId, Long linkId, Long shortLinkId) {
         return dsl.insertInto(PRODUCT_POST_LINK)
             .set(PRODUCT_POST_LINK.POST_ID, postId)
             .set(PRODUCT_POST_LINK.LINK_ID, linkId)
+            .set(PRODUCT_POST_LINK.SHORT_LINK_ID, shortLinkId)
             .returning()
             .fetchOneInto(ProductPostLink.class);
     }
