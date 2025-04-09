@@ -61,6 +61,7 @@ public class ShortLinkService {
         throw new ShortLinkCreationException("Unexpected error during short code generation.");
     }
 
+    @Transactional
     public String findOriginalUrlAndRecordStats(String shortCode, String ip,
         ClientAgentInfo clientAgentInfo) {
 
