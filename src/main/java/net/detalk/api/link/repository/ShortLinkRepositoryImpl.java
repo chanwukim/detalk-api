@@ -35,9 +35,9 @@ public class ShortLinkRepositoryImpl implements ShortLinkRepository{
     }
 
     @Override
-    public Optional<ShortLink> findByShortCode(String shotCode) {
+    public Optional<ShortLink> findByShortCode(String shortCode) {
         return dsl.selectFrom(SHORT_LINKS)
-            .where(SHORT_LINKS.SHORT_CODE.eq(shotCode))
+            .where(SHORT_LINKS.SHORT_CODE.eq(shortCode))
             .fetchOptionalInto(ShortLink.class);
     }
 }
