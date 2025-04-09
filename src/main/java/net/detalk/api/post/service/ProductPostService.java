@@ -7,7 +7,10 @@ import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.detalk.api.link.domain.ShortLink;
+import net.detalk.api.link.service.ShortLinkService;
 import net.detalk.api.post.controller.v1.request.UpdateProductPostRequest;
+import net.detalk.api.post.controller.v1.response.CreateProductPostResponse;
 import net.detalk.api.post.controller.v1.response.GetProductPostResponse;
 import net.detalk.api.plan.service.PricingPlanService;
 import net.detalk.api.post.repository.ProductPostLastSnapshotRepository;
@@ -62,6 +65,7 @@ public class ProductPostService {
     private final ProductPostSnapshotRepository productPostSnapshotRepository;
     private final ProductPostLinkRepository productPostLinkRepository;
     private final ProductPostIdempotentService idempotentService;
+    private final ShortLinkService shortLinkService;
 
     /**
      * PricingPlan
@@ -80,13 +84,12 @@ public class ProductPostService {
     private final UUIDGenerator uuidGenerator;
 
     @Transactional
-    public Long create(CreateProductPostRequest createProductPostRequest, Long memberId) {
+    public CreateProductPostResponse createProductAndPost(CreateProductPostRequest createProductPostRequest, Long memberId) {
 
         final Instant now = timeHolder.now();
 
         // 중복 요청(등록 버튼 따닥) 방지를 위해 멱등성 키를 삽입
         idempotentService.insertIdempotentKey(createProductPostRequest.idempotentKey(), now);
-
 
         // 제품 있으면 재사용 없으면 생성
         String productName = createProductPostRequest.name();
@@ -116,9 +119,14 @@ public class ProductPostService {
         productPostLastSnapshotRepository.save(newProductPostId, postSnapshotId);
 
         // 제품 링크를 조회하거나 없으면 생성 후 게시글과 연관관계 연결
-        ProductLink productLink = productLinkService.getOrCreateProductLink(createProductPostRequest.url(), productId, now);
-        productPostLinkRepository.save(newProductPostId, productLink.getId());
+        ProductLink productLink = productLinkService.getOrCreateProductLink(
+            createProductPostRequest.url(), productId, now);
 
+        // 단축 URL 저장
+        ShortLink shortLink = shortLinkService.createShortLink(createProductPostRequest.url(),
+            memberId);
+
+        productPostLinkRepository.save(newProductPostId, productLink.getId(), shortLink.getId());
 
         // 이미지 파일을 스냅샷에 시퀀스와 함께 저장
         List<String> imageIds = createProductPostRequest.imageIds();
@@ -151,7 +159,7 @@ public class ProductPostService {
 
         productPostSnapshotTagRepository.saveAll(snapshotTags);
 
-        return newProductPostId;
+        return new CreateProductPostResponse(newProductPostId, shortLink.getShortCode());
     }
 
     /**
