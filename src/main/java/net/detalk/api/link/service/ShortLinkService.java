@@ -98,6 +98,7 @@ public class ShortLinkService {
      * @param shortCode 단축 URL
      * @return 국가별 클릭 횟수
      */
+    @Transactional(readOnly = true)
     public List<CountryStatPoint> getClickStatsByCountry(String shortCode) {
 
         Long linkId = shortLinkRepository.findIdByShortCode(shortCode)
