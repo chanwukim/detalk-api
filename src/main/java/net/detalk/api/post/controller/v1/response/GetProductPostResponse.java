@@ -20,6 +20,7 @@ import lombok.Builder;
  * @param tags          태그 목록
  * @param media         미디어 정보 목록
  * @param urls          관련 URL 목록
+ * @param shortCode     단축 URL
  */
 @Builder
 public record GetProductPostResponse(
