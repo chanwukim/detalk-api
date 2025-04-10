@@ -14,7 +14,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import net.detalk.api.link.domain.ShortLink;
+import net.detalk.api.link.service.ShortLinkService;
 import net.detalk.api.post.controller.v1.request.CreateProductPostRequest;
+import net.detalk.api.post.controller.v1.response.CreateProductPostResponse;
 import net.detalk.api.post.controller.v1.response.GetProductPostResponse;
 import net.detalk.api.post.controller.v1.response.GetProductPostResponse.Media;
 import net.detalk.api.plan.domain.PricingPlan;
@@ -86,6 +89,8 @@ class ProductPostServiceTest {
     private PricingPlanService planService;
     @Mock
     private ProductPostIdempotentService idempotentService;
+    @Mock
+    private ShortLinkService shortLinkService;
 
     /**
      * fake random classes
@@ -138,6 +143,7 @@ class ProductPostServiceTest {
             postSnapshotRepository,
             productPostLinkRepository,
             idempotentService,
+            shortLinkService,
             planService,
             tagService,
             timeHolder,
@@ -200,9 +206,10 @@ class ProductPostServiceTest {
 
     @DisplayName("성공[create] - 게시글 생성")
     @Test
-    void create_success_newProduct() {
+    void create_ProductAndPost_success_newProduct() {
         // given
         UUID idempotentKey = uuidGenerator.generateV7();
+        String shortCode = "shortCode";
 
         CreateProductPostRequest request = CreateProductPostRequest.builder()
             .name(productName)
@@ -215,6 +222,19 @@ class ProductPostServiceTest {
             .idempotentKey(String.valueOf(idempotentKey))
             .build();
 
+        ShortLink shortLink = ShortLink.builder()
+            .id(1L)
+            .createdAt(fixedInstant)
+            .creatorId(memberId)
+            .originalUrl(productUrl)
+            .shortCode(shortCode)
+            .build();
+
+        CreateProductPostResponse responseBody = new CreateProductPostResponse(
+            productPostId,
+            shortLink.getShortCode()
+        );
+
         when(idempotentService.insertIdempotentKey(request.idempotentKey(),
             timeHolder.now())).thenReturn(true);
         when(productService.getOrCreateProduct(productName, fixedInstant)).thenReturn(product);
@@ -226,12 +246,16 @@ class ProductPostServiceTest {
         when(productLinkService.getOrCreateProductLink(productUrl, productId,
             fixedInstant)).thenReturn(productLink);
         when(tagService.getOrCreateTag(tagName)).thenReturn(tag);
+        when(shortLinkService.createShortLink(productUrl, memberId)).thenReturn(shortLink);
 
-        // when
-        Long result = productPostService.create(request, memberId);
+
+        CreateProductPostResponse result = productPostService.createProductAndPost(request,
+            memberId);
 
         // then
-        assertThat(result).isEqualTo(1L);
+        assertThat(result).isEqualTo(responseBody);
+        assertThat(result.id()).isEqualTo(productId);
+        assertThat(result.shortLink()).isEqualTo(shortCode);
     }
 
 
