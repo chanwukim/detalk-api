@@ -54,6 +54,8 @@ public class ShortLinkController {
 
     /**
      * 국가별 통계 조회
+     * @param shortCode 단축 URL
+     * @return 국가별 클릭 통계 정보
      */
     @GetMapping("/{shortCode}/stats/by-country")
     public ResponseEntity<ShortLinkCountryStatsResponse> getShortLinkCountryStats(
