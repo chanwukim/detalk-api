@@ -13,6 +13,7 @@ import static net.detalk.jooq.tables.JProductPostSnapshotAttachmentFile.PRODUCT_
 import static net.detalk.jooq.tables.JProductPostSnapshotTag.PRODUCT_POST_SNAPSHOT_TAG;
 import static net.detalk.jooq.tables.JRecommend.RECOMMEND;
 import static net.detalk.jooq.tables.JRecommendProduct.*;
+import static net.detalk.jooq.tables.JShortLinks.SHORT_LINKS;
 import static net.detalk.jooq.tables.JTag.TAG;
 
 import java.time.Instant;
@@ -81,7 +82,8 @@ public class ProductPostRepositoryImpl implements ProductPostRepository {
                 DSL.arrayAggDistinct(TAG.NAME).as("tags"),
                 PRODUCT_POST.RECOMMEND_COUNT.as("recommendCount"),
                 PRODUCT_POST_SNAPSHOT.ID.as("snapshotId"),
-                DSL.arrayAggDistinct(PRODUCT_LINK.URL).as("urls")
+                DSL.arrayAggDistinct(PRODUCT_LINK.URL).as("urls"),
+                SHORT_LINKS.SHORT_CODE.as("shortCode")
             )
             .from(PRODUCT_POST)
             .join(PRODUCT_POST_LAST_SNAPSHOT)
@@ -104,6 +106,8 @@ public class ProductPostRepositoryImpl implements ProductPostRepository {
             .on(PRODUCT_POST_LINK.POST_ID.eq(PRODUCT_POST.ID))
             .leftJoin(PRODUCT_LINK)
             .on(PRODUCT_LINK.ID.eq(PRODUCT_POST_LINK.LINK_ID))
+            .leftJoin(SHORT_LINKS)
+            .on(PRODUCT_POST_LINK.SHORT_LINK_ID.eq(SHORT_LINKS.ID))
             .where(PRODUCT_POST.ID.eq(id))
             .groupBy(
                 PRODUCT_POST.ID,
@@ -116,7 +120,8 @@ public class ProductPostRepositoryImpl implements ProductPostRepository {
                 PRODUCT_POST_SNAPSHOT.DESCRIPTION,
                 PRICING_PLAN.NAME,
                 PRODUCT_POST.RECOMMEND_COUNT,
-                PRODUCT_POST_SNAPSHOT.ID
+                PRODUCT_POST_SNAPSHOT.ID,
+                SHORT_LINKS.ID
             )
             .fetchOne();
 
@@ -191,7 +196,8 @@ public class ProductPostRepositoryImpl implements ProductPostRepository {
             result.get("recommendCount", Integer.class),
             tags,
             images,
-            productUrls
+            productUrls,
+            result.get("shortCode", String.class)
         ));
     }
 
@@ -221,7 +227,8 @@ public class ProductPostRepositoryImpl implements ProductPostRepository {
                 DSL.arrayAggDistinct(TAG.NAME).as("tags"),
                 PRODUCT_POST.RECOMMEND_COUNT.as("recommendCount"),
                 PRODUCT_POST_SNAPSHOT.ID.as("snapshotId"),
-                DSL.arrayAggDistinct(PRODUCT_LINK.URL).as("urls")
+                DSL.arrayAggDistinct(PRODUCT_LINK.URL).as("urls"),
+                SHORT_LINKS.SHORT_CODE.as("shortCode")
             )
             .from(PRODUCT_POST)
             .join(PRODUCT_POST_LAST_SNAPSHOT)
@@ -244,6 +251,8 @@ public class ProductPostRepositoryImpl implements ProductPostRepository {
             .on(PRODUCT_POST_LINK.POST_ID.eq(PRODUCT_POST.ID))
             .leftJoin(PRODUCT_LINK)
             .on(PRODUCT_LINK.ID.eq(PRODUCT_POST_LINK.LINK_ID))
+            .leftJoin(SHORT_LINKS)
+            .on(PRODUCT_POST_LINK.SHORT_LINK_ID.eq(SHORT_LINKS.ID))
             .where(condition)
             .groupBy(
                 PRODUCT_POST.ID,
@@ -256,7 +265,8 @@ public class ProductPostRepositoryImpl implements ProductPostRepository {
                 PRODUCT_POST_SNAPSHOT.DESCRIPTION,
                 PRICING_PLAN.NAME,
                 PRODUCT_POST.RECOMMEND_COUNT,
-                PRODUCT_POST_SNAPSHOT.ID
+                PRODUCT_POST_SNAPSHOT.ID,
+                SHORT_LINKS.ID
             )
             .orderBy(PRODUCT_POST.ID.desc(),PRODUCT_POST.CREATED_AT.desc())
             .limit(pageSize)
@@ -293,7 +303,8 @@ public class ProductPostRepositoryImpl implements ProductPostRepository {
                 DSL.arrayAggDistinct(TAG.NAME).as("tags"),
                 PRODUCT_POST.RECOMMEND_COUNT.as("recommendCount"),
                 PRODUCT_POST_SNAPSHOT.ID.as("snapshotId"),
-                DSL.arrayAggDistinct(PRODUCT_LINK.URL).as("urls")
+                DSL.arrayAggDistinct(PRODUCT_LINK.URL).as("urls"),
+                SHORT_LINKS.SHORT_CODE.as("shortCode")
             )
             .from(PRODUCT_POST)
             .join(PRODUCT_POST_LAST_SNAPSHOT)
@@ -316,6 +327,8 @@ public class ProductPostRepositoryImpl implements ProductPostRepository {
             .on(PRODUCT_POST_LINK.POST_ID.eq(PRODUCT_POST.ID))
             .leftJoin(PRODUCT_LINK)
             .on(PRODUCT_LINK.ID.eq(PRODUCT_POST_LINK.LINK_ID))
+            .leftJoin(SHORT_LINKS)
+            .on(PRODUCT_POST_LINK.SHORT_LINK_ID.eq(SHORT_LINKS.ID))
             .where(condition)
             .groupBy(
                 PRODUCT_POST.ID,
@@ -328,7 +341,8 @@ public class ProductPostRepositoryImpl implements ProductPostRepository {
                 PRODUCT_POST_SNAPSHOT.DESCRIPTION,
                 PRICING_PLAN.NAME,
                 PRODUCT_POST.RECOMMEND_COUNT,
-                PRODUCT_POST_SNAPSHOT.ID
+                PRODUCT_POST_SNAPSHOT.ID,
+                SHORT_LINKS.ID
             )
             .orderBy(PRODUCT_POST.ID.desc(), PRODUCT_POST.CREATED_AT.desc())
             .limit(pageSize)
@@ -364,7 +378,8 @@ public class ProductPostRepositoryImpl implements ProductPostRepository {
                 PRODUCT_POST.RECOMMEND_COUNT.as("recommendCount"),
                 PRODUCT_POST_SNAPSHOT.ID.as("snapshotId"),
                 DSL.arrayAggDistinct(PRODUCT_LINK.URL).as("urls"),
-                RECOMMEND.VALUE.as("reason")
+                RECOMMEND.VALUE.as("reason"),
+                SHORT_LINKS.SHORT_CODE
             )
             .from(PRODUCT_POST)
             .join(RECOMMEND_PRODUCT)
@@ -391,6 +406,8 @@ public class ProductPostRepositoryImpl implements ProductPostRepository {
             .on(PRODUCT_POST_LINK.POST_ID.eq(PRODUCT_POST.ID))
             .leftJoin(PRODUCT_LINK)
             .on(PRODUCT_LINK.ID.eq(PRODUCT_POST_LINK.LINK_ID))
+            .leftJoin(SHORT_LINKS)
+            .on(PRODUCT_POST_LINK.SHORT_LINK_ID.eq(SHORT_LINKS.ID))
             .where(condition)
             .groupBy(
                 PRODUCT_POST.ID,
@@ -404,7 +421,8 @@ public class ProductPostRepositoryImpl implements ProductPostRepository {
                 PRICING_PLAN.NAME,
                 PRODUCT_POST.RECOMMEND_COUNT,
                 PRODUCT_POST_SNAPSHOT.ID,
-                RECOMMEND.VALUE
+                RECOMMEND.VALUE,
+                SHORT_LINKS.ID
             )
             .orderBy(PRODUCT_POST.ID.desc(), PRODUCT_POST.CREATED_AT.desc())
             .limit(pageSize)
@@ -455,7 +473,8 @@ public class ProductPostRepositoryImpl implements ProductPostRepository {
                 DSL.arrayAggDistinct(TAG.NAME).as("tags"),
                 PRODUCT_POST.RECOMMEND_COUNT.as("recommendCount"),
                 PRODUCT_POST_SNAPSHOT.ID.as("snapshotId"),
-                DSL.arrayAggDistinct(PRODUCT_LINK.URL).as("urls")
+                DSL.arrayAggDistinct(PRODUCT_LINK.URL).as("urls"),
+                SHORT_LINKS.SHORT_CODE.as("shortCode")
             )
             /* 필수 태그가 모두 포함된 게시글만 선택 **/
             .from(PRODUCT_POST_SNAPSHOT_TAG)
@@ -483,6 +502,8 @@ public class ProductPostRepositoryImpl implements ProductPostRepository {
             .on(PRODUCT_POST_LINK.POST_ID.eq(PRODUCT_POST.ID))
             .leftJoin(PRODUCT_LINK)
             .on(PRODUCT_LINK.ID.eq(PRODUCT_POST_LINK.LINK_ID))
+            .leftJoin(SHORT_LINKS)
+            .on(PRODUCT_POST_LINK.SHORT_LINK_ID.eq(SHORT_LINKS.ID))
             .where(
                 PRODUCT_POST_SNAPSHOT_TAG.TAG_ID.in(tagIds).and(condition)
             )
@@ -492,7 +513,8 @@ public class ProductPostRepositoryImpl implements ProductPostRepository {
                 MEMBER_PROFILE.ID,
                 PRICING_PLAN.ID,
                 ATTACHMENT_FILE.ID,
-                PRODUCT_MAKER.ID
+                PRODUCT_MAKER.ID,
+                SHORT_LINKS.ID
             )
             .having(DSL.countDistinct(PRODUCT_POST_SNAPSHOT_TAG.TAG_ID).eq(tagIds.size()))
             .orderBy(PRODUCT_POST.ID.desc(), PRODUCT_POST.CREATED_AT.desc())
@@ -588,7 +610,8 @@ public class ProductPostRepositoryImpl implements ProductPostRepository {
             record.get("recommendCount", Integer.class),
             tags,
             images,
-            productUrls
+            productUrls,
+            record.get("shortCode", String.class)
         );
     }
 }

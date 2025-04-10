@@ -32,16 +32,16 @@ import org.springframework.web.bind.annotation.RestController;
 public class ProductPostController {
 
     private final ProductPostService productPostService;
-
     private final RecommendService recommendService;
 
     @PostMapping
     public ResponseEntity<CreateProductPostResponse> create(
-        @Valid @RequestBody CreateProductPostRequest createProductPostRequest,
+        @Valid @RequestBody CreateProductPostRequest request,
         @HasRole({SecurityRole.MEMBER, SecurityRole.ADMIN}) SecurityUser user
         ) {
-        Long productPostId = productPostService.create(createProductPostRequest, user.getId());
-        return ResponseEntity.ok(new CreateProductPostResponse(productPostId));
+        CreateProductPostResponse responseBody = productPostService.createProductAndPost(request,
+            user.getId());
+        return ResponseEntity.ok(responseBody);
     }
 
     @GetMapping

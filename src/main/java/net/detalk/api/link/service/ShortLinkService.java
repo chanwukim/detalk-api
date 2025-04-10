@@ -1,6 +1,6 @@
 package net.detalk.api.link.service;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,19 +33,20 @@ public class ShortLinkService {
     private static final int MAX_CODE_GENERATION_RETRIES = 5;
 
     @Transactional
-    public String createShortLink(String originalUrl, Long creatorId) {
+    public ShortLink createShortLink(String originalUrl, Long creatorId) {
 
         for (int attempt = 1; attempt <= MAX_CODE_GENERATION_RETRIES; attempt++) {
             String shortCode = shortLinkGenerator.generate();
             try {
                 Instant now = timeHolder.now();
-                shortLinkRepository.save(shortCode, originalUrl, creatorId, now);
-                log.info("[Link Created] Original: '{}', Code: {}, User: {}", originalUrl, shortCode, creatorId);
-                return shortCode;
+                ShortLink shortLink = shortLinkRepository.save(shortCode, originalUrl, creatorId, now);
+                log.info("[Link Created] Original: '{}', Code: {}, User: {}", originalUrl,
+                    shortCode, creatorId);
+                return shortLink;
             } catch (DuplicateKeyException e) {
                 log.warn("[Link Creation Attempt {}/{}] Code collision for '{}'. Retrying...",
                     attempt, MAX_CODE_GENERATION_RETRIES, shortCode);
-                // 링크 생성 최대 횟수 도달 했을 시
+                 // 링크 생성 최대 횟수 도달 했을 시
                 if (attempt == MAX_CODE_GENERATION_RETRIES) {
                     log.error("[Link Creation Failed] Max retries ({}) reached for URL: {}. Last code attempted: {}",
                         MAX_CODE_GENERATION_RETRIES, originalUrl, shortCode, e);

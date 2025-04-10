@@ -4,15 +4,17 @@ import lombok.Builder;
 import lombok.Getter;
 
 @Getter
-@Builder
 public class ProductPostLink {
 
     private Long postId;
-    private Long linkId;
+    private Long productLinkId;
+    private Long shortLinkId;
 
-    public ProductPostLink(Long postId, Long linkId) {
+    @Builder
+    public ProductPostLink(Long postId, Long productLinkId, Long shortLinkId) {
         this.postId = postId;
-        this.linkId = linkId;
+        this.productLinkId = productLinkId;
+        this.shortLinkId = shortLinkId;
     }
 
 }
