@@ -1,5 +1,7 @@
 package net.detalk.api.link.service;
 
+import java.util.List;
+import net.detalk.api.link.domain.CountryStatPoint;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import lombok.RequiredArgsConstructor;
@@ -89,5 +91,19 @@ public class ShortLinkService {
         shortLinkLogRepository.save(shortLinkLog);
 
         return shortLink.getOriginalUrl();
+    }
+
+    /**
+     * 국가별 단축 URL 클릭 횟수 조회
+     * @param shortCode 단축 URL
+     * @return 국가별 클릭 횟수
+     */
+    @Transactional(readOnly = true)
+    public List<CountryStatPoint> getClickStatsByCountry(String shortCode) {
+
+        Long linkId = shortLinkRepository.findIdByShortCode(shortCode)
+            .orElseThrow(ShortLinkNotFoundException::new);
+
+        return shortLinkLogRepository.getClickCountsByLinkId(linkId);
     }
 }

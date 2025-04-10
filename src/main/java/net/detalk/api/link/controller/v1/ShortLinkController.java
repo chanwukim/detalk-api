@@ -1,9 +1,12 @@
 package net.detalk.api.link.controller.v1;
 
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.detalk.api.link.domain.CountryStatPoint;
 import net.detalk.api.link.controller.v1.response.ResolveShortLinkResponse;
+import net.detalk.api.link.controller.v1.response.ShortLinkCountryStatsResponse;
 import net.detalk.api.link.service.ShortLinkService;
 import net.detalk.api.support.util.ClientInfoUtils;
 import net.detalk.api.support.util.ClientInfoUtils.ClientAgentInfo;
@@ -25,6 +28,12 @@ public class ShortLinkController {
     private final ShortLinkService shortLinkService;
     private final ClientInfoUtils clientInfoUtils;
 
+    /**
+     * 단축 URL 통계 저장
+     * @param shortCode 단축 URL
+     * @param servlet 클라이언트 정보
+     * @return 단축 URL의 원본 URL
+     */
     @GetMapping("/{shortCode}")
     public ResponseEntity<ResolveShortLinkResponse> resolveShortLink(
         @PathVariable("shortCode") String shortCode,
@@ -41,6 +50,22 @@ public class ShortLinkController {
         ResolveShortLinkResponse responseBody = new ResolveShortLinkResponse(originalUrl);
 
         return ResponseEntity.ok().body(responseBody);
+    }
+
+    /**
+     * 국가별 통계 조회
+     * @param shortCode 단축 URL
+     * @return 국가별 클릭 통계 정보
+     */
+    @GetMapping("/{shortCode}/stats/by-country")
+    public ResponseEntity<ShortLinkCountryStatsResponse> getShortLinkCountryStats(
+        @PathVariable("shortCode") String shortCode) {
+        List<CountryStatPoint> countryStats = shortLinkService.getClickStatsByCountry(shortCode);
+
+        ShortLinkCountryStatsResponse responseBody = new ShortLinkCountryStatsResponse(
+            countryStats);
+
+        return ResponseEntity.ok(responseBody);
     }
 
 }
